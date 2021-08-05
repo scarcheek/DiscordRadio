@@ -1,0 +1,12 @@
+{
+    "name": "ScarRadio Initial Project",
+    "description": "This is the Project used to getting into Chrome Extensions and will sooner or later become ScarRadio",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+      },
+    "permissions": [
+        "storage"
+    ]
+}
