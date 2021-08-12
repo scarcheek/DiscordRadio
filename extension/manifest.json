@@ -1,22 +1,32 @@
 {
-    "name": "Context Menus Sample (with Event Page)",
-    "description": "Shows some of the features of the Context Menus API using an event page",
+    "name": "Discord Music",
+    "description": "Creates a Discord Rich Rresence based on the YouTube video that has been selected.",
     "version": "0.7",
     "permissions": [
         "contextMenus"
     ],
     "content_scripts": [
         {
-        "matches": [
-            "https://*.youtube.com/*"
+            "matches": [
+                "https://*.youtube.com/*"
             ],
-        "js": ["content.js"],
-        "run_at": "document_start"
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
         }
-    ], 
+    ],
     "background": {
-        "scripts": ["background.js"],
+        "scripts": [
+            "background.js"
+        ],
         "persistent": false
-      },
-    "manifest_version": 2
+    },
+    "manifest_version": 2,
+    "icons": {
+        "16": "images/get_started16.png",
+        "32": "images/get_started32.png",
+        "48": "images/get_started48.png",
+        "128": "images/get_started128.png"
+    }
 }
