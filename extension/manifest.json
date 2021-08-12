@@ -1,5 +1,5 @@
 {
-    "name": "Discord Music",
+    "name": "Discord Radio",
     "description": "Creates a Discord Rich Rresence based on the YouTube video that has been selected.",
     "version": "0.7",
     "permissions": [
