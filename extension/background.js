@@ -10,22 +10,27 @@ chrome.contextMenus.create({
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId == "some-command") {
         console.log(tab);
-
-        chrome.tabs.sendMessage(tab.id, {type: "init"}, function(response) {
+        chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
             updateDiscordRPC(response)
-          });
-
+        });
     }
 });
 
 chrome.runtime.onMessage.addListener(
-    function(request) {
-        if (request.type === "timeUpdate")
-          updateDiscordRPC(request.data);
-      }
+    function (request) {
+        if (request.type === "pause" || request.type === "play" || request.type === "timeupdate")
+            updateDiscordRPC(request.data);
+    }
 )
 
 function updateDiscordRPC(data) {
     console.dir(data);
-    //TODO: moch
+
+    fetch(`http://localhost:6969`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        mode: "no-cors"
+    }).then((res) =>
+        console.log("hello")
+    )
 }

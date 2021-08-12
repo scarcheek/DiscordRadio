@@ -1,6 +1,7 @@
 //// content.js ////
 console.log("something happens")
 let video
+let counter = 0;
 // 1. Send the background a message requesting the user's data
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
@@ -8,9 +9,21 @@ chrome.runtime.onMessage.addListener(
 
       video = document.querySelector('video');
 
-      video.ontimeupdate = (event) => {
-        chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "timeUpdate" });
+      video.onpause = (event) => {
+        chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "pause" });
       }
+
+      video.onplay = (event) => {
+        chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "play" });
+      }
+
+      video.ontimeupdate = (event) => {
+        if (counter === 5){
+          counter = 0;
+          chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "timeupdate" });
+        } else counter++;
+      }
+
 
       sendResponse(formatData(document));
     }
@@ -23,15 +36,11 @@ function formatData(document, newVideo) {
   let title = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer")[0].textContent
   let channelName = document.querySelector("ytd-channel-name").firstElementChild.children[1].innerText.trim();
 
-  let currentTimeText = Math.floor(currVideo.currentTime / 60) + ':' + Math.floor(currVideo.currentTime % 60)
-  let durationText = Math.floor(currVideo.duration / 60) + ':' + Math.floor(currVideo.duration % 60)
-
-  return { URL: document.URL, 
-    title: title, 
-    channelName: channelName, 
-    currentTimeText: currentTimeText, 
-    durationText: durationText, 
-    duration: currVideo.duration, 
-    currentTime: currVideo.currentTime, 
-    paused: currVideo.paused, }
+  return {
+    URL: document.URL,
+    title: title,
+    channelName: channelName,
+    currTime: Math.floor(currVideo.currentTime),
+    paused: currVideo.paused,
+  }
 }
