@@ -40,18 +40,40 @@ async function main() {
             });
 
             req.on('end', () => {
-                try {                    
+                try {
                     const data = JSON.parse(req.body);
-                    const activity = {
-                        buttons: [
-                            { label: "🎉 Listen Along", url: `${data.URL}&t=${data.currTime + 5}` },
-                            { label: "🎧 Play on YouTube", url: data.URL }
-                        ],
-                        details: data.title,
-                        state: `by: ${data.channelName}`
-                    };
-
-                    if (!data.paused) activity.timestamps = { start: Date.now() - 1000 * data.currTime }
+                    const large_text = config.vibe_texts[Math.floor(Math.random() * config.vibe_texts.length)];
+                    const activity = (data.paused)
+                        ? {
+                            details: data.title,
+                            state: `via: ${data.channelName}`,
+                            assets: {
+                                large_image: 'image',
+                                large_text,
+                                small_image: 'pause-circle',
+                                small_text: 'Paused',
+                            },
+                            buttons: [
+                                { label: "🎧 Play on YouTube", url: data.URL }
+                            ],
+                        }
+                        : {
+                            details: data.title,
+                            state: `via: ${data.channelName}`,
+                            timestamps: {
+                                start: Date.now() - 1000 * data.currTime
+                            },
+                            assets: {
+                                large_image: 'image',
+                                large_text,
+                                small_image: 'play-circle',
+                                small_text: 'Playing',
+                            },
+                            buttons: [
+                                { label: "🎉 Listen Along", url: `${data.URL}&t=${data.currTime + 5}` },
+                                { label: "🎧 Play on YouTube", url: data.URL }
+                            ],
+                        };
 
                     setDiscordActivity(client, activity);
                     res.end();
