@@ -6,6 +6,12 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://*.youtube.com/watch?*"],
+      "js": ["context.js"]
+    }
+  ],
   "options_page": "options.html",
   "permissions": [
     "storage",

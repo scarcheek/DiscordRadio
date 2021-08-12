@@ -14,8 +14,17 @@ chrome.contextMenus.create({
     documentUrlPatterns: ['https://*.youtube.com/watch?*']
 });
 
-chrome.contextMenus.onClicked.addListener(function(info, tab) {
+chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId == "some-command") {
-        console.log("yay!");
+        console.log(tab);
+
+
+        //TODO: des moch i spaeter noch, des is damit progress tracking und so funktioniert beim video
+        //chrome.tabs.sendMessage(tab.id, {text: 'report_back'}, doStuffWithDom);
     }
 });
+
+
+function doStuffWithDom(domContent) {
+    console.log('I received the following DOM content:\n' + domContent);
+}
