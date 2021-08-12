@@ -1,6 +1,12 @@
 {
-    "ApplicationName": "ScarRadio",
-    "version": 1,
-    "ClientID": "874785464278736947",
-    "encoding": "json"
+  "client_id": "875180322428420126",
+  "client_secret": "15MnaulII7NiqgtZgia6HeKOFU12Z8Tx",
+  "redirect_uri": "http://localhost:3000",
+  "baseActivity": {
+    "details": "🎶 Vibing to some great music!",
+    "buttons": [
+      { "label": "🎉 Listen Along", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+      { "label": "🎧 Play on YouTube", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+    ]
+  }
 }
