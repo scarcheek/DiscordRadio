@@ -11,10 +11,21 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId == "some-command") {
         console.log(tab);
 
-        chrome.tabs.sendMessage(tab.id, {greeting: "hello"}, function(response) {
-            console.dir(response);
+        chrome.tabs.sendMessage(tab.id, {type: "init"}, function(response) {
+            updateDiscordRPC(response)
           });
 
     }
 });
 
+chrome.runtime.onMessage.addListener(
+    function(request) {
+        if (request.type === "timeUpdate")
+          updateDiscordRPC(request.data);
+      }
+)
+
+function updateDiscordRPC(data) {
+    console.dir(data);
+    //TODO: moch
+}
