@@ -1,11 +1,11 @@
 //// content.js ////
 console.log("something happens")
-let video
+let video, tab
 let counter = 0;
 // 1. Send the background a message requesting the user's data
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
-    if (request.type === "init") {
+    if (request.type === "init" || request.type === "tabChange") {
 
       video = document.querySelector('video');
 
@@ -18,14 +18,14 @@ chrome.runtime.onMessage.addListener(
       }
 
       video.ontimeupdate = (event) => {
-        if (counter === 5){
+        if (counter === 5) {
           counter = 0;
           chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "timeupdate" });
         } else counter++;
       }
 
-
       sendResponse(formatData(document));
+      //TODO: add a route where you can make the discord rpc go away and execute it in an if (request.type === "tabchange")
     }
   }
 );
