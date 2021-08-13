@@ -21,6 +21,13 @@ async function main() {
         const tokens = await authoriseClient(client, config, ['rpc.activities.write']);
         await authenticateClient(client, tokens);
 
+        const randomImageNr = Math.random();
+        const large_image = 
+            (randomImageNr < 0.01)? 'image-man' :
+            (randomImageNr < 0.02)? 'image-woman' :
+            (randomImageNr < 0.03)? 'image-bear' :
+                                    'image';
+
         const server = http.createServer((req, res) => {
             req.body = '';
 
@@ -37,7 +44,7 @@ async function main() {
                             details: data.title,
                             state: `via: ${data.channelName}`,
                             assets: {
-                                large_image: 'image',
+                                large_image,
                                 large_text,
                                 small_image: 'pause-circle',
                                 small_text: 'Paused',
@@ -53,7 +60,7 @@ async function main() {
                                 start: Date.now() - 1000 * data.currTime
                             },
                             assets: {
-                                large_image: 'image',
+                                large_image,
                                 large_text,
                                 small_image: 'play-circle',
                                 small_text: 'Playing',
