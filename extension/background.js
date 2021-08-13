@@ -9,7 +9,6 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId == "some-command") {
-        console.log(tab);
         chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
             updateDiscordRPC(response)
         });
@@ -24,13 +23,9 @@ chrome.runtime.onMessage.addListener(
 )
 
 function updateDiscordRPC(data) {
-    console.dir(data);
-
     fetch(`http://localhost:6969`, {
         method: "POST",
         body: JSON.stringify(data),
         mode: "no-cors"
-    }).then((res) =>
-        console.log("hello")
-    )
+    });
 }

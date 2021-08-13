@@ -9,28 +9,17 @@ let buffer = Buffer.alloc(0);
 main();
 async function main() {
     try {
+        console.log('📻 Discord Radio 🎶');
+        console.log('-------------------');
+        console.log('Discord Rich Presence based on the YouTube video that has been selected.');
+        console.log('1. Start this app and authorise it');
+        console.log('2. Use the browser extension to select a video (by using the context menu ;))');
+        console.log();
+        console.log('🔌 Connecting to Discord...');
+
         const client = await createDiscordConnection(config.client_id);
         const tokens = await authoriseClient(client, config, ['rpc.activities.write']);
         await authenticateClient(client, tokens);
-
-        client.on('readable', $ => {
-            const data = client.read();
-            if (!data) return;
-
-            buffer = Buffer.concat([buffer, data]);
-
-            while (buffer.length >= 8) {
-                const payloadLength = buffer.readUInt32LE(4);
-                if (buffer.length < 8 + payloadLength) return;
-
-                console.log('Received Data:');
-                const payloadString = buffer.toString('utf8', 8, 8 + payloadLength);
-                const payload = JSON.parse(payloadString);
-                onDiscordEvent(payload);
-
-                buffer = buffer.slice(8 + payloadLength);
-            }
-        });
 
         const server = http.createServer((req, res) => {
             req.body = '';
@@ -88,24 +77,19 @@ async function main() {
         });
 
         server.listen(6969, () => {
-            console.log('listening on port 6969')
-        })
+            console.log('🎉 All set up and ready to go!\n📻 Listening for the browser extension.');
+        });
     }
     catch (err) {
         console.error(err);
     }
 }
 
-function onDiscordEvent(event) {
-    console.dir(event);
-}
+
 
 const OPCODES = {
     HANDSHAKE: 0,
     FRAME: 1,
-    CLOSE: 2,
-    PING: 3,
-    PONG: 4,
 };
 
 /**
@@ -121,8 +105,6 @@ function createDiscordConnection(client_id, ipcId = 0) {
             client.removeAllListeners();
             client.ipcId = ipcId;
 
-            console.log(`Connected to Discord ${client.ipcId}`);
-            console.log('Shaking hands with Discord...');
             await handshake(client, client_id);
             res(client);
         });
@@ -139,7 +121,7 @@ function createDiscordConnection(client_id, ipcId = 0) {
  * @returns {Promise<string>}
  */
 function authoriseClient(client, { client_id, client_secret, redirect_uri }, scopes) {
-    console.log('Authorizing...');
+    console.log('💳 Authorizing...');
     sendDiscordCommand(client, {
         cmd: 'AUTHORIZE',
         nonce: uuid(),
@@ -162,7 +144,6 @@ function authoriseClient(client, { client_id, client_secret, redirect_uri }, sco
                 const payloadLength = buffer.readUInt32LE(4);
                 if (buffer.length < 8 + payloadLength) return;
 
-                console.log('Authorization complete');
                 const payloadString = buffer.toString('utf8', 8, 8 + payloadLength);
                 const payload = JSON.parse(payloadString);
 
@@ -191,7 +172,6 @@ function authoriseClient(client, { client_id, client_secret, redirect_uri }, sco
  * @param {net.Socket} client
  */
 function authenticateClient(client, { access_token }) {
-    console.log('Authenticating...');
     sendDiscordCommand(client, {
         cmd: 'AUTHENTICATE',
         nonce: uuid(),
@@ -213,10 +193,6 @@ function authenticateClient(client, { access_token }) {
                 const payloadLength = buffer.readUInt32LE(4);
                 if (buffer.length < 8 + payloadLength) return;
 
-                console.log('Authentication complete');
-                const payloadString = buffer.toString('utf8', 8, 8 + payloadLength);
-                const payload = JSON.parse(payloadString);
-
                 buffer = buffer.slice(8 + payloadLength);
                 client.removeListener('readable', onAuthenticateResponse);
                 res();
@@ -229,7 +205,6 @@ function authenticateClient(client, { access_token }) {
  * @param {net.Socket} client
  */
 function setDiscordActivity(client, activity) {
-    console.log('Setting the Discord Activity...');
     sendDiscordCommand(client, {
         cmd: 'SET_ACTIVITY',
         nonce: uuid(),
@@ -242,7 +217,9 @@ function setDiscordActivity(client, activity) {
 
 
 
-
+/**
+ * @param {net.Socket} client
+ */
 function handshake(client, client_id) {
     const payloadString = JSON.stringify({ v: 1, client_id });
     const payloadLength = Buffer.byteLength(payloadString);
@@ -266,10 +243,6 @@ function handshake(client, client_id) {
             if (buffer.length >= 8) {
                 const payloadLength = buffer.readUInt32LE(4);
                 if (buffer.length < 8 + payloadLength) return;
-
-                console.log('Handshake complete');
-                const payloadString = buffer.toString('utf8', 8, 8 + payloadLength);
-                const payload = JSON.parse(payloadString);
 
                 buffer = buffer.slice(8 + payloadLength);
                 client.removeListener('readable', onHandshakeResponse);
