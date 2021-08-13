@@ -14,6 +14,8 @@ async function main() {
         console.log('Discord Rich Presence based on the YouTube video that has been selected.');
         console.log('1. Start this app and authorise it');
         console.log('2. Use the browser extension to select a video (by using the context menu ;))');
+        console.log('2.5 If the page doesn\'t get tracked immediately, just refresh it with F5');
+        console.log('3. 🕺 Vibe with friends and family! 💃');
         console.log();
         console.log('🔌 Connecting to Discord...');
 
@@ -22,15 +24,25 @@ async function main() {
         await authenticateClient(client, tokens);
 
         const randomImageNr = Math.random();
-        const large_image = 
-            (randomImageNr < 0.01)? 'image-man' :
-            (randomImageNr < 0.02)? 'image-woman' :
-            (randomImageNr < 0.03)? 'image-bear' :
-                                    'image';
+        const large_image =
+            (randomImageNr < 0.01) ? 'image-man' :
+                (randomImageNr < 0.02) ? 'image-woman' :
+                    (randomImageNr < 0.03) ? 'image-bear' :
+                        'image';
 
         const server = http.createServer((req, res) => {
-            req.body = '';
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Methods", "*");
 
+            if (req.method === 'OPTIONS') return res.end();
+
+            if (req.method === 'DELETE') {
+                removeDiscordActivity(client);
+                res.end();
+                return
+            }
+
+            req.body = '';
             req.on('data', (chunk) => {
                 req.body += chunk;
             });
@@ -222,7 +234,18 @@ function setDiscordActivity(client, activity) {
     });
 }
 
-
+/**
+ * @param {net.Socket} client
+ */
+function removeDiscordActivity(client) {
+    sendDiscordCommand(client, {
+        cmd: 'SET_ACTIVITY',
+        nonce: uuid(),
+        args: {
+            pid: process.pid,
+        }
+    });
+}
 
 /**
  * @param {net.Socket} client

@@ -11,16 +11,14 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (info.menuItemId == "some-command") {
         selectedTabId = tab.id
         chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
+            console.log(`Now tracking: ${tab.title}`)
             updateDiscordRPC(response)
         });
     }
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    console.log("Tab updated: " + tabId);
     if (changeInfo && changeInfo.status == "complete" && tabId === selectedTabId) {
-
-        console.log("selected tab changed")
         chrome.tabs.sendMessage(tabId, { data: tab, type: "tabChange" }, function (response) {
             updateDiscordRPC(response)
         });
