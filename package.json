@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node index"
+    "start": "node src/index"
   },
   "dependencies": {
     "node-fetch": "^2.6.1",
