@@ -14,11 +14,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
             chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
                 console.log(`Stopped tracking tab with id: ${selectedTabId}`)
 
-                chrome.contextMenus.update("tracker", {
-                    title: "Track current Video with Discord RPC",
-                    contexts: ["page"],
-                    documentUrlPatterns: ['https://*.youtube.com/watch?*']
-                })
+                updateContext();
                 selectedTabId = null
             });
             return
@@ -35,11 +31,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
             if (!window.chrome.runtime.lastError) {
                 console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
 
-                chrome.contextMenus.update("tracker", {
-                    title: "Remove current Tab from Discord RPC",
-                    contexts: ["page"],
-                    documentUrlPatterns: ['*://*/*']
-                })
+                updateContext(true)
                 selectedTabId = tab.id
                 updateDiscordRPC(response)
             } else {
@@ -67,16 +59,27 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
         }).then(() => {
             console.log(`Stopped tracking Tab with id: ${selectedTabId}`)
             selectedTabId = null
+
+            updateContext();
         }).catch(err => console.error('gotted error: ' + err));
     }
-})
+});
+
+chrome.tabs.onActiveChanged.addListener(function (tabId, selectInfo) {
+    if (selectInfo) {
+        if (tabId !== selectedTabId) {
+            return updateContext();
+        }
+        return updateContext(true);
+    }
+
+});
 
 chrome.runtime.onMessage.addListener(function (request) {
     if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
         updateDiscordRPC(request.data);
     }
-}
-)
+});
 
 function updateDiscordRPC(data) {
     fetch(`http://localhost:6969`, {
@@ -84,4 +87,19 @@ function updateDiscordRPC(data) {
         body: JSON.stringify(data),
         mode: "no-cors"
     }).catch((err) => console.error(err.message));
+}
+
+function updateContext(remove) {
+    if (remove) {
+        return chrome.contextMenus.update("tracker", {
+            title: "Remove current Tab from Discord RPC",
+            contexts: ["page"],
+            documentUrlPatterns: ['*://*/*']
+        })
+    }
+    return chrome.contextMenus.update("tracker", {
+        title: "Track current Video with Discord RPC",
+        contexts: ["page"],
+        documentUrlPatterns: ['https://*.youtube.com/watch?*']
+    })
 }
