@@ -1,27 +1,49 @@
 // Contextmenu shit
 let selectedTabId = null;
 chrome.contextMenus.create({
-    id: "some-command",
-    title: "Display current Video in Discord RPC",
+    id: "tracker",
+    title: "Track current Video with Discord RPC",
     contexts: ["page"],
     documentUrlPatterns: ['https://*.youtube.com/watch?*']
 });
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
-    if (info.menuItemId == "some-command") {
+    if (info.menuItemId == "tracker") {
+        // Remove tracking from page
+        if (selectedTabId && selectedTabId === tab.id) {
+            chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
+                console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+
+                chrome.contextMenus.update("tracker", {
+                    title: "Track current Video with Discord RPC",
+                    contexts: ["page"],
+                    documentUrlPatterns: ['https://*.youtube.com/watch?*']
+                })
+                selectedTabId = null
+            });
+            return
+        }
+
+        //Change tracked page
         if (selectedTabId && selectedTabId !== tab.id) {
             chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
                 console.log(`Stopped tracking tab with id: ${selectedTabId}`)
             });
         }
 
-        selectedTabId = tab.id
         chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
             if (!window.chrome.runtime.lastError) {
                 console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
+
+                chrome.contextMenus.update("tracker", {
+                    title: "Remove current Tab from Discord RPC",
+                    contexts: ["page"],
+                    documentUrlPatterns: ['*://*/*']
+                })
+                selectedTabId = tab.id
                 updateDiscordRPC(response)
             } else {
-                console.error('fuck')
+                console.error('You need to refresh the page before trying to track it. If that doesn\'t fix it, contact Scar#9670 on Discord');
             }
         });
     }
