@@ -57,6 +57,7 @@ export async function connect(client_id, version = 1) {
  * @return {Promise<TokenInfo>} The Discord token info.
  */
 export async function authorize(client, client_id, client_secret, scopes, redirect_uri) {
+  
   const { payload } = await client.sendAndReceiveFrame({
     cmd: 'AUTHORIZE',
     nonce: uuid(),

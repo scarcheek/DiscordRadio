@@ -77,3 +77,6 @@ typings/
 
 # ides
 .vscode
+
+# auth config
+auth.json

@@ -1,6 +1,9 @@
 import http from 'http';
+import fs from 'fs/promises';
+import fetch from 'node-fetch';
 import rpcClient from './rpc.js';
 import { requestHandlerFor } from './server.js';
+import { url } from 'inspector';
 
 const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../../config.json');
@@ -19,12 +22,24 @@ try {
   console.log('🔌 Connecting to Discord...');
 
   const client = await rpcClient(config.client_id);
+
   console.log('💳 Authorizing...');
-  await client.login(
-    config.client_id, 
-    config.client_secret, 
-    ['rpc.activities.write'],
-    config.redirect_uri,
+  const authConfig = tryRequire('../../auth.json') ?? {};
+
+  const tokenInfo = (authConfig?.refresh_token)
+  ? await refreshToken(authConfig.refresh_token)
+  : await client.authorize(
+      config.client_id, 
+      config.client_secret, 
+      ['identify'],
+      config.redirect_uri,
+    );
+
+  authConfig.refresh_token = tokenInfo.refresh_token;
+  await fs.writeFile(new URL('../../auth.json', import.meta.url), JSON.stringify(authConfig, null, 2), 'utf8');
+
+  await client.authenticate(
+    tokenInfo.access_token,
   );
 
   config.large_image = pickRandomImage();
@@ -47,4 +62,26 @@ function pickRandomImage() {
           (randomImageNr < 0.02) ? 'image-woman' :
           (randomImageNr < 0.03) ? 'image-bear' :
           'image';
+}
+
+function refreshToken(refresh_token) {
+  const method = 'POST';
+  const url = 'https://discord.com/api/v9/oauth2/token';
+  const body = new URLSearchParams({
+    refresh_token,
+    client_id: config.client_id,
+    client_secret: config.client_secret,
+    grant_type: 'refresh_token',
+  });
+
+  return fetch(url, { method, body }).then(res => res.json());
+}
+
+function tryRequire(path) {
+  try {
+    return require(path);
+  }
+  catch (err) {
+    return undefined;
+  }
 }
