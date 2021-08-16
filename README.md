@@ -1,2 +1,1 @@
-# ScarRadio
- 
+# DiscordRadio
