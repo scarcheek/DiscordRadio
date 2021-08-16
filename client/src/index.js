@@ -32,6 +32,7 @@ try {
   server.listen(6969, () => {
     console.log('🎉 All set up and ready to go!');
     console.log('📻 Listening for the browser extension.');
+    console.log();
   });
 }
 catch (err) {

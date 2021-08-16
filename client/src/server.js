@@ -1,5 +1,7 @@
 import { updateActivity } from './activity.js';
 
+let prevData = {};
+
 
 
 export function requestHandlerFor(client, config) {
@@ -7,9 +9,22 @@ export function requestHandlerFor(client, config) {
     try {
       setCorsHeaders(res);
 
-      if (req.method === 'POST') parseJsonBody(req, data => updateActivity(client, config, data));
-      if (req.method === 'DELETE') client.setActivity();
-      
+      if (req.method === 'POST') {
+        parseJsonBody(req, data => {
+          updateActivity(client, config, data);
+          
+          if (prevData?.title !== data.title) {
+            console.log(`🎶 Now listening to ${data.title}`);
+            prevData = data;
+          }
+        });
+      }
+      if (req.method === 'DELETE') {
+        client.setActivity();
+        console.log(`🙉 Stopped listening to ${prevData.title}`);
+        prevData = {};
+      }
+
       res.end();
     }
     catch (err) {
