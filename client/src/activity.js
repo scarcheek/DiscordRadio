@@ -1,8 +1,11 @@
-module.exports = {
-  createPausedActivity,
-  createPlayingActivity,
-  updateActivity,
-};
+export function updateActivity(client, config, data) {
+  const large_text = pickRandomText(config.vibe_texts);
+  const activity = (data.paused)
+    ? createPausedActivity(data, config.large_image, large_text)
+    : createPlayingActivity(data, config.large_image, large_text);
+
+  client.setActivity(activity);
+}
 
 
 
@@ -42,16 +45,6 @@ function createPlayingActivity(data, large_image, large_text) {
   };
 }
 
-function updateActivity(client, config, data) {
-  const large_text = pickRandomText(config.vibe_texts);
-  const activity = (data.paused)
-    ? createPausedActivity(data, config.large_image, large_text)
-    : createPlayingActivity(data, config.large_image, large_text);
-
-  client.setActivity(activity);
-}
-
 function pickRandomText(texts) {
   return texts[Math.floor(Math.random() * texts.length)];
 }
-

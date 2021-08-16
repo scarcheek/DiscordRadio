@@ -1,14 +1,8 @@
-const { updateActivity } = require('./activity');
-
-module.exports = {
-  requestHandlerFor,
-  setCorsHeaders,
-  parseJsonBody,
-};
+import { updateActivity } from './activity.js';
 
 
 
-function requestHandlerFor(client, config) {
+export function requestHandlerFor(client, config) {
   return (req, res) => {
     try {
       setCorsHeaders(res);
@@ -25,6 +19,8 @@ function requestHandlerFor(client, config) {
     }
   };
 }
+
+
 
 function setCorsHeaders(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
