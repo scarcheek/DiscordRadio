@@ -26,21 +26,11 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
     if (selectedTabId && selectedTabId !== tab.id) {
       chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+        initializeTrack(tab)
       });
+    } else {
+      initializeTrack(tab);
     }
-
-    chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
-      if (!window.chrome.runtime.lastError) {
-        console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
-
-        removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
-        selectedTabId = tab.id;
-        selectedWindowId = tab.windowId;
-        updateDiscordRPC(response);
-      } else {
-        console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord');
-      }
-    });
   }
   if (info.menuItemId === 'stop') {
     chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
@@ -69,7 +59,7 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
     fetch(`http://localhost:6969`, {
       method: "DELETE"
     }).then(() => {
-      console.log(`Stopped tracking Tab with id: ${selectedTabId}`)
+      console.log(`Stopped tracking tab with id: ${selectedTabId}`)
       selectedTabId = null;
       selectedWindowId = null;
 
@@ -96,6 +86,21 @@ function updateDiscordRPC(data) {
     body: JSON.stringify(data),
     mode: "no-cors"
   }).catch((err) => console.error(err.message));
+}
+
+function initializeTrack(tab) {
+  chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
+    if (!window.chrome.runtime.lastError) {
+      console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
+
+      removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
+      selectedTabId = tab.id;
+      selectedWindowId = tab.windowId;
+      updateDiscordRPC(response);
+    } else {
+      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord');
+    }
+  });
 }
 
 function onFocusedChanged(newId, selectedId) {
