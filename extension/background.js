@@ -22,16 +22,19 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   if (info.menuItemId == "track") {
-    //Change tracked page
+    // A Tab was already tracked
     if (selectedTabId && selectedTabId !== tab.id) {
       chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
         initializeTrack(tab)
       });
-    } else {
+    }
+    //First track of the session
+    else {
       initializeTrack(tab);
     }
   }
+  // The contextMenu option to 'stop tracking' has been selected
   if (info.menuItemId === 'stop') {
     chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
@@ -103,16 +106,21 @@ function initializeTrack(tab) {
   });
 }
 
+/**
+ * When the focus changes you either want to add back the 'tracking' option or remove it + add the 'stop' option
+ * @param {number} newId The new Id (window.id, tab.id, ...) you got from the fired event
+ * @param {number} selectedId The currently selected Id
+ */
 function onFocusedChanged(newId, selectedId) {
-  if (newId) {
-    if (newId !== selectedId) {
-      addContextMenu(contextMenuIds.track);
-      return
-    }
-    removeAndAddContext(contextMenuIds.stop, contextMenuIds.track)
-  }
+  newId && newId !== selectedId ? addContextMenu(contextMenuIds.track) : removeAndAddContext(contextMenuIds.stop, contextMenuIds.track)
+
 }
 
+/**
+ * Conveniently removes one contextmenu option and adds another one
+ * @param {number} addId The Id of the contextmenu option you want to add
+ * @param {number} removeId The Id of the contextmenu option you want to remove
+ */
 function removeAndAddContext(addId, removeId) {
   if (addId !== removeId) {
     addContextMenu(addId);
@@ -120,9 +128,20 @@ function removeAndAddContext(addId, removeId) {
   }
 }
 
+/**
+ * Adds a contextmenu option
+ * Shortcut for the complicated and un-handy chrome api
+ * @param {number} contextMenuId 
+ */
 function addContextMenu(contextMenuId) {
   chrome.contextMenus.update(contextMenuId, { enabled: true })
 }
+
+/**
+ * Removes a contextmenu option
+ * Shortcut for the complicated and un-handy chrome api
+ * @param {number} contextMenuId 
+ */
 function removeContextMenu(contextMenuId) {
   chrome.contextMenus.update(contextMenuId, { enabled: false })
 }
