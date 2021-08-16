@@ -14,9 +14,9 @@ try {
   console.log('📻 Discord Radio 🎶');
   console.log('-------------------');
   console.log('Discord Rich Presence based on the YouTube video that has been selected.');
-  console.log('1. Start this app and authorise it');
-  console.log('2. Use the browser extension to select a video (by using the context menu ;))');
-  console.log('2.5 If the page doesn\'t get tracked immediately, just refresh it with F5');
+  console.log('1. ✨ Start this app and authorise it ✨');
+  console.log('2. 🧩 Use the browser extension to select a video (by using the context menu ;))');
+  console.log('   📝 If the page doesn\'t get tracked immediately, just refresh it with F5');
   console.log('3. 🕺 Vibe with friends and family! 💃');
   console.log();
   console.log('🔌 Connecting to Discord...');
