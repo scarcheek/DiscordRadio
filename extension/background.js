@@ -1,5 +1,10 @@
 // Contextmenu shit
-let selectedTabId = null;
+let selectedTabId = null, selectedWindowId = null;
+let contextMenuIds = {
+  track: 'track',
+  stop: 'stop'
+}
+
 chrome.contextMenus.create({
   id: "stop",
   title: "Remove tracked Tab from Discord RPC",
@@ -28,10 +33,10 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
       if (!window.chrome.runtime.lastError) {
         console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
 
-        addContextMenu('stop');
-        removeContextMenu('track');
-        selectedTabId = tab.id
-        updateDiscordRPC(response)
+        removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
+        selectedTabId = tab.id;
+        selectedWindowId = tab.windowId;
+        updateDiscordRPC(response);
       } else {
         console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord');
       }
@@ -41,9 +46,9 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
     chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
 
-      addContextMenu('track');
-      removeContextMenu('stop');
-      selectedTabId = null
+      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
+      selectedTabId = null;
+      selectedWindowId = null;
     });
   }
 });
@@ -65,25 +70,19 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
       method: "DELETE"
     }).then(() => {
       console.log(`Stopped tracking Tab with id: ${selectedTabId}`)
-      selectedTabId = null
+      selectedTabId = null;
+      selectedWindowId = null;
 
-      addContextMenu('track');
-      removeContextMenu('stop');
+      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
     }).catch(err => console.error('gotted error: ' + err));
   }
 });
 
-chrome.tabs.onActiveChanged.addListener(function (tabId, selectInfo) {
-  if (selectInfo) {
-    if (tabId !== selectedTabId) {
-      addContextMenu('track');
-      return
-    }
-    addContextMenu('stop');
-    removeContextMenu('track');
-  }
-
+chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
+  if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
 });
+
+chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windowId, selectedWindowId) });
 
 chrome.runtime.onMessage.addListener(function (request) {
   if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
@@ -99,9 +98,26 @@ function updateDiscordRPC(data) {
   }).catch((err) => console.error(err.message));
 }
 
+function onFocusedChanged(newId, selectedId) {
+  if (newId) {
+    if (newId !== selectedId) {
+      addContextMenu(contextMenuIds.track);
+      return
+    }
+    removeAndAddContext(contextMenuIds.stop, contextMenuIds.track)
+  }
+}
+
+function removeAndAddContext(addId, removeId) {
+  if (addId !== removeId) {
+    addContextMenu(addId);
+    removeContextMenu(removeId);
+  }
+}
+
 function addContextMenu(contextMenuId) {
-  chrome.contextMenus.update(contextMenuId, {enabled: true})
+  chrome.contextMenus.update(contextMenuId, { enabled: true })
 }
 function removeContextMenu(contextMenuId) {
-  chrome.contextMenus.update(contextMenuId, {enabled: false})
+  chrome.contextMenus.update(contextMenuId, { enabled: false })
 }
