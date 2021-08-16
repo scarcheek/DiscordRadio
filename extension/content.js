@@ -5,14 +5,12 @@ let counter = 5;
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
     if (request.type === "init") {
-      removeVideo();
       addVideo(sendResponse);
     } else if (request.type === "tabChange") {
       if (!window.location.search.includes('v='))
         removeVideo(sendResponse);
       else
         addVideo(sendResponse);
-      //TODO: add a route where you can make the discord rpc go away and execute it in an if (request.type === "tabchange")
     } else if (request.type === "tabRemove") {
       removeVideo(sendResponse);
     }

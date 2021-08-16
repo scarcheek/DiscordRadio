@@ -1,23 +1,42 @@
 // Contextmenu shit
-let selectedTabId = null, selectedWindowId = null;
+let selectedTabId = null, selectedWindowId = null, currentMood = null;
 let contextMenuIds = {
   track: 'track',
   stop: 'stop'
 }
 
-chrome.contextMenus.create({
-  id: "stop",
-  title: "Remove tracked Tab from Discord RPC",
-  contexts: ["page"],
-  documentUrlPatterns: ['*://*/*'],
-  enabled: false
-})
+chrome.runtime.onInstalled.addListener(function () {
+  chrome.storage.sync.get('mood', (data) => {
+    if (data.mood)
+      currentMood = data.mood
+    else
+      chrome.storage.sync.set({ mood: 'default' })
+  })
+  chrome.declarativeContent.onPageChanged.addRules([{
+    //From: https://developer.chrome.com/docs/extensions/reference/declarativeContent/#rules
 
-chrome.contextMenus.create({
-  id: "track",
-  title: "Track current Tab with Discord RPC",
-  contexts: ["page"],
-  documentUrlPatterns: ['https://*.youtube.com/watch?*']
+    conditions: [new chrome.declarativeContent.PageStateMatcher({
+      css: ["video"],
+      pageUrl: { hostEquals: 'www.youtube.com', schemes: ['https'] },
+    })],
+    actions: [new chrome.declarativeContent.ShowPageAction()]
+  }]);
+
+  chrome.contextMenus.create({
+    id: "stop",
+    title: "Remove tracked Tab from Discord RPC",
+    contexts: ["page"],
+    documentUrlPatterns: ['*://*/*'],
+    enabled: false
+  })
+
+  chrome.contextMenus.create({
+    id: "track",
+    title: "Track current Tab with Discord RPC",
+    contexts: ["page"],
+    documentUrlPatterns: ['https://*.youtube.com/watch?*']
+  });
+
 });
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
@@ -77,6 +96,13 @@ chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
 
 chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windowId, selectedWindowId) });
 
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync') {
+    if (changes.mood)
+      currentMood = changes.mood.newValue;
+  }
+})
+
 chrome.runtime.onMessage.addListener(function (request) {
   if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
     updateDiscordRPC(request.data);
@@ -84,6 +110,9 @@ chrome.runtime.onMessage.addListener(function (request) {
 });
 
 function updateDiscordRPC(data) {
+  data.mood = currentMood;
+
+  console.log(data)
   fetch(`http://localhost:6969`, {
     method: "POST",
     body: JSON.stringify(data),
