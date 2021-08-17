@@ -16,8 +16,7 @@ chrome.runtime.onInstalled.addListener(function () {
     //From: https://developer.chrome.com/docs/extensions/reference/declarativeContent/#rules
 
     conditions: [new chrome.declarativeContent.PageStateMatcher({
-      css: ["video"],
-      pageUrl: { hostEquals: 'www.youtube.com', schemes: ['https'] },
+      pageUrl: { schemes: ['https'] },
     })],
     actions: [new chrome.declarativeContent.ShowPageAction()]
   }]);
