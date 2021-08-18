@@ -3,7 +3,6 @@ import fs from 'fs/promises';
 import fetch from 'node-fetch';
 import rpcClient from './rpc.js';
 import { requestHandlerFor } from './server.js';
-import { url } from 'inspector';
 
 const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../../config.json');
@@ -21,7 +20,7 @@ try {
   console.log();
   console.log('🔌 Connecting to Discord...');
 
-  const client = await rpcClient(config.client_id);
+  const client = await tryConnect(config.client_id);
 
   console.log('💳 Authorizing...');
   const authConfig = tryRequire('../../auth.json') ?? {};
@@ -83,5 +82,14 @@ function tryRequire(path) {
   }
   catch (err) {
     return undefined;
+  }
+}
+
+async function tryConnect(client_id) {
+  try {
+    return await rpcClient(client_id);
+  }
+  catch (err) {
+    return tryConnect(client_id);
   }
 }
