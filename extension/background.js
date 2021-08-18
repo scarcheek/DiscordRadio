@@ -1,16 +1,16 @@
 // Contextmenu shit
-let selectedTabId = null, selectedWindowId = null, currentMood = null;
+let selectedTabId = null, selectedWindowId = null, currentMoodId = null;
 let contextMenuIds = {
   track: 'track',
   stop: 'stop'
 }
 
 chrome.runtime.onInstalled.addListener(function () {
-  chrome.storage.sync.get('mood', (data) => {
-    if (data.mood)
-      currentMood = data.mood
+  chrome.storage.sync.get('moodId', (data) => {
+    if (data.moodId)
+      currentMoodId = data.moodId
     else
-      chrome.storage.sync.set({ mood: 'default' })
+      chrome.storage.sync.set({ moodId: 'default' })
   })
   chrome.declarativeContent.onPageChanged.addRules([{
     //From: https://developer.chrome.com/docs/extensions/reference/declarativeContent/#rules
@@ -97,8 +97,10 @@ chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windo
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
-    if (changes.mood)
-      currentMood = changes.mood.newValue;
+    if (changes.moodId){
+      console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
+      currentMoodId = changes.moodId.newValue;
+    }
   }
 })
 
@@ -109,9 +111,8 @@ chrome.runtime.onMessage.addListener(function (request) {
 });
 
 function updateDiscordRPC(data) {
-  data.mood = currentMood;
+  data.moodId = currentMoodId;
 
-  console.log(data)
   fetch(`http://localhost:6969`, {
     method: "POST",
     body: JSON.stringify(data),
