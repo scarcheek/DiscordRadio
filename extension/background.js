@@ -12,14 +12,6 @@ chrome.runtime.onInstalled.addListener(function () {
     else
       chrome.storage.sync.set({ moodId: 'none' })
   })
-  chrome.declarativeContent.onPageChanged.addRules([{
-    //From: https://developer.chrome.com/docs/extensions/reference/declarativeContent/#rules
-
-    conditions: [new chrome.declarativeContent.PageStateMatcher({
-      pageUrl: { schemes: ['https'] },
-    })],
-    actions: [new chrome.declarativeContent.ShowPageAction()]
-  }]);
 
   chrome.contextMenus.create({
     id: "stop",
@@ -36,78 +28,80 @@ chrome.runtime.onInstalled.addListener(function () {
     documentUrlPatterns: ['https://*.youtube.com/watch?*']
   });
 
-});
-
-chrome.contextMenus.onClicked.addListener(function (info, tab) {
-  if (info.menuItemId == "track") {
-    // A Tab was already tracked
-    if (selectedTabId && selectedTabId !== tab.id) {
+  chrome.contextMenus.onClicked.addListener(function (info, tab) {
+    if (info.menuItemId == "track") {
+      // A Tab was already tracked
+      if (selectedTabId && selectedTabId !== tab.id) {
+        chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
+          console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+          initializeTrack(tab)
+        });
+      }
+      //First track of the session
+      else {
+        initializeTrack(tab);
+      }
+    }
+    // The contextMenu option to 'stop tracking' has been selected
+    if (info.menuItemId === 'stop') {
       chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-        initializeTrack(tab)
+  
+        removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
+        
+        chrome.browserAction.setBadgeText({text: ''});
+        selectedTabId = null;
+        selectedWindowId = null;
       });
     }
-    //First track of the session
-    else {
-      initializeTrack(tab);
+  });
+  
+  chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+    if (changeInfo && changeInfo.status == "complete" && tabId === selectedTabId) {
+      chrome.tabs.sendMessage(tabId, { data: tab, type: "tabChange" }, function (response) {
+        if (!window.chrome.runtime.lastError) {
+          console.log('Tracked tab change detected', response)
+          updateDiscordRPC(response)
+        }
+      });
     }
-  }
-  // The contextMenu option to 'stop tracking' has been selected
-  if (info.menuItemId === 'stop') {
-    chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
-      console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-
-      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-      selectedTabId = null;
-      selectedWindowId = null;
-    });
-  }
-});
-
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  if (changeInfo && changeInfo.status == "complete" && tabId === selectedTabId) {
-    chrome.tabs.sendMessage(tabId, { data: tab, type: "tabChange" }, function (response) {
-      if (!window.chrome.runtime.lastError) {
-        console.log('Tracked tab change detected', response)
-        updateDiscordRPC(response)
+  });
+  
+  chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
+    if (removeInfo && tabId === selectedTabId) {
+      fetch(`http://localhost:6969`, {
+        method: "DELETE"
+      }).then(() => {
+        console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+        selectedTabId = null;
+        selectedWindowId = null;
+  
+        removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
+        chrome.browserAction.setBadgeText({text: ''});
+      }).catch(err => console.error('gotted error: ' + err));
+    }
+  });
+  
+  chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
+    if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
+  });
+  
+  chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windowId, selectedWindowId) });
+  
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync') {
+      if (changes.moodId){
+        console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
+        currentMoodId = changes.moodId.newValue;
       }
-    });
-  }
-});
-
-chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
-  if (removeInfo && tabId === selectedTabId) {
-    fetch(`http://localhost:6969`, {
-      method: "DELETE"
-    }).then(() => {
-      console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-      selectedTabId = null;
-      selectedWindowId = null;
-
-      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-    }).catch(err => console.error('gotted error: ' + err));
-  }
-});
-
-chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
-  if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
-});
-
-chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windowId, selectedWindowId) });
-
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'sync') {
-    if (changes.moodId){
-      console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
-      currentMoodId = changes.moodId.newValue;
     }
-  }
-})
-
-chrome.runtime.onMessage.addListener(function (request) {
-  if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
-    updateDiscordRPC(request.data);
-  }
+  })
+  
+  chrome.runtime.onMessage.addListener(function (request) {
+    if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
+      updateDiscordRPC(request.data);
+    }
+  });
 });
 
 function updateDiscordRPC(data) {
@@ -128,6 +122,7 @@ function initializeTrack(tab) {
       removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
       selectedTabId = tab.id;
       selectedWindowId = tab.windowId;
+      chrome.browserAction.setBadgeText({text: 'ON'});
       updateDiscordRPC(response);
     } else {
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord');
