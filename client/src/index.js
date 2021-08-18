@@ -90,6 +90,12 @@ async function tryConnect(client_id) {
     return await rpcClient(client_id);
   }
   catch (err) {
+    console.log('💥 Connection failed, reconnecting in 15s...');
+    await wait(15_000);
     return tryConnect(client_id);
   }
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
