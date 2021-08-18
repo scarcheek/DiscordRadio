@@ -14,7 +14,7 @@ function createPausedActivity(data, large_image, large_text) {
     details: data.title,
     state: `via: ${data.channelName}`,
     assets: {
-      large_image,
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : large_image,
       large_text,
       small_image: 'pause-circle',
       small_text: 'Paused',
@@ -33,7 +33,7 @@ function createPlayingActivity(data, large_image, large_text) {
       start: Date.now() - 1000 * data.currTime
     },
     assets: {
-      large_image,
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : large_image,
       large_text,
       small_image: 'play-circle',
       small_text: 'Playing',
