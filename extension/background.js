@@ -10,7 +10,7 @@ chrome.runtime.onInstalled.addListener(function () {
     if (data.moodId)
       currentMoodId = data.moodId
     else
-      chrome.storage.sync.set({ moodId: 'default' })
+      chrome.storage.sync.set({ moodId: 'none' })
   })
   chrome.declarativeContent.onPageChanged.addRules([{
     //From: https://developer.chrome.com/docs/extensions/reference/declarativeContent/#rules
@@ -111,7 +111,7 @@ chrome.runtime.onMessage.addListener(function (request) {
 });
 
 function updateDiscordRPC(data) {
-  data.moodId = currentMoodId;
+  data.mood = currentMoodId;
 
   fetch(`http://localhost:6969`, {
     method: "POST",

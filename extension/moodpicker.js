@@ -6,7 +6,7 @@ console.log(images)
 
 chrome.storage.sync.get('moodId', (data) => {
   images.forEach(image => {
-    if (image.moodId === data.moodId){
+    if (image.id === data.moodId){
       image.element.style.borderColor = '#E49076';
     }
     image.element.onclick = (event) => {
