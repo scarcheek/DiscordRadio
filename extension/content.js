@@ -62,7 +62,7 @@ function formatData(document, newVideo) {
   let channelName = document.querySelector('.ytd-video-owner-renderer ytd-channel-name yt-formatted-string').innerText.trim();
 
   return {
-    URL: document.URL,
+    URL: document.URL.replaceAll(/&t=\d+s(?=&|$)/g, ''),
     title: title,
     channelName: channelName,
     currTime: Math.floor(currVideo.currentTime),
