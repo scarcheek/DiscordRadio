@@ -46,16 +46,16 @@ chrome.runtime.onInstalled.addListener(function () {
     if (info.menuItemId === 'stop') {
       chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-  
+
         removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-        
-        chrome.browserAction.setBadgeText({text: ''});
+
+        chrome.browserAction.setBadgeText({ text: '' });
         selectedTabId = null;
         selectedWindowId = null;
       });
     }
   });
-  
+
   chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (changeInfo && changeInfo.status == "complete" && tabId === selectedTabId) {
       chrome.tabs.sendMessage(tabId, { data: tab, type: "tabChange" }, function (response) {
@@ -66,7 +66,7 @@ chrome.runtime.onInstalled.addListener(function () {
       });
     }
   });
-  
+
   chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
     if (removeInfo && tabId === selectedTabId) {
       fetch(`http://localhost:6969`, {
@@ -75,28 +75,28 @@ chrome.runtime.onInstalled.addListener(function () {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
         selectedTabId = null;
         selectedWindowId = null;
-  
+
         removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-        chrome.browserAction.setBadgeText({text: ''});
+        chrome.browserAction.setBadgeText({ text: '' });
       }).catch(err => console.error('gotted error: ' + err));
     }
   });
-  
+
   chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
     if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
   });
-  
+
   chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windowId, selectedWindowId) });
-  
+
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'sync') {
-      if (changes.moodId){
+      if (changes.moodId) {
         console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
         currentMoodId = changes.moodId.newValue;
       }
     }
   })
-  
+
   chrome.runtime.onMessage.addListener(function (request) {
     if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
       updateDiscordRPC(request.data);
@@ -122,7 +122,7 @@ function initializeTrack(tab) {
       removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
       selectedTabId = tab.id;
       selectedWindowId = tab.windowId;
-      chrome.browserAction.setBadgeText({text: 'ON'});
+      chrome.browserAction.setBadgeText({ text: 'ON' });
       updateDiscordRPC(response);
     } else {
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord');
@@ -136,7 +136,14 @@ function initializeTrack(tab) {
  * @param {number} selectedId The currently selected Id
  */
 function onFocusedChanged(newId, selectedId) {
-  newId && newId !== selectedId ? addContextMenu(contextMenuIds.track) : removeAndAddContext(contextMenuIds.stop, contextMenuIds.track)
+  if (newId && newId !== selectedId) {
+    chrome.browserAction.setBadgeText({ text: '' });
+    addContextMenu(contextMenuIds.track)
+  }
+  else {
+    removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
+    chrome.browserAction.setBadgeText({ text: 'ON' });
+  }
 
 }
 
