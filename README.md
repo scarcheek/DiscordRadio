@@ -1,1 +1,2 @@
 # DiscordRadio
+read me :Kappa:
