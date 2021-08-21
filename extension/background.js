@@ -68,6 +68,12 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   }
 });
 
+chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
+  if(tabId === selectedTabId && attachInfo && attachInfo.newWindowId !== selectedWindowId) {
+    selectedWindowId = attachInfo.newWindowId
+  }
+})
+
 chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
   if (removeInfo && tabId === selectedTabId) {
     fetch(`http://localhost:6969`, {
@@ -84,10 +90,13 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
 });
 
 chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
+  console.log("EVENT: OnActiveChanged: ", tabId, selectedTabId)
   if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
 });
 
-chrome.windows.onFocusChanged.addListener((windowId) => { onFocusedChanged(windowId, selectedWindowId) });
+chrome.windows.onFocusChanged.addListener((windowId) => { 
+  console.log("EVENT: onFocusChanged: ", windowId, selectedWindowId)
+  onFocusedChanged(windowId, selectedWindowId) });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
