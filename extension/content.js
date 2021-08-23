@@ -1,6 +1,5 @@
 //// content.js ////
 let video;
-let counter = 5;
 // 1. Send the background a message requesting the user's data
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
@@ -29,11 +28,8 @@ function addVideo(sendResponse) {
     chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "play" });
   }
 
-  video.ontimeupdate = (event) => {
-    if (counter === 5) {
-      counter = 0;
-      chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "timeupdate" });
-    } else counter++;
+  video.onseeked = (event) => {
+      chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "seeked" });
   }
 
   sendResponse(formatData(document));
@@ -42,12 +38,11 @@ function addVideo(sendResponse) {
 
 function removeVideo(sendResponse) {
   if (video) {
-    video.ontimeupdate = null;
+    video.seeked = null;
     video.onpause = null;
     video.onplay = null;
     video = null;
   }
-  counter = 5;
   fetch(`http://localhost:6969`, {
     method: "DELETE"
   }).then(() => {

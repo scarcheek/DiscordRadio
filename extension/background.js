@@ -1,4 +1,3 @@
-// Contextmenu shit
 let selectedTabId = null, selectedWindowId = null, currentMoodId = null;
 let contextMenuIds = {
   track: 'track',
@@ -13,20 +12,24 @@ chrome.storage.sync.get('moodId', (data) => {
     currentMoodId = data.moodId
 })
 
-chrome.contextMenus.create({
-  id: "stop",
-  title: "Remove tracked Tab from Discord RPC",
-  contexts: ["page"],
-  documentUrlPatterns: ['*://*/*'],
-  enabled: false
+// Contextmenu shit
+chrome.contextMenus.removeAll(() => {
+  chrome.contextMenus.create({
+    id: "stop",
+    title: "Remove tracked Tab from Discord RPC",
+    contexts: ["page"],
+    documentUrlPatterns: ['*://*/*'],
+    enabled: false
+  })
+
+  chrome.contextMenus.create({
+    id: "track",
+    title: "Track current Tab with Discord RPC",
+    contexts: ["page"],
+    documentUrlPatterns: ['https://*.youtube.com/watch?*']
+  });
 })
 
-chrome.contextMenus.create({
-  id: "track",
-  title: "Track current Tab with Discord RPC",
-  contexts: ["page"],
-  documentUrlPatterns: ['https://*.youtube.com/watch?*']
-});
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   if (info.menuItemId == "track") {
@@ -69,7 +72,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 });
 
 chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
-  if(tabId === selectedTabId && attachInfo && attachInfo.newWindowId !== selectedWindowId) {
+  if (tabId === selectedTabId && attachInfo && attachInfo.newWindowId !== selectedWindowId) {
     selectedWindowId = attachInfo.newWindowId
   }
 })
@@ -94,9 +97,10 @@ chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
   if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
 });
 
-chrome.windows.onFocusChanged.addListener((windowId) => { 
+chrome.windows.onFocusChanged.addListener((windowId) => {
   console.log("EVENT: onFocusChanged: ", windowId, selectedWindowId)
-  onFocusedChanged(windowId, selectedWindowId) });
+  onFocusedChanged(windowId, selectedWindowId)
+});
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
@@ -108,7 +112,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 })
 
 chrome.runtime.onMessage.addListener(function (request) {
-  if (request.type === "pause" || request.type === "play" || request.type === "timeupdate") {
+  if (request.type === "pause" || request.type === "play" || request.type === "seeked") {
     updateDiscordRPC(request.data);
   }
 });
@@ -134,7 +138,7 @@ function initializeTrack(tab) {
       chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ON' });
       updateDiscordRPC(response);
     } else {
-      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord');
+      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', window.chrome.runtime.lastError.message);
     }
   });
 }
