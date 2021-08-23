@@ -4,14 +4,14 @@ let prevData = {};
 
 
 
-export function requestHandlerFor(client, config) {
+export function requestHandlerFor(client, ws, config) {
   return (req, res) => {
     try {
       setCorsHeaders(res);
 
       if (req.method === 'POST') {
         parseJsonBody(req, data => {
-          updateActivity(client, config, data);
+          updateActivity(client, ws, config, data);
           
           if (prevData?.title !== data.title) {
             console.log(`🎶 Now listening to ${data.title}`);

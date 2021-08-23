@@ -1,0 +1,63 @@
+import express from 'express';
+import { WebSocketServer } from 'ws';
+import path from 'path';
+
+
+const httpServer = express();
+httpServer.use(express.static('public'));
+httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/index.html')));
+
+httpServer.listen(42069, $=> console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
+
+
+const listeners = new Map();
+const hostPlayerStates = new Map();
+
+const wsServer = new WebSocketServer({ port: 420 });
+wsServer.on('connection', (ws) => {
+  ws.once('message', (msg) => {
+    const connUrl = msg.toString();
+
+    if (connUrl.startsWith('host://')) connectHost(ws, connUrl);
+    else connectListener(ws, connUrl);
+  });
+});
+
+wsServer.on('listening', $=> console.log(`Yo he, donn hot da websuckit surfer e schon gwunnen!`));
+
+
+function connectHost(ws, connectionUrl) {
+  const host = connectionUrl.replace('host://', '');
+
+  ws.on('message', playerState => {
+    playerState = JSON.parse(playerState.toString());
+    playerState.updatedOn = Date.now();
+    hostPlayerStates.set(host, playerState);
+    console.dir(hostPlayerStates.get(host));
+
+    if (!listeners.has(host)) return;
+    listeners.get(host).forEach(ws => ws.send(JSON.stringify(playerState)));
+  });
+
+  ws.on('close', $=> {
+    hostPlayerStates.delete(host);
+  });
+}
+
+function connectListener(ws, connectionUrl) {
+  const host = connectionUrl.replace('http://localhost:42069/', '');
+
+  if (!listeners.has(host)) {
+    listeners.set(host, []);
+  }
+
+  listeners.get(host).push(ws);
+  ws.send(JSON.stringify(hostPlayerStates.get(host)));
+
+  ws.on('close', $=> {
+    const newListeners = listeners.get(host).filter(listener => listener !== ws);
+
+    if (newListeners.length === 0) listeners.delete(host);
+    else listeners.set(host, newListeners);
+  });
+}

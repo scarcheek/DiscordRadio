@@ -1,6 +1,8 @@
 import http from 'http';
+import WebSocket from 'ws';
 import fs from 'fs/promises';
 import fetch from 'node-fetch';
+import process from 'process';
 import rpcClient from './rpc.js';
 import { requestHandlerFor } from './server.js';
 
@@ -37,16 +39,28 @@ try {
   authConfig.refresh_token = tokenInfo.refresh_token;
   await fs.writeFile(new URL('../../auth.json', import.meta.url), JSON.stringify(authConfig, null, 2), 'utf8');
 
-  await client.authenticate(
+  const { user } = await client.authenticate(
     tokenInfo.access_token,
   );
 
+  config.user = `${user.username}#${user.discriminator}`;
   config.large_image = pickRandomImage();
-  const server = http.createServer( requestHandlerFor(client, config) );
-  server.listen(6969, () => {
-    console.log('🎉 All set up and ready to go!');
-    console.log('📻 Listening for the browser extension.');
-    console.log();
+
+  const ws = new WebSocket('ws://localhost:420');
+  ws.on('open', function open() {
+    ws.send(`host://${config.user}`);
+    
+    const server = http.createServer( requestHandlerFor(client, ws, config) );
+    server.listen(6969, () => {
+      console.log('🎉 All set up and ready to go!');
+      console.log('📻 Listening for the browser extension.');
+      console.log();
+    });
+  });
+
+  process.on('SIGINT', $=> {
+    ws.close();
+    process.exit();
   });
 }
 catch (err) {
