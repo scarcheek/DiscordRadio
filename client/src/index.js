@@ -9,8 +9,6 @@ import { requestHandlerFor } from './server.js';
 const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../../config.json');
 
-
-
 try {
   console.log('📻 Discord Radio 🎶');
   console.log('-------------------');
@@ -46,9 +44,10 @@ try {
   config.user = `${user.username}#${user.discriminator}`;
   config.large_image = pickRandomImage();
 
-  tryServerConnect(client)
-
   
+  console.log('🔌 Connecting to the Server...');
+
+  tryServerConnect(client)
 }
 catch (err) {
   console.error(err);
