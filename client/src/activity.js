@@ -1,16 +1,21 @@
+export const state = {
+  lastData: {
+    nrOfListeners: 0,
+  },
+};
+
 export function updateActivity(client, ws, config, data) {
+  data.nrOfListeners = state.lastData.nrOfListeners;
+  state.lastData = data;
+
   const large_text = pickRandomText(config.vibe_texts);
   const activity = (data.paused)
     ? createPausedActivity(data, config, large_text)
     : createPlayingActivity(data, config, large_text);
 
   client.setActivity(activity);
-
-  console.dir(data);
   ws.send(JSON.stringify(data));
 }
-
-
 
 function createPausedActivity(data, config, large_text) {
   return {
@@ -42,7 +47,7 @@ function createPlayingActivity(data, config, large_text) {
       small_text: 'Playing',
     },
     buttons: [
-      { label: "🎉 Listen Along", url: `http://localhost:42069/${config.user}` },
+      { label: `🎉 Listen along with ${data.nrOfListeners} friends!`, url: `http://localhost:42069/${config.user}` },
       { label: "🎧 Play on YouTube", url: data.URL },
     ],
   };

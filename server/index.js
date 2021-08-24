@@ -11,7 +11,7 @@ httpServer.listen(42069, $=> console.log(`Yo he, donn hot da http surfer e schon
 
 
 const listeners = new Map();
-const hostPlayerStates = new Map();
+const hosts = new Map();
 
 const wsServer = new WebSocketServer({ port: 420 });
 wsServer.on('connection', (ws) => {
@@ -32,15 +32,14 @@ function connectHost(ws, connectionUrl) {
   ws.on('message', playerState => {
     playerState = JSON.parse(playerState.toString());
     playerState.updatedOn = Date.now();
-    hostPlayerStates.set(host, playerState);
-    console.dir(hostPlayerStates.get(host));
+    hosts.set(host, {hostWs: ws, playerState});
 
     if (!listeners.has(host)) return;
     listeners.get(host).forEach(ws => ws.send(JSON.stringify(playerState)));
   });
 
   ws.on('close', $=> {
-    hostPlayerStates.delete(host);
+    hosts.delete(host);
   });
 }
 
@@ -52,10 +51,17 @@ function connectListener(ws, connectionUrl) {
   }
 
   listeners.get(host).push(ws);
-  ws.send(JSON.stringify(hostPlayerStates.get(host)));
+
+  if (hosts.has(host)) {
+    const { hostWs, playerState } = hosts.get(host);
+    ws.send(JSON.stringify(playerState));
+    hostWs.send(listeners.get(host).length);
+  }
 
   ws.on('close', $=> {
     const newListeners = listeners.get(host).filter(listener => listener !== ws);
+    const { hostWs } = hosts.get(host);
+    hostWs.send(newListeners.length);
 
     if (newListeners.length === 0) listeners.delete(host);
     else listeners.set(host, newListeners);

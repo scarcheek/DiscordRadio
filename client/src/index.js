@@ -5,6 +5,8 @@ import fetch from 'node-fetch';
 import process from 'process';
 import rpcClient from './rpc.js';
 import { requestHandlerFor } from './server.js';
+import { updateActivity, state } from './activity.js';
+
 
 const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../../config.json');
@@ -105,6 +107,12 @@ async function tryServerConnect(client) {
   const ws = new WebSocket('ws://localhost:420');
   ws.on('open', function open() {
     ws.send(`host://${config.user}`);
+    ws.on('message', nrOfListeners => {
+      state.lastData.nrOfListeners = nrOfListeners;
+      updateActivity(client, ws, config, state.lastData);
+      console.log("listening with " + nrOfListeners);
+    });
+
 
     const server = http.createServer(requestHandlerFor(client, ws, config));
     server.listen(6969, () => {
