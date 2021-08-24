@@ -28,10 +28,10 @@ try {
   const authConfig = tryRequire('../../auth.json') ?? {};
 
   const tokenInfo = (authConfig?.refresh_token)
-  ? await refreshToken(authConfig.refresh_token)
-  : await client.authorize(
-      config.client_id, 
-      config.client_secret, 
+    ? await refreshToken(authConfig.refresh_token)
+    : await client.authorize(
+      config.client_id,
+      config.client_secret,
       ['identify'],
       config.redirect_uri,
     );
@@ -46,22 +46,9 @@ try {
   config.user = `${user.username}#${user.discriminator}`;
   config.large_image = pickRandomImage();
 
-  const ws = new WebSocket('ws://localhost:420');
-  ws.on('open', function open() {
-    ws.send(`host://${config.user}`);
-    
-    const server = http.createServer( requestHandlerFor(client, ws, config) );
-    server.listen(6969, () => {
-      console.log('🎉 All set up and ready to go!');
-      console.log('📻 Listening for the browser extension.');
-      console.log();
-    });
-  });
+  tryServerConnect(client)
 
-  process.on('SIGINT', $=> {
-    ws.close();
-    process.exit();
-  });
+  
 }
 catch (err) {
   console.error(err);
@@ -71,10 +58,10 @@ catch (err) {
 
 function pickRandomImage() {
   const randomImageNr = Math.random();
-  return  (randomImageNr < 0.01) ? 'image-man' :
-          (randomImageNr < 0.02) ? 'image-woman' :
-          (randomImageNr < 0.03) ? 'image-bear' :
-          'image';
+  return (randomImageNr < 0.01) ? 'image-man' :
+    (randomImageNr < 0.02) ? 'image-woman' :
+      (randomImageNr < 0.03) ? 'image-bear' :
+        'image';
 }
 
 function refreshToken(refresh_token) {
@@ -104,7 +91,7 @@ async function tryConnect(client_id) {
     return await rpcClient(client_id);
   }
   catch (err) {
-    console.log('💥 Connection failed, reconnecting in 15s...');
+    console.log('💥 Connection to Discord failed, reconnecting in 15s...');
     await wait(15_000);
     return tryConnect(client_id);
   }
@@ -112,4 +99,30 @@ async function tryConnect(client_id) {
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+async function tryServerConnect(client) {
+  const ws = new WebSocket('ws://localhost:420');
+  ws.on('open', function open() {
+    ws.send(`host://${config.user}`);
+
+    const server = http.createServer(requestHandlerFor(client, ws, config));
+    server.listen(6969, () => {
+      console.log('🎉 All set up and ready to go!');
+      console.log('📻 Listening for the browser extension.');
+      console.log();
+    });
+  });
+
+  ws.on('error', async () => {
+    console.log('💥 Connection to server failed, reconnecting in 15s...');
+    await wait(15_000);
+    tryServerConnect(client);
+  })
+
+  process.on('SIGINT', $ => {
+    ws.close();
+    process.exit();
+  });
 }
