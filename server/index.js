@@ -7,7 +7,7 @@ const httpServer = express();
 httpServer.use(express.static('public'));
 httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/index.html')));
 
-httpServer.listen(42069, $=> console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
+httpServer.listen(42069, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 
 
 const listeners = new Map();
@@ -23,7 +23,7 @@ wsServer.on('connection', (ws) => {
   });
 });
 
-wsServer.on('listening', $=> console.log(`Yo he, donn hot da websuckit surfer e schon gwunnen!`));
+wsServer.on('listening', $ => console.log(`Yo he, donn hot da websuckit surfer e schon gwunnen!`));
 
 
 function connectHost(ws, connectionUrl) {
@@ -32,13 +32,13 @@ function connectHost(ws, connectionUrl) {
   ws.on('message', playerState => {
     playerState = JSON.parse(playerState.toString());
     playerState.updatedOn = Date.now();
-    hosts.set(host, {hostWs: ws, playerState});
+    hosts.set(host, { hostWs: ws, playerState });
 
     if (!listeners.has(host)) return;
     listeners.get(host).forEach(ws => ws.send(JSON.stringify(playerState)));
   });
 
-  ws.on('close', $=> {
+  ws.on('close', $ => {
     hosts.delete(host);
   });
 }
@@ -58,11 +58,12 @@ function connectListener(ws, connectionUrl) {
     hostWs.send(listeners.get(host).length);
   }
 
-  ws.on('close', $=> {
+  ws.on('close', $ => {
     const newListeners = listeners.get(host).filter(listener => listener !== ws);
-    const { hostWs } = hosts.get(host);
-    hostWs.send(newListeners.length);
-
+    if (hosts.has(host)) {
+      const { hostWs } = hosts.get(host);
+      hostWs.send(newListeners.length);
+    }
     if (newListeners.length === 0) listeners.delete(host);
     else listeners.set(host, newListeners);
   });

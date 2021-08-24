@@ -47,7 +47,7 @@ function createPlayingActivity(data, config, large_text) {
       small_text: 'Playing',
     },
     buttons: [
-      { label: `🎉 Listen along with ${data.nrOfListeners} friends!`, url: `http://localhost:42069/${config.user}` },
+      { label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners} friend${data.nrOfListeners === 0 ? 's' : ''}!` :  `along!`}`, url: `http://localhost:42069/${config.user}` },
       { label: "🎧 Play on YouTube", url: data.URL },
     ],
   };
