@@ -28,6 +28,7 @@ wsServer.on('listening', $ => console.log(`Yo he, donn hot da websuckit surfer e
 
 function connectHost(ws, connectionUrl) {
   const host = connectionUrl.replace('host://', '');
+  ws.send((listeners.get(host) ?? []).length);
 
   ws.on('message', playerState => {
     playerState = JSON.parse(playerState.toString());

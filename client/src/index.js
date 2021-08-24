@@ -108,9 +108,8 @@ async function tryServerConnect(client) {
   ws.on('open', function open() {
     ws.send(`host://${config.user}`);
     ws.on('message', nrOfListeners => {
-      state.lastData.nrOfListeners = nrOfListeners;
+      state.lastData.nrOfListeners = parseInt(nrOfListeners);
       updateActivity(client, ws, config, state.lastData);
-      console.log("listening with " + nrOfListeners);
     });
 
 
