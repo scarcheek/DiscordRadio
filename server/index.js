@@ -1,6 +1,8 @@
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import path from 'path';
+const require = (await import('module')).createRequire(import.meta.url);
+const config = require('../../config.json');
 
 
 const httpServer = express();
@@ -45,7 +47,7 @@ function connectHost(ws, connectionUrl) {
 }
 
 function connectListener(ws, connectionUrl) {
-  const host = connectionUrl.replace('http://localhost:42069/', '');
+  const host = connectionUrl.replace(`http://${config.server_uri}:42069/`, '');
 
   if (!listeners.has(host)) {
     listeners.set(host, []);

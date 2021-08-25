@@ -1,7 +1,7 @@
 const server_uri = '194.163.173.136';
 
 let player, hostPlayerState;
-document.title = `Listening to: ${(window.location).toString().replace('http://localhost:42069/', '')}`;
+document.title = `Listening to: ${(window.location).toString().replace(`http://${server_uri}:42069/`, '')}`;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
