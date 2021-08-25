@@ -123,6 +123,7 @@ async function tryServerConnect(client) {
       setupServer(client, ws)
       console.log('🎉 All set up and ready to go!');
     } else {
+      retryServerConnectCount = -1;
       console.log('🤖 Reconnected.')
       console.log()
     }
@@ -130,7 +131,7 @@ async function tryServerConnect(client) {
 
   ws.on('error', async (e) => {
     if (retryServerConnectCount === 3) {
-      console.log('⚡ Connection to server failed, starting without server connection.');
+      console.log('⚡ Connection to server failed, continuing without server connection.');
       if (!closed)
         setupServer(client);
       return
@@ -145,7 +146,7 @@ async function tryServerConnect(client) {
     if (retryServerConnectCount === -1) {
       retryServerConnectCount++;
       closed = true;
-      console.log('💥 Lost connection to server, reconnecting in 15s...');
+      console.log('🔌 Lost connection to server, reconnecting in 15s...');
       await wait(15_000);
       tryServerConnect(client);
     }
@@ -157,7 +158,6 @@ function setupServer(client, ws) {
   server.listen(6969, () => {
     console.log('📻 Listening for the browser extension.');
     console.log();
-
     retryServerConnectCount = -1;
   });
 }
