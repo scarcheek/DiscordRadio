@@ -3,8 +3,6 @@ import { state } from './index.js';
 
 let prevData = {};
 
-
-
 export function requestHandlerFor(client, config) {
   return (req, res) => {
     try {
