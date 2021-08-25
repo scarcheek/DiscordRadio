@@ -109,7 +109,7 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-let retryServerConnectCount = 0
+let retryServerConnectCount = 0, closed = false;
 async function tryServerConnect(client) {
   ws = new WebSocket('ws://localhost:420');
   ws.on('open', function open() {
@@ -119,20 +119,36 @@ async function tryServerConnect(client) {
       updateActivity(client, ws, config, state.lastData);
     });
 
-    console.log('🎉 All set up and ready to go!');
-    setupServer(client, ws)
+    if (!closed) {
+      setupServer(client, ws)
+      console.log('🎉 All set up and ready to go!');
+    } else {
+      console.log('🤖 Reconnected.')
+      console.log()
+    }
   });
 
-  ws.on('error', async () => {
+  ws.on('error', async (e) => {
     if (retryServerConnectCount === 3) {
       console.log('⚡ Connection to server failed, starting without server connection.');
-      setupServer(client);
+      if (!closed)
+        setupServer(client);
       return
     }
     retryServerConnectCount++;
     console.log('💥 Connection to server failed, reconnecting in 15s...');
     await wait(15_000);
     tryServerConnect(client);
+  })
+
+  ws.on('close', async (e) => {
+    if (retryServerConnectCount === -1) {
+      retryServerConnectCount++;
+      closed = true;
+      console.log('💥 Lost connection to server, reconnecting in 15s...');
+      await wait(15_000);
+      tryServerConnect(client);
+    }
   })
 }
 
@@ -141,5 +157,7 @@ function setupServer(client, ws) {
   server.listen(6969, () => {
     console.log('📻 Listening for the browser extension.');
     console.log();
+
+    retryServerConnectCount = -1;
   });
 }
