@@ -1,3 +1,4 @@
+let lastRequestData = null;
 let selectedTabId = null, selectedWindowId = null, currentMoodId = null;
 let contextMenuIds = {
   track: 'track',
@@ -107,6 +108,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     if (changes.moodId) {
       console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
       currentMoodId = changes.moodId.newValue;
+      updateDiscordRPC(lastRequestData);
     }
   }
 })
@@ -117,6 +119,7 @@ chrome.runtime.onMessage.addListener(function (request) {
   }
 });
 function updateDiscordRPC(data) {
+  lastRequestData = data;
   data.mood = currentMoodId;
 
   fetch(`http://localhost:6969`, {
