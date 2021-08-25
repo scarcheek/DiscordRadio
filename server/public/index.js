@@ -1,3 +1,4 @@
+const config = require('../../config.json')
 let player, hostPlayerState;
 document.title = `Listening to: ${(window.location).toString().replace('http://localhost:42069/', '')}`;
 
@@ -10,7 +11,7 @@ function onYouTubeIframeAPIReady() {
       'enablejsapi': 1,
       'iv_load_policy': 3,
       'modestbranding': 1,
-      'origin': 'http://localhost:42069',
+      'origin': `http://${config.server_uri}:42069`,
       'rel': 0,
       'controls': 0,
       'disablekb': 1
@@ -22,7 +23,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 async function onPlayerReady() {
-  const ws = new WebSocket('ws://localhost:420');
+  const ws = new WebSocket(`ws://${config.server_uri}:420`);
   ws.onopen = async () => {
     ws.send(window.location);
     window.onbeforeunload = $ => ws.close();

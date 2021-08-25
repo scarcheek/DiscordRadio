@@ -104,7 +104,7 @@ function wait(ms) {
 
 let retryServerConnectCount = 0, closed = false;
 async function tryServerConnect(client) {
-  state.ws = new WebSocket('ws://localhost:420');
+  state.ws = new WebSocket(`ws://${config.server_uri}:420`);
   state.ws.on('open', function open() {
     state.ws.send(`host://${config.user}`);
     state.ws.on('message', nrOfListeners => {
