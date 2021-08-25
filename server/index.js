@@ -2,7 +2,7 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 import path from 'path';
 const require = (await import('module')).createRequire(import.meta.url);
-const config = require('../../config.json');
+const config = require('../config.json');
 
 
 const httpServer = express();
