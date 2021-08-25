@@ -35,7 +35,8 @@ function createPausedActivity(data, config, large_text) {
 }
 
 function createPlayingActivity(data, config, large_text, listenAlong) {
-  let buttons = []
+  let buttons = [];
+
   if (listenAlong) {
     buttons.push({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://localhost:42069/${config.user}` });
   }

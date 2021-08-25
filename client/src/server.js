@@ -1,17 +1,18 @@
 import { updateActivity } from './activity.js';
+import { state } from './index.js';
 
 let prevData = {};
 
 
 
-export function requestHandlerFor(client, ws, config) {
+export function requestHandlerFor(client, config) {
   return (req, res) => {
     try {
       setCorsHeaders(res);
 
       if (req.method === 'POST') {
         parseJsonBody(req, data => {
-          updateActivity(client, ws, config, data);
+          updateActivity(client, state.ws, config, data);
           
           if (prevData?.title !== data.title) {
             console.log(`🎶 Now listening to ${data.title}`);

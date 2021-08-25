@@ -5,12 +5,15 @@ import fetch from 'node-fetch';
 import process from 'process';
 import rpcClient from './rpc.js';
 import { requestHandlerFor } from './server.js';
-import { updateActivity, state } from './activity.js';
+import { updateActivity, state as activityState } from './activity.js';
 
 
 const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../../config.json');
-let ws;
+
+export const state = {
+  ws: null,
+};
 
 try {
   console.log('📻 Discord Radio 🎶');
@@ -53,8 +56,8 @@ try {
   tryServerConnect(client)
 
   process.on('SIGINT', $ => {
-    if (ws)
-      ws.close();
+    if (state.ws)
+      state.ws.close();
     process.exit();
   });
 }
@@ -111,16 +114,16 @@ function wait(ms) {
 
 let retryServerConnectCount = 0, closed = false;
 async function tryServerConnect(client) {
-  ws = new WebSocket('ws://localhost:420');
-  ws.on('open', function open() {
-    ws.send(`host://${config.user}`);
-    ws.on('message', nrOfListeners => {
-      state.lastData.nrOfListeners = parseInt(nrOfListeners);
-      updateActivity(client, ws, config, state.lastData);
+  state.ws = new WebSocket('ws://localhost:420');
+  state.ws.on('open', function open() {
+    state.ws.send(`host://${config.user}`);
+    state.ws.on('message', nrOfListeners => {
+      activityState.lastData.nrOfListeners = parseInt(nrOfListeners);
+      updateActivity(client, state.ws, config, activityState.lastData);
     });
 
     if (!closed) {
-      setupServer(client, ws)
+      setupServer(client);
       console.log('🎉 All set up and ready to go!');
     } else {
       retryServerConnectCount = -1;
@@ -129,11 +132,13 @@ async function tryServerConnect(client) {
     }
   });
 
-  ws.on('error', async (e) => {
+  state.ws.on('error', async (e) => {
     if (retryServerConnectCount === 3) {
       console.log('⚡ Connection to server failed, continuing without server connection.');
-      if (!closed)
+      if (!closed) {
+        state.ws = null;
         setupServer(client);
+      }
       return
     }
     retryServerConnectCount++;
@@ -142,7 +147,7 @@ async function tryServerConnect(client) {
     tryServerConnect(client);
   })
 
-  ws.on('close', async (e) => {
+  state.ws.on('close', async (e) => {
     if (retryServerConnectCount === -1) {
       retryServerConnectCount++;
       closed = true;
@@ -153,8 +158,8 @@ async function tryServerConnect(client) {
   })
 }
 
-function setupServer(client, ws) {
-  const server = http.createServer(requestHandlerFor(client, ws, config));
+function setupServer(client) {
+  const server = http.createServer(requestHandlerFor(client, config));
   server.listen(6969, () => {
     console.log('📻 Listening for the browser extension.');
     console.log();
