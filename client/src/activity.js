@@ -11,10 +11,11 @@ export function updateActivity(client, ws, config, data) {
   const large_text = pickRandomText(config.vibe_texts);
   const activity = (data.paused)
     ? createPausedActivity(data, config, large_text)
-    : createPlayingActivity(data, config, large_text);
+    : createPlayingActivity(data, config, large_text, !!ws);
 
   client.setActivity(activity);
-  ws.send(JSON.stringify(data));
+  if (ws)
+    ws.send(JSON.stringify(data));
 }
 
 function createPausedActivity(data, config, large_text) {
@@ -33,7 +34,12 @@ function createPausedActivity(data, config, large_text) {
   };
 }
 
-function createPlayingActivity(data, config, large_text) {
+function createPlayingActivity(data, config, large_text, listenAlong) {
+  let buttons = []
+  if (listenAlong) {
+    buttons.push({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://localhost:42069/${config.user}` });
+  }
+  buttons.push({ label: "🎧 Play on YouTube", url: data.URL });
   return {
     details: data.title,
     state: `via: ${data.channelName}`,
@@ -46,10 +52,7 @@ function createPlayingActivity(data, config, large_text) {
       small_image: 'play-circle',
       small_text: 'Playing',
     },
-    buttons: [
-      { label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` :  `along!`}`, url: `http://localhost:42069/${config.user}` },
-      { label: "🎧 Play on YouTube", url: data.URL },
-    ],
+    buttons,
   };
 }
 

@@ -10,6 +10,7 @@ import { updateActivity, state } from './activity.js';
 
 const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../../config.json');
+let ws;
 
 try {
   console.log('📻 Discord Radio 🎶');
@@ -46,10 +47,16 @@ try {
   config.user = `${user.username}#${user.discriminator}`;
   config.large_image = pickRandomImage();
 
-  
+
   console.log('🔌 Connecting to the Server...');
 
   tryServerConnect(client)
+
+  process.on('SIGINT', $ => {
+    if (ws)
+      ws.close();
+    process.exit();
+  });
 }
 catch (err) {
   console.error(err);
@@ -102,9 +109,9 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
+let retryServerConnectCount = 0
 async function tryServerConnect(client) {
-  const ws = new WebSocket('ws://localhost:420');
+  ws = new WebSocket('ws://localhost:420');
   ws.on('open', function open() {
     ws.send(`host://${config.user}`);
     ws.on('message', nrOfListeners => {
@@ -112,23 +119,27 @@ async function tryServerConnect(client) {
       updateActivity(client, ws, config, state.lastData);
     });
 
-
-    const server = http.createServer(requestHandlerFor(client, ws, config));
-    server.listen(6969, () => {
-      console.log('🎉 All set up and ready to go!');
-      console.log('📻 Listening for the browser extension.');
-      console.log();
-    });
+    console.log('🎉 All set up and ready to go!');
+    setupServer(client, ws)
   });
 
   ws.on('error', async () => {
+    if (retryServerConnectCount === 3) {
+      console.log('⚡ Connection to server failed, starting without server connection.');
+      setupServer(client);
+      return
+    }
+    retryServerConnectCount++;
     console.log('💥 Connection to server failed, reconnecting in 15s...');
     await wait(15_000);
     tryServerConnect(client);
   })
+}
 
-  process.on('SIGINT', $ => {
-    ws.close();
-    process.exit();
+function setupServer(client, ws) {
+  const server = http.createServer(requestHandlerFor(client, ws, config));
+  server.listen(6969, () => {
+    console.log('📻 Listening for the browser extension.');
+    console.log();
   });
 }
