@@ -119,6 +119,7 @@ chrome.runtime.onMessage.addListener(function (request) {
   }
 });
 function updateDiscordRPC(data) {
+  if (!data) return;
   lastRequestData = data;
   data.mood = currentMoodId;
 

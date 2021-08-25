@@ -48,7 +48,7 @@ try {
   );
 
   config.user = `${user.username}#${user.discriminator}`;
-  config.large_image = pickRandomImage();
+  config.large_image = 'image';
 
 
   console.log('🔌 Connecting to the Server...');
@@ -63,16 +63,6 @@ try {
 }
 catch (err) {
   console.error(err);
-}
-
-
-
-function pickRandomImage() {
-  const randomImageNr = Math.random();
-  return (randomImageNr < 0.01) ? 'image-man' :
-    (randomImageNr < 0.02) ? 'image-woman' :
-      (randomImageNr < 0.03) ? 'image-bear' :
-        'image';
 }
 
 function refreshToken(refresh_token) {
