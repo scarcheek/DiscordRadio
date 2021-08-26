@@ -1,21 +1,16 @@
-export const state = {
-  lastData: {
-    nrOfListeners: 0,
-  },
-};
+import $ from './state.js';
 
-export function updateActivity(client, ws, config, data) {
-  data.nrOfListeners = state.lastData.nrOfListeners;
-  state.lastData = data;
+export function updateActivity(data, config) {
+  data.nrOfListeners = $.nrOfListeners;
+  $.currActivityData = data;
 
   const large_text = pickRandomText(config.vibe_texts);
   const activity = (data.paused)
     ? createPausedActivity(data, config, large_text)
-    : createPlayingActivity(data, config, large_text, !!ws);
+    : createPlayingActivity(data, config, large_text, !!$.serverConn);
 
-  client.setActivity(activity);
-  if (ws)
-    ws.send(JSON.stringify(data));
+  $.discordConn.setActivity(activity);
+  if ($.serverConn) $.serverConn.send(JSON.stringify(data));
 }
 
 function createPausedActivity(data, config, large_text) {
@@ -23,7 +18,7 @@ function createPausedActivity(data, config, large_text) {
     details: data.title,
     state: `via: ${data.channelName}`,
     assets: {
-      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : config.large_image,
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
       large_text,
       small_image: 'pause-circle',
       small_text: 'Paused',
@@ -35,12 +30,12 @@ function createPausedActivity(data, config, large_text) {
 }
 
 function createPlayingActivity(data, config, large_text, listenAlong) {
-  let buttons = [];
+  const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
 
   if (listenAlong) {
-    buttons.push({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://${config.server_uri}:${config.server_port}/${config.user}` });
+    buttons.unshift({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://${config.server_uri}:${config.server_port}/${config.user}` });
   }
-  buttons.push({ label: "🎧 Play on YouTube", url: data.URL });
+
   return {
     details: data.title,
     state: `via: ${data.channelName}`,
@@ -48,7 +43,7 @@ function createPlayingActivity(data, config, large_text, listenAlong) {
       start: Date.now() - 1000 * data.currTime
     },
     assets: {
-      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : config.large_image,
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
       large_text,
       small_image: 'play-circle',
       small_text: 'Playing',

@@ -7,7 +7,7 @@ const config = require('../config.json');
 
 const httpServer = express();
 httpServer.use(express.static('public'));
-httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/index.html')));
+httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/listener-client.html')));
 
 httpServer.listen(config.server_port, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 

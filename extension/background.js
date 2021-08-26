@@ -124,15 +124,17 @@ function updateDiscordRPC(data) {
   data.mood = currentMoodId;
 
   fetch(`http://localhost:6969`, {
-    method: "POST",
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(data),
-    mode: "no-cors"
   }).catch((err) => console.error(err.message));
 }
 
 function initializeTrack(tab) {
   console.log(`trying to track tab with id: ${tab.id}`)
-  chrome.tabs.sendMessage(tab.id, { type: "init" }, function (response) {
+  chrome.tabs.sendMessage(tab.id, { type: 'init' }, function (response) {
     if (!window.chrome.runtime.lastError) {
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
 

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { v4 as uuid } from 'uuid';
-import ipcClient from './infrastructure/ipc.js';
+import ipcClient from './ipc.js';
 
 /** @typedef {import('../@types/infrastructure/ipc').IpcClient} IpcClient */
 /** @typedef {import('../@types/rpc').RpcClient} RpcClient */
