@@ -1,23 +1,24 @@
 const server_uri = 'discordradio.tk';
-const server_port = '80'
+const server_port = 80;
+
+Array.prototype.last = function() { return this[this.length - 1]; };
 
 let player, hostPlayerState;
-document.title = `Listening to: ${window.location.toString().split('/')[window.location.toString().split('/').length - 1]}`;
+document.title = `Listening to: ${window.location.toString().split('/').last()}`;
 
 
 
 function onYouTubeIframeAPIReady() {
-  player = new YT.Player('player', {
+  new YT.Player('player', {
     height: '100%',
     width: '100%',
     playerVars: {
-      'autoplay': 0,
       'enablejsapi': 1,
       'iv_load_policy': 3,
       'modestbranding': 1,
       'origin': `http://${server_uri}:${server_port}`,
       'rel': 0,
-      'controls': 0,
+      'controls': 1,
       'disablekb': 1,
     },
     events: {
@@ -28,20 +29,26 @@ function onYouTubeIframeAPIReady() {
 }
 
 async function onPlayerReady(readyEvent) {
+  console.log('Player ready:', readyEvent);
+  player = readyEvent.target;
+
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
+    console.log('Sending listener url to the server...');
     ws.send(window.location);
-    window.onbeforeunload = $ => ws.close();
+    window.onbeforeunload = () => ws.close();
   };
 
   ws.onmessage = async (e) => {
+    console.log('Received a message from the server...');
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.initializedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
-
+    console.log('Received player state:', hostPlayerState);
+    
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
@@ -55,13 +62,18 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function onPlayerStateChange(event) {
-  if (event.data === -1) {
+  console.log('Player state changed:', event.data);
+
+  if (event.data === YT.PlayerState.CUED) {
+    console.log('Player video ready');
+
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
   }
 }
 
 async function loadNewVideo(readyEvent) {
+  console.log('Loading new video...');
   player.cueVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 }
 
