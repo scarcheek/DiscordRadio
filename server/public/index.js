@@ -10,7 +10,6 @@ function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
     height: '100%',
     width: '100%',
-    videoId: 'dQw4w9WgXcQ',
     playerVars: {
       'autoplay': 1,
       'enablejsapi': 1,
@@ -27,7 +26,7 @@ function onYouTubeIframeAPIReady() {
   });
 }
 
-async function onPlayerReady() {
+async function onPlayerReady(readyEvent) {
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
     ws.send(window.location);
@@ -45,7 +44,7 @@ async function onPlayerReady() {
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
-    if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
+    if (currVideoId !== hostPlayerState.videoId) loadNewVideo(readyEvent);
     else updatePlayer();
   };
 
@@ -54,7 +53,8 @@ async function onPlayerReady() {
   }
 }
 
-async function loadNewVideo() {
+async function loadNewVideo(readyEvent) {
+  console.log(player)
   await player.loadVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
