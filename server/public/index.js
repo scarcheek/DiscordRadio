@@ -10,6 +10,7 @@ function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
     height: '100%',
     width: '100%',
+    videoId: 'dQw4w9WgXcQ',
     playerVars: {
       'autoplay': 1,
       'enablejsapi': 1,
@@ -18,7 +19,7 @@ function onYouTubeIframeAPIReady() {
       'origin': `http://${server_uri}:${server_port}`,
       'rel': 0,
       'controls': 0,
-      'disablekb': 1
+      'disablekb': 1,
     },
     events: {
       'onReady': onPlayerReady,
