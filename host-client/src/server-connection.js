@@ -11,7 +11,7 @@ export default async function connectToServer(config) {
     $.serverConn.send(`host://${config.user}`);
     $.serverConn.on('message', nrOfListeners => {
       $.nrOfListeners = parseInt(nrOfListeners);
-      if ($.currentActivityData) updateActivity($.currentActivityData, config);
+      if ($.currActivityData) updateActivity($.currActivityData, config);
     });
 
     if (!closed) {
