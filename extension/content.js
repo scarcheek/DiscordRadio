@@ -2,14 +2,16 @@
 let video;
 // 1. Send the background a message requesting the user's data
 chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
+  async function (request, sender, sendResponse) {
     if (request.type === "init") {
       addVideo(sendResponse);
     } else if (request.type === "tabChange") {
       if (!window.location.search.includes('v='))
         removeVideo(sendResponse);
-      else
+      else{
+        await wait(500);
         addVideo(sendResponse);
+      }
     } else if (request.type === "tabRemove") {
       removeVideo(sendResponse);
     }
@@ -17,22 +19,22 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-function addVideo(sendResponse) {
+async function addVideo(sendResponse) {
   video = document.querySelector('video');
 
-  video.onpause = (event) => {
-    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "pause" });
+  video.onpause =  (event) => {
+    chrome.runtime.sendMessage({ data:  formatData(document, event.target), type: "pause" });
   }
 
-  video.onplay = (event) => {
-    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "play" });
+  video.onplay =  (event) => {
+    chrome.runtime.sendMessage({ data:  formatData(document, event.target), type: "play" });
   }
 
-  video.onseeked = (event) => {
-      chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "seeked" });
+  video.onseeked = async (event) => {
+      chrome.runtime.sendMessage({ data:  formatData(document, event.target), type: "seeked" });
   }
 
-  sendResponse(formatData(document));
+  sendResponse( formatData(document));
   return
 }
 
@@ -50,7 +52,7 @@ function removeVideo(sendResponse) {
   }).catch(err => console.error('gotted error: ' + err));
 }
 
-function formatData(document, newVideo) {
+ function formatData(document, newVideo) {
   let currVideo = newVideo ? newVideo : video;
 
   let title = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer")[0].textContent
@@ -63,4 +65,8 @@ function formatData(document, newVideo) {
     currTime: Math.floor(currVideo.currentTime),
     paused: currVideo.paused,
   }
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
