@@ -29,25 +29,22 @@ async function onPlayerReady(readyEvent) {
 
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
-    console.log('Sending listener url to the server...');
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
   };
 
-  ws.onmessage = async (e) => {
-    console.log('Received a message from the server...');
+  ws.onmessage = async e => {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
-    console.log('Received player state:', hostPlayerState);
     
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
-    if (currVideoId !== hostPlayerState.videoId) loadNewVideo(readyEvent);
+    if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
     else updatePlayer();
   };
 
@@ -57,11 +54,7 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function onPlayerStateChange(event) {
-  console.log('Player state changed:', event.data);
-
   if (event.data === YT.PlayerState.CUED) {
-    console.log('Player video ready');
-
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
   }
@@ -74,12 +67,13 @@ async function onPlayerStateChange(event) {
   prevState = event.data;
 }
 
-async function loadNewVideo(readyEvent) {
+async function loadNewVideo() {
   console.log('Loading new video...');
   player.cueVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 }
 
 async function updatePlayer() {
+  console.log('Updating the player...');
   await player.seekTo(hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
