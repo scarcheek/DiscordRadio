@@ -44,13 +44,6 @@ async function onPlayerReady(readyEvent) {
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
-    if (!currVideoId) {
-      await readyEvent.target.loadVideoById((hostPlayerState.videoId, hostPlayerState.currTime))
-      readyEvent.target.playVideo()
-      currVideoId = hostPlayerState.videoId
-      return
-    }
-
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo(readyEvent);
     else updatePlayer();
   };
