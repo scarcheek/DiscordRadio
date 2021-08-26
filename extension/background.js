@@ -54,7 +54,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
 
-      chrome.browserAction.setBadgeText({ tabId: selectedTabId, text: '' });
+      chrome.browserAction.setBadgeText({ text: '' });
       selectedTabId = null;
       selectedWindowId = null;
     });
@@ -88,7 +88,7 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
       selectedWindowId = null;
 
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-      chrome.browserAction.setBadgeText({ tabId, text: '' });
+      chrome.browserAction.setBadgeText({ text: '' });
     }).catch(err => console.error('gotted error: ' + err));
   }
 });
