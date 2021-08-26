@@ -9,7 +9,7 @@ const httpServer = express();
 httpServer.use(express.static('public'));
 httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/index.html')));
 
-httpServer.listen(42069, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
+httpServer.listen(config.server_port, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 
 
 const listeners = new Map();
@@ -47,7 +47,7 @@ function connectHost(ws, connectionUrl) {
 }
 
 function connectListener(ws, connectionUrl) {
-  const host = connectionUrl.replace(`http://${config.server_uri}:42069/`, '');
+  const host = connectionUrl.replace(`http://${config.server_uri}:${config.server_port}/`, '');
 
   if (!listeners.has(host)) {
     listeners.set(host, []);

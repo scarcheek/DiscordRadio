@@ -2,7 +2,8 @@
   "client_id": "875518867680657458",
   "client_secret": "dihMntY3A_LVfiYCY_5EOJQn5XRDR4l3",
   "redirect_uri": "http://localhost:6969",
-  "server_uri": "194.163.173.136",
+  "server_uri": "localhost",
+  "server_port": "80",
   "vibe_texts": [
     "I'm so happy you're here!",
     "You have a new friend request.",

@@ -1,7 +1,8 @@
-const server_uri = '194.163.173.136';
+const server_uri = 'localhost';
+const server_port = '80'
 
 let player, hostPlayerState;
-document.title = `Listening to: ${(window.location).toString().replace(`http://${server_uri}:42069/`, '')}`;
+document.title = `Listening to: ${(window.location).toString().replace(`http://${server_uri}:${server_port}/`, '')}`;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
@@ -12,7 +13,7 @@ function onYouTubeIframeAPIReady() {
       'enablejsapi': 1,
       'iv_load_policy': 3,
       'modestbranding': 1,
-      'origin': `http://${server_uri}:42069`,
+      'origin': `http://${server_uri}:${server_port}`,
       'rel': 0,
       'controls': 0,
       'disablekb': 1
@@ -31,6 +32,7 @@ async function onPlayerReady() {
   };
 
   ws.onmessage = async (e) => {
+    console.log('onmessage called and there is ', e.data)
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
@@ -41,6 +43,8 @@ async function onPlayerReady() {
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
+    console.log(`currVidId: ${currVideoId} hostplayerstateid: ${hostPlayerState.videoId}`)
+    console.log(currVideoId !== hostPlayerState.videoId)
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
     else updatePlayer();
   };
@@ -51,14 +55,15 @@ async function onPlayerReady() {
 }
 
 async function loadNewVideo() {
-  player.loadVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
+  console.log('Loading video with id: ', hostPlayerState.videoId)
+  await player.loadVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
 }
 
 async function updatePlayer() {
-  player.seekTo(hostPlayerState.currTime);
+  await player.seekTo(hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();

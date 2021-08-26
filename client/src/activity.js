@@ -38,7 +38,7 @@ function createPlayingActivity(data, config, large_text, listenAlong) {
   let buttons = [];
 
   if (listenAlong) {
-    buttons.push({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://${config.server_uri}:42069/${config.user}` });
+    buttons.push({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://${config.server_uri}:${config.server_port}/${config.user}` });
   }
   buttons.push({ label: "🎧 Play on YouTube", url: data.URL });
   return {
