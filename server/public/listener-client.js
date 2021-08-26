@@ -16,7 +16,6 @@ function onYouTubeIframeAPIReady() {
       modestbranding: 1,
       origin: `http://${server_uri}:${server_port}`,
       rel: 0,
-      disablekb: 1,
     },
     events: {
       onReady: onPlayerReady,
