@@ -34,7 +34,7 @@ function connectHost(ws, connectionUrl) {
 
   ws.on('message', playerState => {
     playerState = JSON.parse(playerState.toString());
-    playerState.updatedOn = Date.now();
+    
     hosts.set(host, { hostWs: ws, playerState });
 
     if (!listeners.has(host)) return;
@@ -47,7 +47,7 @@ function connectHost(ws, connectionUrl) {
 }
 
 function connectListener(ws, connectionUrl) {
-  const host = connectionUrl.replace(`http://${config.server_uri}:${config.server_port}/`, '');
+  const host = connectionUrl.split('/')[connectionUrl.split('/').length-1];
 
   if (!listeners.has(host)) {
     listeners.set(host, []);

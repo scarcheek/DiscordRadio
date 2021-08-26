@@ -2,7 +2,9 @@ const server_uri = 'localhost';
 const server_port = '80'
 
 let player, hostPlayerState;
-document.title = `Listening to: ${(window.location).toString().replace(`http://${server_uri}:${server_port}/`, '')}`;
+document.title = `Listening to: ${window.location.toString().split('/')[window.location.toString().split('/').length - 1]}`;
+
+
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
@@ -32,7 +34,6 @@ async function onPlayerReady() {
   };
 
   ws.onmessage = async (e) => {
-    console.log('onmessage called and there is ', e.data)
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
@@ -43,8 +44,6 @@ async function onPlayerReady() {
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
-    console.log(`currVidId: ${currVideoId} hostplayerstateid: ${hostPlayerState.videoId}`)
-    console.log(currVideoId !== hostPlayerState.videoId)
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
     else updatePlayer();
   };
@@ -55,7 +54,6 @@ async function onPlayerReady() {
 }
 
 async function loadNewVideo() {
-  console.log('Loading video with id: ', hostPlayerState.videoId)
   await player.loadVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
@@ -71,16 +69,28 @@ async function updatePlayer() {
 
 window.addEventListener('keydown', (e) => {
   const playerVolume = player.getVolume();
+  let newVolume;
   switch (e.code) {
     case 'ArrowDown':
-      player.setVolume(Math.max((playerVolume - 2.5), 0))
+      newVolume = Math.max((playerVolume - 5), 0)
+      player.setVolume(newVolume)
+      showSnackbar(`${newVolume}%`)
       break;
     case 'ArrowUp':
-      player.setVolume(Math.min((playerVolume + 2.5), 100))
+      newVolume = Math.min((playerVolume + 5), 100)
+      player.setVolume(Math.min((playerVolume + 5), 100))
+      showSnackbar(`${newVolume}%`)
       break;
     case 'KeyM':
-      player.isMuted() ? player.unMute() : player.mute()
-      break;
+      if (player.isMuted()) {
+        player.unMute();
+        showSnackbar('Unmuted')
+      }
+      else {
+        player.mute()
+        showSnackbar('Muted')
+      }
+      break; 
     case 'Space':
       if (player.getPlayerState() === 1)
         player.pauseVideo()
@@ -93,3 +103,12 @@ window.addEventListener('keydown', (e) => {
       break;
   }
 })
+
+function showSnackbar(text) {
+  const snackbar = document.querySelector('#snackbar')
+  snackbar.className = "show"
+  snackbar.innerText = text
+  setTimeout(function () {
+    snackbar.className = "";
+  }, 3000);
+}

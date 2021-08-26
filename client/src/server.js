@@ -10,6 +10,7 @@ export function requestHandlerFor(client, config) {
 
       if (req.method === 'POST') {
         parseJsonBody(req, data => {
+          data.updatedOn = Date.now()
           updateActivity(client, state.ws, config, data);
           
           if (prevData?.title !== data.title) {
