@@ -33,7 +33,10 @@ function createPlayingActivity(data, config, large_text, listenAlong) {
   const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
 
   if (listenAlong) {
-    buttons.unshift({ label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, url: `http://${config.server_uri}:${config.server_port}/${config.user}` });
+    buttons.unshift({ 
+      label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, 
+      url: `http://${config.server_uri}:${(config.server_port !== 80) ? config.server_port : ''}/${config.user}` 
+    });
   }
 
   return {
