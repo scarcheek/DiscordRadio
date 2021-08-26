@@ -12,13 +12,13 @@ export default function listenForExtension(config) {
       try {
         const data = req.body;
         data.updatedOn = Date.now();
-        updateActivity(data, config);
         
         if ($.currActivityData?.title !== data.title) {
           console.log(`🎶 Now listening to ${data.title}`);
           $.currActivityData = data;
         }
-  
+        
+        updateActivity(data, config);
         res.end();
       }
       catch (err) {

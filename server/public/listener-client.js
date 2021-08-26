@@ -3,11 +3,11 @@ const server_port = 80;
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
-let player, hostPlayerState, autoplayFailHandlerEnabled = false;
+let player, hostPlayerState;
 document.title = `Listening to: ${window.location.toString().split('/').last()}`;
 
 function onYouTubeIframeAPIReady() {
-  new YT.Player('player', {
+  player = new YT.Player('player', {
     height: '100%',
     width: '100%',
     playerVars: {
@@ -26,7 +26,6 @@ function onYouTubeIframeAPIReady() {
 
 async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
-  player = readyEvent.target;
 
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
@@ -41,7 +40,7 @@ async function onPlayerReady(readyEvent) {
 
     hostPlayerState = JSON.parse(e.data);
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
-    hostPlayerState.initializedOn = Date.now();
+    hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
     console.log('Received player state:', hostPlayerState);
     
@@ -60,18 +59,16 @@ async function onPlayerReady(readyEvent) {
 async function onPlayerStateChange(event) {
   console.log('Player state changed:', event.data);
 
-  if (!autoplayFailHandlerEnabled && event.data === YT.PlayerState.UNSTARTED) {
-    autoplayFailHandlerEnabled = true;
-    document.addEventListener('click', e => {
-      player.playVideo();
-    }, { once: true });
-  }
-
   if (event.data === YT.PlayerState.CUED) {
     console.log('Player video ready');
-
+    
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
+  }
+  else if (event.data === YT.PlayerState.PLAYING) {
+    hostPlayerState.currTime += (Date.now() - hostPlayerState.playedOn) / 1000;
+    hostPlayerState.playedOn = Date.now();
+    player.seekTo(hostPlayerState.currTime);
   }
 }
 
@@ -85,50 +82,4 @@ async function updatePlayer() {
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
-}
-
-window.addEventListener('keydown', (e) => {
-  const playerVolume = player.getVolume();
-  let newVolume;
-  switch (e.code) {
-    case 'ArrowDown':
-      newVolume = Math.max((playerVolume - 5), 0)
-      player.setVolume(newVolume)
-      showSnackbar(`${newVolume}%`)
-      break;
-    case 'ArrowUp':
-      newVolume = Math.min((playerVolume + 5), 100)
-      player.setVolume(Math.min((playerVolume + 5), 100))
-      showSnackbar(`${newVolume}%`)
-      break;
-    case 'KeyM':
-      if (player.isMuted()) {
-        player.unMute();
-        showSnackbar('Unmuted')
-      }
-      else {
-        player.mute()
-        showSnackbar('Muted')
-      }
-      break;
-    case 'Space':
-      if (player.getPlayerState() === 1)
-        player.pauseVideo()
-      else if (player.getPlayerState() === 2) {
-        player.playVideo()
-
-        hostPlayerState.currTime += (Date.now() - hostPlayerState.initializedOn) / 1000;
-        player.seekTo(hostPlayerState.currTime);
-      }
-      break;
-  }
-})
-
-function showSnackbar(text) {
-  const snackbar = document.querySelector('#snackbar')
-  snackbar.className = "show"
-  snackbar.innerText = text
-  setTimeout(function () {
-    snackbar.className = "";
-  }, 3000);
 }
