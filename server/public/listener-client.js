@@ -3,27 +3,23 @@ const server_port = 80;
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
-let player, hostPlayerState;
+let player, hostPlayerState, autoplayFailHandlerEnabled = false;
 document.title = `Listening to: ${window.location.toString().split('/').last()}`;
-
-
 
 function onYouTubeIframeAPIReady() {
   new YT.Player('player', {
     height: '100%',
     width: '100%',
     playerVars: {
-      'enablejsapi': 1,
-      'iv_load_policy': 3,
-      'modestbranding': 1,
-      'origin': `http://${server_uri}:${server_port}`,
-      'rel': 0,
-      'controls': 1,
-      'disablekb': 1,
+      iv_load_policy: 3,
+      modestbranding: 1,
+      origin: `http://${server_uri}:${server_port}`,
+      rel: 0,
+      disablekb: 1,
     },
     events: {
-      'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange
     },
   });
 }
@@ -63,6 +59,13 @@ async function onPlayerReady(readyEvent) {
 
 async function onPlayerStateChange(event) {
   console.log('Player state changed:', event.data);
+
+  if (!autoplayFailHandlerEnabled && event.data === YT.PlayerState.UNSTARTED) {
+    autoplayFailHandlerEnabled = true;
+    document.addEventListener('click', e => {
+      player.playVideo();
+    }, { once: true });
+  }
 
   if (event.data === YT.PlayerState.CUED) {
     console.log('Player video ready');
