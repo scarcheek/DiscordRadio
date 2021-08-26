@@ -3,7 +3,7 @@ const server_port = 80;
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
-let player, hostPlayerState;
+let player, hostPlayerState, prevState = YT.PlayerState.UNSTARTED;
 document.title = `Listening to: ${window.location.toString().split('/').last()}`;
 
 function onYouTubeIframeAPIReady() {
@@ -61,15 +61,17 @@ async function onPlayerStateChange(event) {
 
   if (event.data === YT.PlayerState.CUED) {
     console.log('Player video ready');
-    
+
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
   }
-  else if (event.data === YT.PlayerState.PLAYING) {
+  else if (prevState !== YT.PlayerState.BUFFERING && event.data === YT.PlayerState.PLAYING) {
     hostPlayerState.currTime += (Date.now() - hostPlayerState.playedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     player.seekTo(hostPlayerState.currTime);
   }
+
+  prevState = event.data;
 }
 
 async function loadNewVideo(readyEvent) {
