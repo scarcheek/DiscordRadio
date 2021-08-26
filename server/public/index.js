@@ -44,6 +44,13 @@ async function onPlayerReady(readyEvent) {
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
+    if (!currVideoId) {
+      await readyEvent.target.loadVideoById((hostPlayerState.videoId, hostPlayerState.currTime))
+      if (hostPlayerState.paused) readyEvent.target.pauseVideo();
+      else readyEvent.target.playVideo();
+      return
+    }
+
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo(readyEvent);
     else updatePlayer();
   };
@@ -91,7 +98,7 @@ window.addEventListener('keydown', (e) => {
         player.mute()
         showSnackbar('Muted')
       }
-      break; 
+      break;
     case 'Space':
       if (player.getPlayerState() === 1)
         player.pauseVideo()
