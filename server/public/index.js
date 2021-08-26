@@ -1,4 +1,4 @@
-const server_uri = 'localhost';
+const server_uri = 'discordradio.tk';
 const server_port = '80'
 
 let player, hostPlayerState;
