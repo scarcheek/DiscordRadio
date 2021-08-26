@@ -3,10 +3,11 @@ const server_port = 80;
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
-let player, hostPlayerState, prevState = YT.PlayerState.UNSTARTED;
+let player, hostPlayerState, prevState;
 document.title = `Listening to: ${window.location.toString().split('/').last()}`;
 
 function onYouTubeIframeAPIReady() {
+  prevState = YT.PlayerState.UNSTARTED;
   player = new YT.Player('player', {
     height: '100%',
     width: '100%',
