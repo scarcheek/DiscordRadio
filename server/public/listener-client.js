@@ -55,7 +55,7 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function onPlayerStateChange(event) {
-  if (event.data === 5) {
+  if (event.data === -1) {
     if (hostPlayerState.paused) player.pauseVideo();
     else player.playVideo();
   }
