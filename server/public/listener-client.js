@@ -11,7 +11,7 @@ function onYouTubeIframeAPIReady() {
     height: '100%',
     width: '100%',
     playerVars: {
-      'autoplay': 1,
+      'autoplay': 0,
       'enablejsapi': 1,
       'iv_load_policy': 3,
       'modestbranding': 1,
@@ -22,6 +22,7 @@ function onYouTubeIframeAPIReady() {
     },
     events: {
       'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange
     },
   });
 }
@@ -53,11 +54,15 @@ async function onPlayerReady(readyEvent) {
   }
 }
 
-async function loadNewVideo(readyEvent) {
-  await player.loadVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
+async function onPlayerStateChange(event) {
+  if (event.data === 5) {
+    if (hostPlayerState.paused) player.pauseVideo();
+    else player.playVideo();
+  }
+}
 
-  if (hostPlayerState.paused) player.pauseVideo();
-  else player.playVideo();
+async function loadNewVideo(readyEvent) {
+  player.cueVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 }
 
 async function updatePlayer() {
