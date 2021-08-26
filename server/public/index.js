@@ -46,7 +46,9 @@ async function onPlayerReady(readyEvent) {
 
     if (!currVideoId) {
       await readyEvent.target.loadVideoById((hostPlayerState.videoId, hostPlayerState.currTime))
-      
+      readyEvent.target.playVideo()
+      currVideoId = hostPlayerState.videoId
+      return
     }
 
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo(readyEvent);
@@ -59,7 +61,6 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function loadNewVideo(readyEvent) {
-  console.log(player)
   await player.loadVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
