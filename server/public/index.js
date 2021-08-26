@@ -46,9 +46,7 @@ async function onPlayerReady(readyEvent) {
 
     if (!currVideoId) {
       await readyEvent.target.loadVideoById((hostPlayerState.videoId, hostPlayerState.currTime))
-      if (hostPlayerState.paused) readyEvent.target.pauseVideo();
-      else readyEvent.target.playVideo();
-      return
+      
     }
 
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo(readyEvent);
