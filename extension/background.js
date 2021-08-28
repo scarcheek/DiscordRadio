@@ -54,7 +54,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
 
-      chrome.browserAction.setBadgeText({ text: '' });
+      chrome.browserAction.setBadgeText({ tabId: selectedTabId, text: '' });
       selectedTabId = null;
       selectedWindowId = null;
     });
@@ -84,11 +84,11 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
       method: "DELETE"
     }).then(() => {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+      chrome.browserAction.setBadgeText({ tabId: selectedTabId, text: '' });
+      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
+
       selectedTabId = null;
       selectedWindowId = null;
-
-      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-      chrome.browserAction.setBadgeText({ text: '' });
     }).catch(err => console.error('gotted error: ' + err));
   }
 });
@@ -120,8 +120,9 @@ chrome.runtime.onMessage.addListener(function (request) {
 });
 function updateDiscordRPC(data) {
   if (!data) return;
-  lastRequestData = data;
   data.mood = currentMoodId;
+
+  console.log('sending data:', data)
 
   fetch(`http://localhost:6969`, {
     method: 'POST',
@@ -130,6 +131,7 @@ function updateDiscordRPC(data) {
     },
     body: JSON.stringify(data),
   }).catch((err) => console.error(err.message));
+  lastRequestData = data;
 }
 
 function initializeTrack(tab) {
@@ -144,6 +146,7 @@ function initializeTrack(tab) {
       chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ON' });
       updateDiscordRPC(response);
     } else {
+      chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ERR' })
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', window.chrome.runtime.lastError.message);
     }
   });
@@ -161,7 +164,6 @@ function onFocusedChanged(newId, selectedId) {
   else {
     removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
   }
-
 }
 
 /**
