@@ -54,7 +54,6 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
 
-      chrome.browserAction.setBadgeText({ tabId: selectedTabId, text: '' });
       selectedTabId = null;
       selectedWindowId = null;
     });
@@ -84,7 +83,6 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
       method: "DELETE"
     }).then(() => {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-      chrome.browserAction.setBadgeText({ tabId: selectedTabId, text: '' });
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
 
       selectedTabId = null;
@@ -93,9 +91,9 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
   }
 });
 
-chrome.tabs.onActiveChanged.addListener((tabId, selectInfo) => {
-  console.log("EVENT: OnActiveChanged: ", tabId, selectedTabId)
-  if (selectInfo) { onFocusedChanged(tabId, selectedTabId); }
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  console.log("EVENT: OnActiveChanged: ", activeInfo.tabId, selectedTabId)
+  if (activeInfo) { onFocusedChanged(activeInfo.tabId, selectedTabId); }
 });
 
 chrome.windows.onFocusChanged.addListener((windowId) => {
@@ -137,16 +135,14 @@ function updateDiscordRPC(data) {
 function initializeTrack(tab) {
   console.log(`trying to track tab with id: ${tab.id}`)
   chrome.tabs.sendMessage(tab.id, { type: 'init' }, function (response) {
-    if (!window.chrome.runtime.lastError) {
+    if (!chrome.runtime.lastError) {
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
 
       removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
       selectedTabId = tab.id;
       selectedWindowId = tab.windowId;
-      chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ON' });
       updateDiscordRPC(response);
     } else {
-      chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ERR' })
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', window.chrome.runtime.lastError.message);
     }
   });

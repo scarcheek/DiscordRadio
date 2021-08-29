@@ -8,8 +8,7 @@ chrome.runtime.onMessage.addListener(
     } else if (request.type === "tabChange") {
       if (!window.location.search.includes('v='))
         removeVideo(sendResponse);
-      else{
-        await wait(500);
+      else {
         addVideo(sendResponse);
       }
     } else if (request.type === "tabRemove") {
@@ -22,19 +21,19 @@ chrome.runtime.onMessage.addListener(
 async function addVideo(sendResponse) {
   video = document.querySelector('video');
 
-  video.onpause =  (event) => {
-    chrome.runtime.sendMessage({ data:  formatData(document, event.target), type: "pause" });
+  video.onpause = (event) => {
+    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "pause" });
   }
 
-  video.onplay =  (event) => {
-    chrome.runtime.sendMessage({ data:  formatData(document, event.target), type: "play" });
+  video.onplay = (event) => {
+    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "play" });
   }
 
   video.onseeked = async (event) => {
-      chrome.runtime.sendMessage({ data:  formatData(document, event.target), type: "seeked" });
+    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "seeked" });
   }
 
-  sendResponse( formatData(document));
+  sendResponse(formatData(document));
   return
 }
 
@@ -52,7 +51,7 @@ function removeVideo(sendResponse) {
   }).catch(err => console.error('gotted error: ' + err));
 }
 
- function formatData(document, newVideo) {
+function formatData(document, newVideo) {
   let currVideo = newVideo ? newVideo : video;
 
   let title = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer")[0].textContent
