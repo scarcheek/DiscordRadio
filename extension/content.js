@@ -6,10 +6,13 @@ chrome.runtime.onMessage.addListener(
     if (request.type === "init") {
       addVideo(sendResponse);
     } else if (request.type === "tabChange") {
-      if (!window.location.search.includes('v='))
+      if (!window.location.search.includes('v=')) {
         removeVideo(sendResponse);
+      }
       else {
-        addVideo(sendResponse);
+        if (!request.url.includes('#discordradio')) {
+          window.location.replace(`${request.url}#discordradio`);
+        }
       }
     } else if (request.type === "tabRemove") {
       removeVideo(sendResponse);
@@ -17,6 +20,10 @@ chrome.runtime.onMessage.addListener(
     return true;
   }
 );
+
+if (location.hash === '#discordradio') {
+  window.addEventListener('load', e => chrome.runtime.sendMessage({ type: "tabChanged" }));
+}
 
 async function addVideo(sendResponse) {
   video = document.querySelector('video');
@@ -52,13 +59,12 @@ function removeVideo(sendResponse) {
 }
 
 function formatData(document, newVideo) {
-  let currVideo = newVideo ? newVideo : video;
-
-  let title = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer")[0].textContent
-  let channelName = document.querySelector('.ytd-video-owner-renderer ytd-channel-name yt-formatted-string').innerText.trim();
+  const currVideo = newVideo ? newVideo : video;
+  const title = document.querySelector('meta[itemprop="name"]').content;
+  const channelName = document.querySelector('span[itemprop="author"] link[itemprop="name"]').attributes.content.value;
 
   return {
-    URL: document.URL.replaceAll(/&t=\d+s(?=&|$)/g, ''),
+    URL: location.href.split('#').slice(0, -1).join('#').replaceAll(/&t=\d+s(?=&|$)/g, ''),
     title: title,
     channelName: channelName,
     currTime: Math.floor(currVideo.currentTime),

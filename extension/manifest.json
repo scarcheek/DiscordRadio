@@ -1,12 +1,12 @@
 {
   "name": "Discord Radio",
   "description": "Creates a Discord Rich Presence based on the YouTube video that has been selected.",
-  "version": "0.8",
+  "version": "0.9",
   "permissions": [
     "contextMenus",
     "storage",
     "declarativeContent",
-    "activeTab"
+    "tabs"
   ],
   "content_scripts": [
     {
@@ -15,9 +15,7 @@
       ],
       "js": [
         "content.js"
-      ],
-      "run_at": "document_end",
-      "all_frames": true
+      ]
     }
   ],
   "background": {

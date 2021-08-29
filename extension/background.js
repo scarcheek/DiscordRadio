@@ -60,14 +60,11 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
   }
 });
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  if (changeInfo && changeInfo.status == "complete" && tabId === selectedTabId) {
-    chrome.tabs.sendMessage(tabId, { data: tab, type: "tabChange" }, function (response) {
-      if (!window.chrome.runtime.lastError) {
-        console.log('Tracked tab change detected', response)
-        updateDiscordRPC(response)
-      }
-    });
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log('Tab updated:', changeInfo);
+
+  if (changeInfo.url && tabId === selectedTabId) {
+    chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: "tabChange" });
   }
 });
 
@@ -112,9 +109,13 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 })
 
-chrome.runtime.onMessage.addListener(function (request) {
-  if (request.type === "pause" || request.type === "play" || request.type === "seeked") {
+chrome.runtime.onMessage.addListener(async (request) => {
+  if (['pause', 'play', 'seeked'].includes(request.type)) {
     updateDiscordRPC(request.data);
+  }
+  else if (request.type === 'tabChanged') {
+    const tab = await chrome.tabs.query({active: true, currentWindow: true});
+    initializeTrack(tab[0]);
   }
 });
 function updateDiscordRPC(data) {
@@ -146,7 +147,7 @@ function initializeTrack(tab) {
       updateDiscordRPC(response);
     } else {
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
-      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', window.chrome.runtime.lastError.message);
+      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', chrome.runtime.lastError.message);
     }
   });
 }
