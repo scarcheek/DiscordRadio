@@ -43,7 +43,7 @@ function createPlayingActivity(data, config, large_text, listenAlong) {
     details: data.title,
     state: `via: ${data.channelName}`,
     timestamps: {
-      start: Date.now() - 1000 * data.currTime
+      start: data.updatedOn - 1000 * data.currTime
     },
     assets: {
       large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
