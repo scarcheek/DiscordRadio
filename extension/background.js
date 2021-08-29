@@ -83,6 +83,7 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
       method: "DELETE"
     }).then(() => {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+      chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
 
       selectedTabId = null;
@@ -141,8 +142,10 @@ function initializeTrack(tab) {
       removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
       selectedTabId = tab.id;
       selectedWindowId = tab.windowId;
+      chrome.action.setBadgeText({ tabId: tab.id, text: 'ON' });
       updateDiscordRPC(response);
     } else {
+      chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', window.chrome.runtime.lastError.message);
     }
   });
