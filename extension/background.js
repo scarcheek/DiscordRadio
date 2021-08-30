@@ -53,6 +53,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
 
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
+      chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
 
       selectedTabId = null;
       selectedWindowId = null;
