@@ -39,6 +39,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
       console.log(`Removing old tracked tab`)
       chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
+        chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
         initializeTrack(tab)
       });
     }
@@ -115,7 +116,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
     updateDiscordRPC(request.data);
   }
   else if (request.type === 'tabChanged') {
-    const tab = await chrome.tabs.query({active: true, currentWindow: true});
+    const tab = await chrome.tabs.query({ active: true, currentWindow: true });
     initializeTrack(tab[0]);
   }
 });
