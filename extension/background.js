@@ -39,7 +39,6 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
       console.log(`Removing old tracked tab`)
       chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
         console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-        chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
         initializeTrack(tab)
       });
     }
@@ -141,6 +140,9 @@ function initializeTrack(tab) {
   chrome.tabs.sendMessage(tab.id, { type: 'init' }, function (response) {
     if (!chrome.runtime.lastError) {
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
+
+      if (selectedTabId)
+        chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
 
       removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
       selectedTabId = tab.id;
