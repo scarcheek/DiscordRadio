@@ -53,6 +53,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
       console.log(`Stopped tracking tab with id: ${selectedTabId}`)
 
       removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
+      chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
 
       selectedTabId = null;
       selectedWindowId = null;
@@ -114,7 +115,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
     updateDiscordRPC(request.data);
   }
   else if (request.type === 'tabChanged') {
-    const tab = await chrome.tabs.query({active: true, currentWindow: true});
+    const tab = await chrome.tabs.query({ active: true, currentWindow: true });
     initializeTrack(tab[0]);
   }
 });
@@ -139,6 +140,9 @@ function initializeTrack(tab) {
   chrome.tabs.sendMessage(tab.id, { type: 'init' }, function (response) {
     if (!chrome.runtime.lastError) {
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
+
+      if (selectedTabId)
+        chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
 
       removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
       selectedTabId = tab.id;
