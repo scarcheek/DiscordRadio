@@ -64,7 +64,7 @@ function formatData(document, newVideo) {
   const channelName = document.querySelector('span[itemprop="author"] link[itemprop="name"]').attributes.content.value;
 
   return {
-    URL: location.href.split('#').slice(0, -1).join('#').replaceAll(/&t=\d+s(?=&|$)/g, ''),
+    URL: location.href.replaceAll(/&t=\d+s(?=&|$)/g, '').replace('#discordradio', ''),
     title: title,
     channelName: channelName,
     currTime: Math.floor(currVideo.currentTime),

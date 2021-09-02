@@ -1,6 +1,6 @@
 {
   "server_uri": "discordradio.tk",
-  "server_port": "80",
+  "server_port": 80,
   "client_id": "875518867680657458",
   "client_secret": "dihMntY3A_LVfiYCY_5EOJQn5XRDR4l3",
   "redirect_uri": "http://localhost:6969",

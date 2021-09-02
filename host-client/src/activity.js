@@ -35,7 +35,7 @@ function createPlayingActivity(data, config, large_text, listenAlong) {
   if (listenAlong) {
     buttons.unshift({ 
       label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`, 
-      url: `http://${config.server_uri}:${(config.server_port !== 80) ? config.server_port : ''}/${config.user}` 
+      url: `http://${config.server_uri}:${(config.server_port != 80) ? config.server_port : ''}/${config.user}` 
     });
   }
 
