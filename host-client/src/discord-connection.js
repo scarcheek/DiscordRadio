@@ -28,7 +28,7 @@ async function tryConnect(client_id, isRetry = false) {
       await wait(5_000);
     }
     
-    return tryConnect(client_id, false);
+    return tryConnect(client_id, true);
   }
 }
 
