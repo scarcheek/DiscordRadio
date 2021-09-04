@@ -37,6 +37,7 @@ async function onPlayerReady(readyEvent) {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
+    updateDiscordRPC(hostPlayerState);
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
@@ -78,4 +79,18 @@ async function updatePlayer() {
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
+}
+
+function updateDiscordRPC(data) {
+  if (!data) return;
+  console.log('sending data:', data)
+
+  fetch(`http://localhost:6969`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+  }).catch((err) => console.error(err.message));
+  // thnx Loris for the code
 }
