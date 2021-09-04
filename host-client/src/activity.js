@@ -5,9 +5,11 @@ export function updateActivity(data, config) {
   $.currActivityData = data;
 
   const large_text = pickRandomText(config.vibe_texts);
-  const activity = (data.paused)
-    ? createPausedActivity(data, config, large_text)
-    : createPlayingActivity(data, config, large_text, !!$.serverConn);
+  const activity = (data.host)
+    ? createListeningAlongActivity(data, config, large_text, !!$.serverConn)
+    : (data.paused)
+      ? createPausedActivity(data, config, large_text)
+      : createPlayingActivity(data, config, large_text, !!$.serverConn);
 
   $.discordConn.setActivity(activity);
   if ($.serverConn) $.serverConn.send(JSON.stringify(data));
@@ -43,7 +45,39 @@ function createPlayingActivity(data, config, large_text, listenAlong) {
     details: data.title,
     state: `via: ${data.channelName}`,
     timestamps: {
-      start: data.updatedOn - 1000 * data.currTime
+      start: data.updatedOn - (1000 * data.currTime)
+    },
+    assets: {
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
+      large_text,
+      small_image: 'play-circle',
+      small_text: 'Playing',
+    },
+    buttons,
+  };
+}
+
+function createListeningAlongActivity(data, config, large_text, listenAlong) {
+  const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
+  const host = data.host.split('#')[0];
+
+  if (data.host !== $.listenAlong.host) {
+    $.listenAlong.host = data.host;
+    $.listenAlong.startTime = Date.now();
+  }
+
+  if (listenAlong) {
+    buttons.unshift({ 
+      label: `🎉 Listen with ${host} & friends!`, 
+      url: `http://${config.server_uri}:${(config.server_port != 80) ? config.server_port : ''}/${data.host}` 
+    });
+  }
+
+  return {
+    details: data.title,
+    state: `Listening along with ${host}! 🙃`,
+    timestamps: {
+      start: $.listenAlong.startTime,
     },
     assets: {
       large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
