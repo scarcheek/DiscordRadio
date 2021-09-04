@@ -68,7 +68,7 @@ function createListeningAlongActivity(data, config, large_text, listenAlong) {
 
   if (listenAlong) {
     buttons.unshift({ 
-      label: `🎉 Listen with ${host} & friends!`, 
+      label: `🎉 Join along with ${host}!`,
       url: `http://${config.server_uri}:${(config.server_port != 80) ? config.server_port : ''}/${data.host}` 
     });
   }
