@@ -4,7 +4,8 @@ const server_port = 80;
 Array.prototype.last = function() { return this[this.length - 1]; };
 
 let player, hostPlayerState, prevState;
-document.title = `Listening to: ${window.location.toString().split('/').last()}`;
+const host = location.href.split('/').last();
+document.title = `Listening to: ${host}`;
 
 function onYouTubeIframeAPIReady() {
   prevState = YT.PlayerState.UNSTARTED;
@@ -37,7 +38,7 @@ async function onPlayerReady(readyEvent) {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
-    updateDiscordRPC(hostPlayerState);
+    updateDiscordRPC({ host, ...hostPlayerState});
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
