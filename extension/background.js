@@ -114,9 +114,8 @@ chrome.runtime.onMessage.addListener(async (request) => {
   if (['pause', 'play', 'seeked'].includes(request.type)) {
     updateDiscordRPC(request.data);
   }
-  else if (request.type === 'tabChanged') {
-    const tab = await chrome.tabs.query({ active: true, currentWindow: true });
-    initializeTrack(tab[0]);
+  else if (request.type === 'pageLoaded') {
+    if (selectedTabId) initializeTrack(await chrome.tabs.get(selectedTabId));
   }
 });
 function updateDiscordRPC(data) {

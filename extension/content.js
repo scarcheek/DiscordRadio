@@ -5,25 +5,23 @@ chrome.runtime.onMessage.addListener(
   async function (request, sender, sendResponse) {
     if (request.type === "init") {
       addVideo(sendResponse);
-    } else if (request.type === "tabChange") {
+    } 
+    else if (request.type === "tabChange") {
       if (!window.location.search.includes('v=')) {
         removeVideo(sendResponse);
       }
-      else {
-        if (!request.url.includes('#discordradio')) {
-          window.location.replace(`${request.url}#discordradio`);
-        }
+      else if (!request.url.includes('#discordradio')) {
+        window.location.replace(`${request.url}#discordradio`); // trigger reload
       }
-    } else if (request.type === "tabRemove") {
+    } 
+    else if (request.type === "tabRemove") {
       removeVideo(sendResponse);
     }
     return true;
   }
 );
 
-if (location.hash === '#discordradio') {
-  window.addEventListener('load', e => chrome.runtime.sendMessage({ type: "tabChanged" }));
-}
+window.addEventListener('load', e => chrome.runtime.sendMessage({ type: "pageLoaded" }));
 
 async function addVideo(sendResponse) {
   video = document.querySelector('video');
@@ -64,7 +62,7 @@ function formatData(document, newVideo) {
   const channelName = document.querySelector('span[itemprop="author"] link[itemprop="name"]').attributes.content.value;
 
   return {
-    URL: location.href.replaceAll(/&t=\d+s(?=&|$)/g, '').replace('#discordradio', ''),
+    URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
     title: title,
     channelName: channelName,
     currTime: Math.floor(currVideo.currentTime),
