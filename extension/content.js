@@ -57,14 +57,13 @@ function removeVideo(sendResponse) {
 }
 
 function formatData(document, newVideo) {
-  const currVideo = newVideo ? newVideo : video;
-  const title = document.querySelector('meta[itemprop="name"]').content;
-  const channelName = document.querySelector('span[itemprop="author"] link[itemprop="name"]').attributes.content.value;
+  const currVideo = newVideo ?? video;
+  const ytInfo = JSON.parse(document.querySelector('#scriptTag')?.textContent);
 
   return {
     URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
-    title: title,
-    channelName: channelName,
+    title: ytInfo?.name,
+    channelName: ytInfo?.author,
     currTime: Math.floor(currVideo.currentTime),
     paused: currVideo.paused,
   }
