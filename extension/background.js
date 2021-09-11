@@ -23,23 +23,24 @@ let lastRequestData = null;
 
 
 // Set the default mood and storage state on installation
-chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({ 
+chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({
   moodId: 'none',
-  trackedTabId: null, 
-  trackedWindowId: null, 
+  trackedTabId: null,
+  trackedWindowId: null,
   lastData: null,
 }));
 
 // Load the state from the storage
 chrome.storage.sync.get(null, (storageState) => {
+  outputDebugMessage(35, 'chrome.storage.sync.get', null, storageState)
   if (storageState) Object.assign($, storageState);
 });
 
 // Sync the state with the storage
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
-    console.log(`🚀 ~ chrome.storage.onChanged.addListener ~ changes`, changes);
-    Object.entries(changes).forEach(([key, {newValue}]) => $[key] = newValue);
+    outputDebugMessage(42, 'chrome.storage.onChanged', null, changes)
+    Object.entries(changes).forEach(([key, { newValue }]) => $[key] = newValue);
 
     if (changes.moodId) {
       console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
@@ -92,6 +93,8 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
 // Add the listener for url changes
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  outputDebugMessage(96, 'chrome.tabs.onUpdated', null, changeInfo)
+
   if (changeInfo.url && tabId === $.trackedTabId) {
     chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
   }
@@ -99,7 +102,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // Add the tab closed listener
 chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
-  console.log("🚀 ~ file: background.js ~ line 92 ~ removeInfo", removeInfo);
+  outputDebugMessage(105, 'chrome.tabs.onRemoved', { removeInfo })
   if (removeInfo && tabId === $.trackedTabId) {
     removeTrack();
   }
@@ -108,12 +111,12 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
 
 // Add the tab/window focus changed listeners to update the context menu accordingly
 chrome.tabs.onActivated.addListener((activeInfo) => {
-  console.log("EVENT: OnActiveChanged: ", activeInfo?.tabId, $.trackedTabId)
+  outputDebugMessage(114, 'chrome.tabs.onActivated', { tabId: activeInfo?.tabId, trackedTabId: $.trackedTabId })
   if (activeInfo) onFocusedChanged(activeInfo.tabId, $.trackedTabId);
 });
 
 chrome.windows.onFocusChanged.addListener((windowId) => {
-  console.log("EVENT: onFocusChanged: ", windowId, $.trackedWindowId)
+  outputDebugMessage(119, 'chrome.tabs.onFocusChanged', { windowId, trackedWindowId: $.trackedWindowId })
   onFocusedChanged(windowId, $.trackedWindowId)
 });
 
@@ -167,7 +170,7 @@ function initializeTrack(tab) {
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ON' });
       chrome.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
       updateDiscordRPC(res);
-    } 
+    }
     else {
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', chrome.runtime.lastError.message);
@@ -235,4 +238,28 @@ function enableContextMenuOption(contextMenuId) {
  */
 function disableContextMenuOption(contextMenuId) {
   chrome.contextMenus.update(contextMenuId, { enabled: false });
+}
+
+/**
+ * 
+ * @param {number} line 
+ * @param {name} caller 
+ * @param {Object} props 
+ */
+function outputDebugMessage(line, caller, props, ...objects) {
+  let propsString = '';
+  if (props) {
+    for (let i = 0; i < Object.keys(props).length; i++) {
+      propsString += `${Object.keys(props)[i]} ${Object.values(props)[i]}${Object.keys(props)[i + 1] ? ' > ' : ''}`;
+    }
+  }
+  const outPutString = `🚀 ~ file: background.js ~ line ${line} ~ ${caller}${propsString.length > 0 ? ` ~ ${propsString}` : ''}`
+
+  console.log(outPutString);
+  if (objects.length > 0) {
+    if (objects.length === 1)
+      console.dir(objects[0]);
+    else
+      console.dir(objects)
+  }
 }
