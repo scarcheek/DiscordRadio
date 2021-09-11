@@ -1,63 +1,77 @@
-//// content.js ////
+const MESSAGES = {
+  init: 'init',
+  pause: 'pause',
+  play: 'play',
+  seek: 'seek',
+  remove: 'remove',
+  refreshPage: 'refreshPage',
+  pageLoaded: 'pageLoaded',
+};
+
 let video;
-// 1. Send the background a message requesting the user's data
+
+
+// let background.js know the page is loaded
+window.addEventListener('load', () => chrome.runtime.sendMessage({ type: MESSAGES.pageLoaded }));
+
+// communication with background.js
 chrome.runtime.onMessage.addListener(
-  async function (request, sender, sendResponse) {
-    if (request.type === "init") {
-      addVideo(sendResponse);
-    } 
-    else if (request.type === "tabChange") {
-      if (!window.location.search.includes('v=')) {
-        removeVideo(sendResponse);
-      }
-      else if (!request.url.includes('#discordradio')) {
-        window.location.replace(`${request.url}#discordradio`); // trigger reload
-      }
-    } 
-    else if (request.type === "tabRemove") {
-      removeVideo(sendResponse);
+  async function (req, sender, reply) {
+    switch (req.type) {
+      case MESSAGES.init:
+        addVideo(reply);
+        break;
+
+      case MESSAGES.remove:
+        removeVideo(reply);
+        break;
+
+      case MESSAGES.refreshPage:
+        if (location.search.includes('v=')) location.reload();
+        else removeVideo(reply);
+        break;
     }
-    return true;
+
+    return true; // indicates an asynchronous response
   }
 );
 
-window.addEventListener('load', e => chrome.runtime.sendMessage({ type: "pageLoaded" }));
 
-async function addVideo(sendResponse) {
+async function addVideo(reply) {
   video = document.querySelector('video');
 
-  video.onpause = (event) => {
-    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "pause" });
+  video.onpause =()=> {
+    chrome.runtime.sendMessage({ data: formatData(), type: MESSAGES.pause });
   }
 
-  video.onplay = (event) => {
-    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "play" });
+  video.onplay =()=> {
+    chrome.runtime.sendMessage({ data: formatData(), type: MESSAGES.play });
   }
 
-  video.onseeked = async (event) => {
-    chrome.runtime.sendMessage({ data: formatData(document, event.target), type: "seeked" });
+  video.onseeked =()=> {
+    chrome.runtime.sendMessage({ data: formatData(), type: MESSAGES.seek });
   }
 
-  sendResponse(formatData(document));
+  reply(formatData());
   return
 }
 
-function removeVideo(sendResponse) {
+function removeVideo(reply) {
   if (video) {
-    video.seeked = null;
     video.onpause = null;
     video.onplay = null;
+    video.onseeked = null;
     video = null;
   }
-  fetch(`http://localhost:6969`, {
-    method: "DELETE"
-  }).then(() => {
-    if (sendResponse) sendResponse({ farewell: "removed video reference" })
-  }).catch(err => console.error('gotted error: ' + err));
+
+  fetch(`http://localhost:6969`, { method: "DELETE" })
+  .then(() => {
+    if (reply) reply({ farewell: "removed video reference" });
+  })
+  .catch(err => console.error('gotted error: ' + err));
 }
 
-function formatData(document, newVideo) {
-  const currVideo = newVideo ?? video;
+function formatData() {
   const playerInfo = {};
 
   if (document.querySelector('#scriptTag')) {
@@ -71,14 +85,9 @@ function formatData(document, newVideo) {
   }
 
   return {
+    ...playerInfo,
     URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
-    title: playerInfo?.title,
-    channelName: playerInfo?.channelName,
-    currTime: Math.floor(currVideo.currentTime),
-    paused: currVideo.paused,
+    currTime: Math.floor(video.currentTime),
+    paused: video.paused,
   }
-}
-
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

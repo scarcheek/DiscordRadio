@@ -1,128 +1,148 @@
-let lastRequestData = null;
-let selectedTabId = null, selectedWindowId = null, currentMoodId = null;
-let contextMenuIds = {
+const MESSAGES = {
+  init: 'init',
+  pause: 'pause',
+  play: 'play',
+  seek: 'seek',
+  remove: 'remove',
+  refreshPage: 'refreshPage',
+  pageLoaded: 'pageLoaded',
+};
+
+const CONTEXT_MENU = {
   track: 'track',
-  stop: 'stop'
-}
+  stop: 'stop',
+};
 
-chrome.runtime.onInstalled.addListener(function () {
-  chrome.storage.sync.set({ moodId: 'none' })
+const $ = {
+  moodId: null,
+  trackedTabId: null,
+  trackedWindowId: null,
+};
+
+let lastRequestData = null;
+
+
+// Set the default mood and storage state on installation
+chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({ 
+  moodId: 'none',
+  trackedTabId: null, 
+  trackedWindowId: null, 
+  lastData: null,
+}));
+
+// Load the state from the storage
+chrome.storage.sync.get(null, (storageState) => {
+  console.log("🚀 ~ file: background.js ~ line 26 ~ chrome.storage.sync.get ~ storageState", storageState);
+  if (storageState) Object.assign($, storageState);
 });
-chrome.storage.sync.get('moodId', (data) => {
-  if (data.moodId)
-    currentMoodId = data.moodId
-})
 
-// Contextmenu shit
+// Sync the state with the storage
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync') {
+    console.log("🚀 ~ file: background.js ~ line 41 ~ chrome.storage.onChanged.addListener ~ changes", changes);
+    Object.entries(changes).forEach(([key, {newValue}]) => $[key] = newValue);
+
+    if (changes.moodId) {
+      console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
+      $.moodId = changes.moodId.newValue;
+      updateDiscordRPC($.lastData);
+    }
+  }
+});
+
+
+// Add the context menu entries
 chrome.contextMenus.removeAll(() => {
   chrome.contextMenus.create({
-    id: "stop",
-    title: "Remove tracked Tab from Discord RPC",
-    contexts: ["page"],
-    documentUrlPatterns: ['*://*/*'],
-    enabled: false
-  })
-
-  chrome.contextMenus.create({
-    id: "track",
+    id: CONTEXT_MENU.track,
     title: "Track current Tab with Discord RPC",
     contexts: ["page"],
     documentUrlPatterns: ['https://*.youtube.com/watch?*']
   });
-})
 
+  chrome.contextMenus.create({
+    id: CONTEXT_MENU.stop,
+    title: "Remove tracked Tab from Discord RPC",
+    contexts: ["page"],
+    documentUrlPatterns: ['*://*/*'],
+    enabled: false
+  });
+});
 
+// Add the context menu listeners
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
-  if (info.menuItemId == "track") {
-    // A Tab was already tracked
-    if (selectedTabId && selectedTabId !== tab.id) {
-      console.log(`Removing old tracked tab`)
-      chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
-        console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-        initializeTrack(tab)
+  if (info.menuItemId == CONTEXT_MENU.track) {
+    if ($.trackedTabId && $.trackedTabId !== tab.id) {
+      // A Tab was already tracked
+      console.log(`Removing old tracked tab`);
+      chrome.tabs.sendMessage($.trackedTabId, { type: MESSAGES.remove }, () => {
+        console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
+        initializeTrack(tab);
       });
     }
-    //First track of the session
     else {
+      // First track of the session
       initializeTrack(tab);
     }
   }
-  // The contextMenu option to 'stop tracking' has been selected
-  if (info.menuItemId === 'stop') {
-    chrome.tabs.sendMessage(selectedTabId, { type: "tabRemove" }, function (response) {
-      console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-
-      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-      chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
-
-      selectedTabId = null;
-      selectedWindowId = null;
-    });
+  else if (info.menuItemId === CONTEXT_MENU.stop) {
+    removeTrack(tab);
   }
 });
 
+
+// Add the listener for url changes
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log('Tab updated:', changeInfo);
+  console.log("🚀 ~ file: background.js ~ line 82 ~ chrome.tabs.onUpdated.addListener ~ changeInfo", changeInfo);
 
-  if (changeInfo.url && tabId === selectedTabId) {
-    chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: "tabChange" });
+  if (changeInfo.url && tabId === $.trackedTabId) {
+    chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
   }
 });
 
-chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
-  if (tabId === selectedTabId && attachInfo && attachInfo.newWindowId !== selectedWindowId) {
-    selectedWindowId = attachInfo.newWindowId
-  }
-})
-
+// Add the tab closed listener
 chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
-  if (removeInfo && tabId === selectedTabId) {
-    fetch(`http://localhost:6969`, {
-      method: "DELETE"
-    }).then(() => {
-      console.log(`Stopped tracking tab with id: ${selectedTabId}`)
-      chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
-      removeAndAddContext(contextMenuIds.track, contextMenuIds.stop);
-
-      selectedTabId = null;
-      selectedWindowId = null;
-    }).catch(err => console.error('gotted error: ' + err));
+  console.log("🚀 ~ file: background.js ~ line 92 ~ removeInfo", removeInfo);
+  if (removeInfo && tabId === $.trackedTabId) {
+    removeTrack();
   }
 });
 
+
+// Add the tab/window focus changed listeners to update the context menu accordingly
 chrome.tabs.onActivated.addListener((activeInfo) => {
-  console.log("EVENT: OnActiveChanged: ", activeInfo.tabId, selectedTabId)
-  if (activeInfo) { onFocusedChanged(activeInfo.tabId, selectedTabId); }
+  console.log("EVENT: OnActiveChanged: ", activeInfo?.tabId, $.trackedTabId)
+  if (activeInfo) onFocusedChanged(activeInfo.tabId, $.trackedTabId);
 });
 
 chrome.windows.onFocusChanged.addListener((windowId) => {
-  console.log("EVENT: onFocusChanged: ", windowId, selectedWindowId)
-  onFocusedChanged(windowId, selectedWindowId)
+  console.log("EVENT: onFocusChanged: ", windowId, $.trackedWindowId)
+  onFocusedChanged(windowId, $.trackedWindowId)
 });
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'sync') {
-    if (changes.moodId) {
-      console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
-      currentMoodId = changes.moodId.newValue;
-      updateDiscordRPC(lastRequestData);
-    }
+chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
+  if (tabId === $.trackedTabId && attachInfo && attachInfo.newWindowId !== $.trackedWindowId) {
+    chrome.storage.sync.set({ trackedWindowId: attachInfo.newWindowId });
   }
-})
+});
 
+
+// communication with content.js
 chrome.runtime.onMessage.addListener(async (request) => {
-  if (['pause', 'play', 'seeked'].includes(request.type)) {
+  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek].includes(request.type)) {
     updateDiscordRPC(request.data);
   }
-  else if (request.type === 'pageLoaded') {
-    if (selectedTabId) initializeTrack(await chrome.tabs.get(selectedTabId));
+  else if (request.type === MESSAGES.pageLoaded) {
+    if ($.trackedTabId) initializeTrack(await chrome.tabs.get($.trackedTabId));
   }
 });
+
+
 function updateDiscordRPC(data) {
   if (!data) return;
-  data.mood = currentMoodId;
+  data.mood = $.moodId;
 
-  console.log('sending data:', data)
+  console.log('sending data:', data);
 
   fetch(`http://localhost:6969`, {
     method: 'POST',
@@ -131,53 +151,74 @@ function updateDiscordRPC(data) {
     },
     body: JSON.stringify(data),
   }).catch((err) => console.error(err.message));
-  lastRequestData = data;
+  chrome.storage.sync.set({ lastData: data });
 }
 
 function initializeTrack(tab) {
-  console.log(`trying to track tab with id: ${tab.id}`)
-  chrome.tabs.sendMessage(tab.id, { type: 'init' }, function (response) {
+  console.log(`trying to track tab with id: ${tab.id}`);
+
+  chrome.tabs.sendMessage(tab.id, { type: MESSAGES.init }, (res) => {
     if (!chrome.runtime.lastError) {
-      console.log(`Now tracking: ${tab.title} with id ${tab.id}`, response)
+      console.log(`Now tracking: ${tab.title} with id ${tab.id}`, res)
 
-      if (selectedTabId)
-        chrome.action.setBadgeText({ tabId: selectedTabId, text: '' });
+      if ($.trackedTabId) {
+        // if already tracking a tab
+        chrome.action.setBadgeText({ tabId: $.trackedTabId, text: '' });
+      }
 
-      removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
-      selectedTabId = tab.id;
-      selectedWindowId = tab.windowId;
+      toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ON' });
-      updateDiscordRPC(response);
-    } else {
+      chrome.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
+      updateDiscordRPC(res);
+    } 
+    else {
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', chrome.runtime.lastError.message);
     }
   });
 }
 
+function removeTrack(tab) {
+  if (tab) {
+    chrome.tabs.sendMessage($.trackedTabId, { type: MESSAGES.remove }, finishRemoveTrack);
+  }
+  else {
+    fetch(`http://localhost:6969`, { method: "DELETE" })
+      .then(finishRemoveTrack)
+      .catch(err => console.error('gotted error: ' + err));
+  }
+
+  function finishRemoveTrack() {
+    console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
+    toggleContextMenuOptions(CONTEXT_MENU.track, CONTEXT_MENU.stop);
+    chrome.action.setBadgeText({ tabId: $.trackedTabId, text: '' });
+    chrome.storage.sync.set({ trackedTabId: null, trackedWindowId: null });
+  }
+}
+
 /**
  * When the focus changes you either want to add back the 'tracking' option or remove it + add the 'stop' option
  * @param {number} newId The new Id (window.id, tab.id, ...) you got from the fired event
- * @param {number} selectedId The currently selected Id
+ * @param {number} trackedId The currently tracked Id
  */
-function onFocusedChanged(newId, selectedId) {
-  if (newId && newId !== selectedId) {
-    addContextMenu(contextMenuIds.track)
+function onFocusedChanged(newId, trackedId) {
+  if (newId !== trackedId) {
+    enableContextMenuOption(CONTEXT_MENU.track);
   }
   else {
-    removeAndAddContext(contextMenuIds.stop, contextMenuIds.track);
+    toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
   }
 }
 
 /**
  * Conveniently removes one contextmenu option and adds another one
- * @param {number} addId The Id of the contextmenu option you want to add
- * @param {number} removeId The Id of the contextmenu option you want to remove
+ * @param {number} enableId The Id of the contextmenu option you want to add
+ * @param {number} disableId The Id of the contextmenu option you want to remove
  */
-function removeAndAddContext(addId, removeId) {
-  if (addId !== removeId) {
-    addContextMenu(addId);
-    removeContextMenu(removeId);
+function toggleContextMenuOptions(enableId, disableId) {
+  if (enableId !== disableId) {
+    enableContextMenuOption(enableId);
+    disableContextMenuOption(disableId);
   }
 }
 
@@ -186,8 +227,8 @@ function removeAndAddContext(addId, removeId) {
  * Shortcut for the complicated and un-handy chrome api
  * @param {number} contextMenuId 
  */
-function addContextMenu(contextMenuId) {
-  chrome.contextMenus.update(contextMenuId, { enabled: true })
+function enableContextMenuOption(contextMenuId) {
+  chrome.contextMenus.update(contextMenuId, { enabled: true });
 }
 
 /**
@@ -195,6 +236,6 @@ function addContextMenu(contextMenuId) {
  * Shortcut for the complicated and un-handy chrome api
  * @param {number} contextMenuId 
  */
-function removeContextMenu(contextMenuId) {
-  chrome.contextMenus.update(contextMenuId, { enabled: false })
+function disableContextMenuOption(contextMenuId) {
+  chrome.contextMenus.update(contextMenuId, { enabled: false });
 }
