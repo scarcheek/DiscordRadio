@@ -72,8 +72,8 @@ function formatData(document, newVideo) {
 
   return {
     URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
-    title: playerInfo?.name,
-    channelName: playerInfo?.author,
+    title: playerInfo?.title,
+    channelName: playerInfo?.channelName,
     currTime: Math.floor(currVideo.currentTime),
     paused: currVideo.paused,
   }
