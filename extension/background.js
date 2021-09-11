@@ -32,14 +32,13 @@ chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({
 
 // Load the state from the storage
 chrome.storage.sync.get(null, (storageState) => {
-  console.log("🚀 ~ file: background.js ~ line 26 ~ chrome.storage.sync.get ~ storageState", storageState);
   if (storageState) Object.assign($, storageState);
 });
 
 // Sync the state with the storage
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
-    console.log("🚀 ~ file: background.js ~ line 41 ~ chrome.storage.onChanged.addListener ~ changes", changes);
+    console.log(`🚀 ~ chrome.storage.onChanged.addListener ~ changes`, changes);
     Object.entries(changes).forEach(([key, {newValue}]) => $[key] = newValue);
 
     if (changes.moodId) {
@@ -93,8 +92,6 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
 // Add the listener for url changes
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log("🚀 ~ file: background.js ~ line 82 ~ chrome.tabs.onUpdated.addListener ~ changeInfo", changeInfo);
-
   if (changeInfo.url && tabId === $.trackedTabId) {
     chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
   }
