@@ -19,9 +19,6 @@ const $ = {
   trackedWindowId: null,
 };
 
-let lastRequestData = null;
-
-
 // Set the default mood and storage state on installation
 chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({
   moodId: 'none',
