@@ -1,5 +1,15 @@
-# DiscordRadio
-A Discord Rich Presence feature to share your currently watched YouTube video or song!
+# 📻 Discord Radio 🎶
+Discord Radio is the first ever Discord Rich Presence feature which not only shares the song/video you are currently listening/watching on YouTube, but also competes with the Spotify Premium Listen Along feature by allowing friends to listen along!
+With our dear friend Groovy receiving a cease and desist from Google 😢, and probably many music bots at risk of following, we hope you agree that Discord Radio is the next best thing in town!
+
+## How it works
+### For listening along
+It's as easy as pressing the listen along button on your friends Discord activity. No client or anything needed!
+Many browsers block media autoplay, so you might have to press play on the initial loading and then the client will sync itself automatically for you.
+
+### For sharing your activity and hosting sessions
+We wanted to make the hosting experience as intuitive as possible. We know you just want to open up YouTube in your favourite browser and start sharing your activity.
+That's why we made a browser extension for that kick-ass browser of yours which handles most of the work. Unfortunately, due to the limitations of browser extensions and the hassle of connecting to Discord in a TOS conform way, you will need to install a small application which gives the browser extension the power to communicate with Discord and update your activity.
 
 ## How To Install
 To share your own YouTube activity you need 2 things:
