@@ -5,7 +5,6 @@
   "permissions": [
     "contextMenus",
     "storage",
-    "declarativeContent",
     "tabs"
   ],
   "content_scripts": [
