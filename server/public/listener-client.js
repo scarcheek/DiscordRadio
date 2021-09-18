@@ -38,11 +38,11 @@ async function onPlayerReady(readyEvent) {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
-    updateDiscordRPC({ host, ...hostPlayerState});
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
-    console.log(`🚀 ~ onPlayerReady ~ hostPlayerState.currTime`, hostPlayerState.currTime);
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
+    console.log(`🚀 ~ onPlayerReady ~ hostPlayerState.currTime`, hostPlayerState.currTime);
+    updateDiscordRPC({ host, ...hostPlayerState});
     
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
@@ -58,6 +58,7 @@ async function onPlayerReady(readyEvent) {
 
 async function onPlayerStateChange(event) {
   console.log(`🚀 ~ onPlayerStateChange 1 ~ hostPlayerState.currTime`, hostPlayerState.currTime);
+  console.dir(event);
 
   if (event.data === YT.PlayerState.CUED) {
     if (hostPlayerState.paused) event.target.pauseVideo();
