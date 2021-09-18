@@ -71,6 +71,7 @@ async function onPlayerStateChange(event) {
 
 async function loadNewVideo() {
   console.log('Loading new video...');
+  const videoId = player.getVideoUrl().split('v=')[1];
   console.group(new Date().toLocaleTimeString("at"));
   console.dir(videoId);
   console.dir(hostPlayerState);
