@@ -71,11 +71,22 @@ async function onPlayerStateChange(event) {
 
 async function loadNewVideo() {
   console.log('Loading new video...');
+  console.group(new Date().toLocaleTimeString("at"));
+  console.dir(videoId);
+  console.dir(hostPlayerState);
+  console.groupEnd();
+
   player.cueVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
 }
 
 async function updatePlayer() {
   console.log('Updating the player...');
+  const videoId = player.getVideoUrl().split('v=')[1];
+  console.group(new Date().toLocaleTimeString("at"));
+  console.dir(videoId);
+  console.dir(hostPlayerState);
+  console.groupEnd();
+
   await player.seekTo(hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
@@ -84,7 +95,7 @@ async function updatePlayer() {
 
 function updateDiscordRPC(data) {
   if (!data) return;
-  console.log('sending data:', data)
+  console.log('Sending data:', data)
 
   fetch(`http://localhost:6969`, {
     method: 'POST',
