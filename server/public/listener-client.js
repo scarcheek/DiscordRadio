@@ -3,7 +3,7 @@ const server_port = 80;
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
-let player, hostPlayerState, prevState;
+let player, hostPlayerState, justCued = false;
 const host = location.href.split('/').last();
 document.title = `Listening to: ${host}`;
 
@@ -64,11 +64,12 @@ async function onPlayerStateChange(event) {
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
   }
-  else if (prevState !== YT.PlayerState.BUFFERING && event.data === YT.PlayerState.PLAYING) {
+  else if (justCued && event.data === YT.PlayerState.PLAYING) {
     hostPlayerState.currTime += (Date.now() - hostPlayerState.playedOn) / 1000;
     console.log(`🚀 ~ onPlayerStateChange 2 ~ hostPlayerState.currTime`, hostPlayerState.currTime);
     hostPlayerState.playedOn = Date.now();
     player.seekTo(hostPlayerState.currTime);
+    justCued = false;
   }
 
   prevState = event.data;
@@ -83,6 +84,7 @@ async function loadNewVideo() {
   console.groupEnd();
 
   player.cueVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
+  justCued = true;
 }
 
 async function updatePlayer() {
