@@ -1,7 +1,7 @@
 const server_uri = 'discordradio.tk';
 const server_port = 80;
 
-Array.prototype.last = function() { return this[this.length - 1]; };
+Array.prototype.last = function () { return this[this.length - 1]; };
 
 let player, hostPlayerState, justCued = false;
 const host = location.href.split('/').last();
@@ -42,8 +42,8 @@ async function onPlayerReady(readyEvent) {
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
     console.log(`🚀 ~ onPlayerReady ~ hostPlayerState.currTime`, hostPlayerState.currTime);
-    updateDiscordRPC({ host, ...hostPlayerState});
-    
+    updateDiscordRPC({ host, ...hostPlayerState });
+
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
@@ -71,8 +71,9 @@ async function onPlayerStateChange(event) {
     player.seekTo(hostPlayerState.currTime);
     justCued = false;
   }
-
-  prevState = event.data;
+  else if (event.data === YT.PlayerState.PAUSED) {
+    justCued = true
+  }
 }
 
 async function loadNewVideo() {

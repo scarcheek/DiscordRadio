@@ -170,7 +170,7 @@ function initializeTrack(tab) {
     }
     else {
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
-      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', chrome.runtime.lastError.message);
+      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#5966 on Discord', chrome.runtime.lastError.message);
     }
   });
 }
