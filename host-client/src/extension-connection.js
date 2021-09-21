@@ -29,7 +29,7 @@ export default function listenForExtension(config) {
     $.extensionConn.delete('/', (req, res) => {
       try {
         $.discordConn.setActivity();
-        console.log(`🙉 Stopped listening to ${$.currActivityData.title}`);
+        console.log(`🙉 Stopped listening to ${$.currActivityData?.title}`);
         $.currActivityData = null;
   
         res.end();
