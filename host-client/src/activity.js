@@ -5,14 +5,14 @@ export function updateActivity(data, config) {
   $.currActivityData = data;
 
   const large_text = pickRandomText(config.vibe_texts);
-  const activity = (data.host)
+  const activity = (data.listeningAlong)
     ? createListeningAlongActivity(data, config, large_text, !!$.serverConn)
     : (data.paused)
       ? createPausedActivity(data, config, large_text)
       : createPlayingActivity(data, config, large_text, !!$.serverConn);
 
   $.discordConn.setActivity(activity);
-  if ($.serverConn) $.serverConn.send(JSON.stringify(data));
+  if ($.serverConn && !data.listeningAlong) $.serverConn.send(JSON.stringify(data));
 }
 
 function createPausedActivity(data, config, large_text) {

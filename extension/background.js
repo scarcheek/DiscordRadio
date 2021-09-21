@@ -17,6 +17,8 @@ const $ = {
   moodId: null,
   trackedTabId: null,
   trackedWindowId: null,
+  lastData: null,
+  listeningAlongTabId: null,
 };
 
 // Set the default mood and storage state on installation
@@ -25,6 +27,7 @@ chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({
   trackedTabId: null,
   trackedWindowId: null,
   lastData: null,
+  listeningAlongTabId: null,
 }));
 
 // Load the state from the storage
@@ -92,7 +95,10 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   outputDebugMessage(96, 'chrome.tabs.onUpdated', null, changeInfo)
 
-  if (changeInfo.url && tabId === $.trackedTabId) {
+  if (tab.title.startsWith('discordradio.tk/')) {
+    updateDiscordRPC({ ...$.lastData, listeningAlong: true, host: getHostFromUrl(tab.title) })
+    chrome.storage.sync.set({ listeningAlongTabId: tabId });
+  } else if (changeInfo.url && tabId === $.trackedTabId) {
     chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
   }
 });
@@ -100,9 +106,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Add the tab closed listener
 chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
   outputDebugMessage(105, 'chrome.tabs.onRemoved', { removeInfo })
-  if (removeInfo && tabId === $.trackedTabId) {
-    removeTrack();
-  }
+  if ($.listeningAlongTabId === tabId) {
+    updateDiscordRPC({ ...$.lastData, listeningAlong: false, host: undefined })
+    chrome.storage.sync.set({ listeningAlongTabId: null });
+  } else
+    if (removeInfo && tabId === $.trackedTabId) {
+      removeTrack();
+    }
 });
 
 
@@ -170,7 +180,7 @@ function initializeTrack(tab) {
     }
     else {
       chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
-      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#9670 on Discord', chrome.runtime.lastError.message);
+      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#5966 on Discord', chrome.runtime.lastError.message);
     }
   });
 }
@@ -259,4 +269,7 @@ function outputDebugMessage(line, caller, props, ...objects) {
     else
       console.dir(objects)
   }
+}
+function getHostFromUrl(url) {
+  return url.split('/')[url.split('/').length - 1];
 }
