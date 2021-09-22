@@ -5,34 +5,51 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
   <link rel="stylesheet" href="index.css">
 
   <title>Discord RPC Gateway</title>
 </head>
 <body>
-  <header>
+  <header class="connected" title="Connected!">
     <h1>Discord RPC Gateway</h1>
-    <figure>
-      <img src="../../assets/discord.png" alt="Discord Connected" title="Connected!"/>
-    </figure>
+    <div class="spinner">
+      <figure>
+        <img src="../../assets/Discord-Logo-White.png" alt="Discord Connection Status"/>
+      </figure>
+    </div>
   </header>
   <main>
-    <section class="app">
+    <section class="app opened">
       <div class="app-info">
-        <h3>Discord Radio</h3>
-        <p>Discord Radio is da best! Duh!</p>
+        <figure class="app-logo">
+          <img src="../../assets/apps/Discord_Radio.png" alt="Discord Radio Logo"/>
+        </figure>
+        <div class="app-info-text">
+          <h3>Discord Radio</h3>
+          <p>Discord Radio is da best! Duh!</p>
+        </div>
+        <span class="app-status connected material-icons-round" title="Connected!">power</span>
       </div>
       <div class="app-actions">
-        <input type="checkbox" name="enabled" checked/>
+        <button><span class="material-icons-round">power_off</span> Disable</button>
+        <button><span class="material-icons-round">visibility_off</span> Hide</button>
       </div>
     </section>
     <section class="app">
       <div class="app-info">
-        <h3>Discord TV</h3>
-        <p>Discord TV is da 2nd best! Poggers!</p>
+        <figure class="app-logo">
+          <img src="../../assets/apps/Discord_TV.png" alt="Discord TV Logo"/>
+        </figure>
+        <div class="app-info-text">
+          <h3>Discord TV</h3>
+          <p>Discord TV is da 2nd best! Poggers!</p>
+        </div>
+        <span class="app-status material-icons-round" title="Enabled!">task_alt</span>
       </div>
       <div class="app-actions">
-        <input type="checkbox" name="enabled" checked/>
+        <button><span class="material-icons-round">power_off</span> Disable</button>
+        <button><span class="material-icons-round">visibility_off</span> Hide</button>
       </div>
     </section>
 </body>

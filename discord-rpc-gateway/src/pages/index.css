@@ -1,7 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Raleway&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway');
 
 * {
   margin: 0;
+}
+
+.material-icons-round {
+  user-select: none;
 }
 
 body {
@@ -14,6 +18,7 @@ body {
   flex-direction: column;
 
   font-family: 'Raleway', sans-serif;
+  background-color: #CBD5E1;
 }
 
 header {
@@ -23,17 +28,20 @@ header {
   align-items: center;
   justify-content: space-between;
 
-  color: #5561F5;
-  background-color: #dbeafe;
-  border-bottom: 2px solid #5561F5;
+  color: #eff6ff;
+  background-color: #1e3a8a;
+  border-left: 0.25rem solid #00000000;
+  border-right: 0.25rem solid #00000000;
+
+  user-select: none;
 }
 
 header h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 header figure {
-  width: 3rem;
+  height: 2rem;
   margin: 0;
 }
 
@@ -45,18 +53,184 @@ header figure img {
   object-position: center;
 }
 
+header.connected {
+  border-left-color: #57F287;
+}
+
+header.idle {
+  border-left-color: #FEE75C;
+}
+
+header.disconnected {
+  border-left-color: #ED4245;
+}
+
+header.disconnected .spinner {
+  animation: spin 1s ease-in-out infinite;
+}
+
+header.disconnected figure {
+  animation: pop 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(0deg);
+  }
+
+  75% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  75% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 .app {
   padding: 0.75rem;
-  margin: 4px;
+  margin: 0.25rem;
 
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
 
   background-color: #F1F5F9;
+  border-radius: 0.25rem;
+
+  cursor: pointer;
 }
 
 .app-info {
-  max-width: 90%;
+  display: flex;
+  align-items: center;
 }
 
+.app-logo {
+  flex-grow: 0;
+
+  width: 2rem;
+  margin: 0;
+  margin-right: 0.75rem;
+}
+
+.app-logo img {
+  height: 100%;
+  width: 100%;
+
+  object-fit: contain;
+  object-position: center;
+}
+
+.app-info-text {
+  flex-grow: 1;
+}
+
+.app-info-text h3 {
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.app-info-text p {
+  font-size: 0.8rem;
+}
+
+.app-status {
+  flex-grow: 0;
+}
+
+.app-status {
+  font-size: 1.25rem;
+}
+
+.app-status.connected {
+  font-size: 1.75rem;
+  color: #57F287;
+}
+
+.app-actions {
+  display: none;
+}
+
+.app.opened {
+  padding-bottom: 0.25rem;
+}
+
+.app.opened .app-actions {
+  margin-top: 0.75rem;
+  border-top: 1px solid #CBD5E1;
+  padding-top: 0.25rem;
+
+  display: flex;
+  justify-content: space-between;
+
+  position: relative;
+}
+
+.app-actions button {
+  width: 45%;
+  padding: 0.5rem 0;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-size: 0.8rem;
+  
+  background: none;
+  border: none;
+  border-radius: 2px;
+
+  transition: all 0.65s 0s;
+  user-select: none;
+  cursor: pointer;
+}
+
+.app-actions button .material-icons-round {
+  padding-right: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.app-actions button:hover {
+  background-color: #CBD5E160;
+}
+
+.app-actions::after {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 1.6rem;
+
+  position: absolute;
+  top: 0.5rem;
+  left: calc(50% - 1px);
+
+  background-color: #CBD5E1;
+}

@@ -1,5 +1,10 @@
-const { app, Tray, BrowserWindow } = require('electron');
+const { app, Tray, BrowserWindow, Menu, nativeImage } = require('electron');
 const path = require('path');
+
+require('./discord-gateway');
+
+const WINDOW_HEIGHT = 500;
+const WINDOW_WIDTH = 300;
 
 const appUI = {
   /** @type {Tray} */ tray: null,
@@ -7,7 +12,6 @@ const appUI = {
 };
 
 app.on('window-all-closed', e => e.preventDefault());
-
 app.whenReady().then(() => {
   appUI.window = createWindow();
   appUI.tray = createTray(appUI.window);
@@ -18,21 +22,28 @@ app.whenReady().then(() => {
  * @param {BrowserWindow} window 
  */
 function createTray(window) {
-  const tray = new Tray(path.join(app.getAppPath(), 'assets/icon.jpg'));
-  tray.setToolTip('Discord Radio my Friend!');
-
-  tray.on('click', () => {
+  const trayImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/Discord-Logo-White.png'));
+  const tray = new Tray(trayImage);
+  tray.setToolTip('Discord RPC Gateway');
+  tray.on('click', $=> {
     window.loadFile('src/pages/index.html');
     window.show();
   });
+
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Show', click: $=> window.show() },
+    { label: 'Quit', click: $=> app.exit() },
+  ]));
 
   return tray;
 }
 
 function createWindow() {
+  const windowImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/Discord-Logo-White.png'));
   const window = new BrowserWindow({
-    width: 350,
-    height: 700,
+    icon: windowImage,
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
     show: false,
     alwaysOnTop: true,
     resizable: false,
@@ -59,10 +70,10 @@ function createWindow() {
  */
 function setWindowPosition(window, tray) {
   const bounds = {
-    x: tray.getBounds().x - window.getBounds().width / 2,
+    x: tray.getBounds().x - WINDOW_WIDTH / 2,
     y: tray.getBounds().y,
-    width: window.getBounds().width,
-    height: window.getBounds().height,
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
   };
 
   if (tray.getBounds().y > 100) bounds.y -= window.getBounds().height;
