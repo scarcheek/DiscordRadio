@@ -4,7 +4,7 @@ const ipcClient = require('./utils/ipc');
 // Discord base rpc path
 const BASE_PATH = '//?/pipe/discord-ipc-'.replaceAll('/', '\\');
 
-const wss = new ws.Server({ port: 6463 });
+const wss = new ws.Server({ port: 6472 });
 wss.on('connection', async (ws, req) => {
   const options = req.url.split('?')[1]
     .split('&')
