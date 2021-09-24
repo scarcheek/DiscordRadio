@@ -93,13 +93,13 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
 // Add the listener for url changes
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(tab)
+  console.log(changeInfo)
   if (tab.id === $.listeningAlongTabId && changeInfo.url) {
     removeListenAlong()
   } if (changeInfo.url && tabId === $.trackedTabId) {
     chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
-  } if (tab.url.includes('discordradio.tk/')) {
-    updateDiscordRPC({ ...$.lastData, listeningAlong: true, host: getHostFromUrl(tab.title) })
+  } if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
+    updateDiscordRPC({ ...$.lastData, host: getHostFromUrl(tab.title) })
     chrome.storage.sync.set({ listeningAlongTabId: tabId });
   }
 });
@@ -203,10 +203,13 @@ function removeTrack(tab) {
 }
 
 function removeListenAlong() {
-  console.log('mama')
-  console.log($.lastData)
-  !$.lastData.listeningAlong ? updateDiscordRPC({ ...$.lastData, listeningAlong: false, host: undefined }) : removeTrack()
-  chrome.storage.sync.set({ listeningAlongTabId: null });
+  fetch(`http://localhost:6969`, { method: "DELETE" })
+    .then(() => {
+      chrome.storage.sync.set({ listeningAlongTabId: null })
+      if ($.lastData)
+        initializeTrack({ id: $.trackedTabId, windowId: $.trackedWindowId, title: $.lastData.title })
+    })
+    .catch(err => console.error('gotted error: ' + err));
 }
 
 /**
