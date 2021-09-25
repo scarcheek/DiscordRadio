@@ -17,7 +17,8 @@ To share your own YouTube activity you need 2 things:
   * The Command Line Client
 
 ### Host-Client
-To get the Host-Client up and running you need to have a node package manager installed on your system.
+
+To get the Host-Client up and running you need to have node v16 and a node package manager installed on your system.
 Execute following commands:
 ```bash
 cd ./host-client && npm install && npm start
