@@ -6,7 +6,7 @@ export function updateActivity(data, config) {
 
   const large_text = pickRandomText(config.vibe_texts);
   console.dir(data)
-  const activity = (data.host)
+  const activity = (data.host && data.host !== config.user)
     ? createListeningAlongActivity(data, config, large_text, !!$.serverConn)
     : (data.paused)
       ? createPausedActivity(data, config, large_text)
