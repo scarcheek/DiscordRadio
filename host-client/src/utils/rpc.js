@@ -13,7 +13,7 @@ import ipcClient from './ipc.js';
 const { env: { XDG_RUNTIME_DIR, TMPDIR, TMP, TEMP } } = process;
 const BASE_PATH = (process.platform === 'win32') 
   ? '//?/pipe/discord-ipc-'.replaceAll('/', '\\')
-  : `${(XDG_RUNTIME_DIR || TMPDIR || TMP || TEMP || '/tmp').replace(/\/$/, '')}/discord-ipc-${id}`;
+  : `${(XDG_RUNTIME_DIR || TMPDIR || TMP || TEMP || '/tmp').replace(/\/$/, '')}/discord-ipc-`;
 
 /**
  * A stateless RPC client which partially applies all the exported functions of this module.
