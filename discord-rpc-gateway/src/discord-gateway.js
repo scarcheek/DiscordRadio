@@ -2,7 +2,10 @@ const ws = require('ws');
 const ipcClient = require('./utils/ipc');
 
 // Discord base rpc path
-const BASE_PATH = '//?/pipe/discord-ipc-'.replaceAll('/', '\\');
+const { env: { XDG_RUNTIME_DIR, TMPDIR, TMP, TEMP } } = process;
+const BASE_PATH = (process.platform === 'win32') 
+  ? '//?/pipe/discord-ipc-'.replaceAll('/', '\\')
+  : `${(XDG_RUNTIME_DIR || TMPDIR || TMP || TEMP || '/tmp').replace(/\/$/, '')}/discord-ipc-${id}`;
 
 const wss = new ws.Server({ port: 6472 });
 wss.on('connection', async (ws, req) => {

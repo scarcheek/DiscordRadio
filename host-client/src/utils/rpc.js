@@ -10,9 +10,10 @@ import ipcClient from './ipc.js';
 /** @typedef {import('../@types/rpc').Activity} Activity */
 
 // Discord base rpc path
-const BASE_PATH = '//?/pipe/discord-ipc-'.replaceAll('/', '\\');
-
-
+const { env: { XDG_RUNTIME_DIR, TMPDIR, TMP, TEMP } } = process;
+const BASE_PATH = (process.platform === 'win32') 
+  ? '//?/pipe/discord-ipc-'.replaceAll('/', '\\')
+  : `${(XDG_RUNTIME_DIR || TMPDIR || TMP || TEMP || '/tmp').replace(/\/$/, '')}/discord-ipc-${id}`;
 
 /**
  * A stateless RPC client which partially applies all the exported functions of this module.
