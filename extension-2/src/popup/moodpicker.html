@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    .image-button {
+      height: 100px;
+      width: 100px;
+      cursor: pointer;
+      border: solid transparent;
+      border-radius: 8px;
+      user-select: none;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      width: 320px;
+      justify-content: space-between;
+    }
+
+    @keyframes rainbow {
+      0% {
+        background-position: 0% 82%
+      }
+      50% {
+        background-position: 100% 19%
+      }
+      100% {
+        background-position: 0% 82%
+      }
+    }
+  </style>
+</head>
+
+<body style="height: 500px;">
+  <h1>Choose your mood</h1>
+  <div class="container">
+    <img id="none" src="../../assets/moods/none.jpg" class="image-button" draggable="false"></img>
+    <img id="a" src="../../assets/moods/mood-a.jpg" class="image-button" draggable="false"></img>
+    <img id="b" src="../../assets/moods/mood-b.jpg" class="image-button" draggable="false"></img>
+    <img id="c" src="../../assets/moods/mood-c.jpg" class="image-button" draggable="false"></img>
+    <img id="d" src="../../assets/moods/mood-d.jpg" class="image-button" draggable="false"></img>
+    <img id="e" src="../../assets/moods/mood-e.jpg" class="image-button" draggable="false"></img>
+    <img id="f" src="../../assets/moods/mood-f.jpg" class="image-button" draggable="false"></img>
+    <img id="g" src="../../assets/moods/mood-g.jpg" class="image-button" draggable="false"></img>
+    <img id="h" src="../../assets/moods/mood-h.jpg" class="image-button" draggable="false"></img>
+    <img id="i" src="../../assets/moods/mood-i.jpg" class="image-button" draggable="false"></img>
+    <img id="j" src="../../assets/moods/mood-j.jpg" class="image-button" draggable="false"></img>
+    <img id="k" src="../../assets/moods/mood-k.jpg" class="image-button" draggable="false"></img>
+    <img id="l" src="../../assets/moods/mood-l.jpg" class="image-button" draggable="false"></img>
+    <img id="m" src="../../assets/moods/mood-m.jpg" class="image-button" draggable="false"></img>
+    <img id="n" src="../../assets/moods/mood-n.jpg" class="image-button" draggable="false"></img>
+    <!-- <img id="o" src="../../assets/moods/mood-o.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="p" src="../../assets/moods/mood-p.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="q" src="../../assets/moods/mood-q.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="r" src="../../assets/moods/mood-r.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="s" src="../../assets/moods/mood-s.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="t" src="../../assets/moods/mood-t.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="u" src="../../assets/moods/mood-u.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="v" src="../../assets/moods/mood-v.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="w" src="../../assets/moods/mood-w.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="x" src="../../assets/moods/mood-x.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="y" src="../../assets/moods/mood-y.jpg" class="image-button" draggable="false"></img> -->
+    <!-- <img id="z" src="../../assets/moods/mood-z.jpg" class="image-button" draggable="false"></img> -->
+  </div>
+  <script src="src/popup/moodpicker.js" />
+  </script>
+</body>
+
+</html>
