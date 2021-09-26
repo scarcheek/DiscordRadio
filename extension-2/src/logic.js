@@ -52,24 +52,34 @@ class Activity {
   static listenData = {};
 
   static async set(data) {
+    data.mood = Activity.prevData?.mood ?? 'none';
     data.nrOfListeners = Activity.prevData?.nrOfListeners ?? 0;
+    data.updatedOn = Date.now();
+    console.log('sending data:', data);
+
     const activity = (data.host && data.host !== discord.user.tag)
       ? Activity._createListeningAlongActivity(data)
       : (data.paused)
         ? Activity._createPausedActivity(data)
         : Activity._createPlayingActivity(data);
 
+    Activity.prevData = data;
+    if (server.conn && !data.host) server.sendActivityData(data);
     discord.setActivity({
       pid: (await browser.windows.getLastFocused()).id,
       activity,
     });
-
-    if (server.conn && !data.host) server.sendActivityData(data);
-    Activity.prevData = data;
   }
 
   static resendPrevData() {
     if (Activity.prevData) {
+      Activity.set(Activity.prevData);
+    }
+  }
+
+  static updateMood(mood) {
+    if (Activity.prevData) {
+      Activity.prevData.mood = mood;
       Activity.set(Activity.prevData);
     }
   }
@@ -89,6 +99,7 @@ class Activity {
   static async listenAlong(data) {
     if (data.host !== discord.user.tag) {
       const activity = Activity._createListeningAlongActivity(data);
+      Activity.prevData = data;
       discord.setActivity({
         pid: (await browser.windows.getLastFocused()).id,
         activity,
@@ -124,7 +135,7 @@ class Activity {
         start: data.updatedOn - (1000 * data.currTime)
       },
       assets: {
-        large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
+        large_image: (data.mood !== 'none') ? `mood-${data.mood}` : 'image',
         large_text: Activity._getRandomVibeText(),
         small_image: 'play-circle',
         small_text: 'Playing',

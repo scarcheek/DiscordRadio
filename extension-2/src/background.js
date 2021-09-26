@@ -17,7 +17,6 @@ const $ = {
   moodId: null,
   trackedTabId: null,
   trackedWindowId: null,
-  lastData: null,
   listeningAlongTabId: null,
 };
 
@@ -26,7 +25,6 @@ chrome.runtime.onInstalled.addListener(() => chrome.storage.sync.set({
   moodId: 'none',
   trackedTabId: null,
   trackedWindowId: null,
-  lastData: null,
   listeningAlongTabId: null,
 }));
 
@@ -45,7 +43,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     if (changes.moodId) {
       console.log(`Mood id changed. Old: ${changes.moodId.oldValue} New: ${changes.moodId.newValue}`)
       $.moodId = changes.moodId.newValue;
-      updateDiscordRPC($.lastData);
+      Activity.updateMood($.moodId);
     }
   }
 });
@@ -96,10 +94,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log(changeInfo)
   if (tab.id === $.listeningAlongTabId && changeInfo.url) {
     removeListenAlong()
-  } if (changeInfo.url && tabId === $.trackedTabId) {
+  } 
+  
+  if (changeInfo.url && tabId === $.trackedTabId) {
     chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
-  } if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
-    updateDiscordRPC({ ...$.lastData, host: getHostFromUrl(tab.url) })
+  } 
+  
+  if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
+    Activity.listenAlong({ ...Activity.prevData, host: getHostFromUrl(tab.url) });
     chrome.storage.sync.set({ listeningAlongTabId: tabId });
   }
 });
@@ -136,23 +138,12 @@ chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
 // communication with content.js
 chrome.runtime.onMessage.addListener(async (request) => {
   if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek].includes(request.type)) {
-    updateDiscordRPC(request.data);
+    if (request.data) Activity.set(request.data);
   }
   else if (request.type === MESSAGES.pageLoaded) {
-    if ($.trackedTabId) initializeTrack(await chrome.tabs.get($.trackedTabId));
+    if ($.trackedTabId) initializeTrack(await browser.tabs.get($.trackedTabId));
   }
 });
-
-
-async function updateDiscordRPC(data) {
-  if (!data) return;
-  data.mood = $.moodId;
-  data.updatedOn = Date.now();
-  
-  console.log('sending data:', data);
-  await Activity.set(data);
-  chrome.storage.sync.set({ lastData: data });
-}
 
 function initializeTrack(tab) {
   console.log(`trying to track tab with id: ${tab.id}`);
@@ -169,7 +160,7 @@ function initializeTrack(tab) {
       toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
       chrome.browserAction.setBadgeText({ tabId: tab.id, text: '✔' });
       chrome.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
-      updateDiscordRPC(res);
+      if (res) Activity.set(res);
     }
     else {
       chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ERR' });
