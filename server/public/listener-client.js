@@ -3,7 +3,7 @@ const server_port = 80;
 
 Array.prototype.last = function () { return this[this.length - 1]; };
 
-let player, hostPlayerState, justCued = false;
+let player, hostPlayerState = {}, justCued = false, discord;
 const host = location.href.split('/').last();
 document.title = `Listening to: ${host}`;
 
@@ -28,10 +28,16 @@ function onYouTubeIframeAPIReady() {
 async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
 
+  // init discord connection
+  discord = new DiscordRPC('875518867680657458');
+  await discord.connect();
+
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
+
+    hostPlayerState.initializedOn = Date.now();
   };
 
   ws.onmessage = async e => {
@@ -107,12 +113,84 @@ function updateDiscordRPC(data) {
   if (!data) return;
   console.log('Sending data:', data)
 
-  fetch(`http://localhost:6969`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data),
-  }).catch((err) => console.error(err.message));
-  // thnx Loris for the code
+  discord.setActivity(createListeningAlongActivity(data));
 }
+
+
+function createListeningAlongActivity(data) {
+  const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
+  const host = data.host.split('#')[0];
+
+  buttons.unshift({
+    label: `🎉 Join along with ${host}!`,
+    url: `http://discordradio.tk/${data.host}`
+  });
+
+
+  return {
+    details: data.title,
+    state: `Listening along with ${host}! 🙃`,
+    timestamps: {
+      start: hostPlayerState.initializedOn,
+    },
+    assets: {
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
+      large_text: getRandomVibeText(),
+      small_image: 'play-circle',
+      small_text: 'Playing',
+    },
+    buttons,
+  };
+}
+
+
+function getRandomVibeText() {
+  return VIBE_TEXTS[Math.floor(Math.random() * VIBE_TEXTS.length)];
+}
+
+
+
+const VIBE_TEXTS = [
+  "I'm so happy you're here!",
+  "You have a new friend request.",
+  "You're looking good today!",
+  "You are awesome!",
+  "You rock!",
+  "You're so rad!",
+  "You're so pretty!",
+  "You're so smart!",
+  "You're so kind!",
+  "You're so funny!",
+  "You're so sweet!",
+  "You're so helpful!",
+  "You're the best ever!",
+  "You are a genius human being!",
+  "You are aIDENTIFIER!",
+  "I'm a little teapot",
+  "I'm a little short",
+  "I'm a little bit of everything",
+  "I'm a little bit of just water",
+  "You have been successfully connected to Vibe.",
+  "I'm a bot, please talk to me!",
+  "I'm a bot, I will not talk to you.",
+  "I'm not a bot, I will not play music for you.",
+  "What do you want to listen to?",
+  "I like it when you sing along with me.",
+  "I like it when you dance with me.",
+  "I like to sing and dance with you.",
+  "Let's all sing along :)",
+  "What a beautiful day",
+  "I really like you",
+  "You are so cool, I love you so much",
+  "These texts were brought to you by Github Copilot 🤖",
+  "Hellö",
+  "Griaß enk",
+  "I kumm glei wieder",
+  "Dos wos unterschiedlich is, is sehr oft auch gleich!",
+  "Wow des funktioniert sogar",
+  "Jetzt mach ich nen Chrome auf und sag Pfffffffff",
+  "Do draussen is da Leiner",
+  "Wos hastn Sicherungskostn auf Lego???",
+  "Newton wor a geniales Oaschloch",
+  "You would like to turn into a Cornetto?"
+];
