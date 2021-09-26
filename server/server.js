@@ -24,6 +24,7 @@ setTimeout(() => {
 // http server for hosting the listener-client
 const httpServer = express();
 httpServer.use(express.static('public'));
+httpServer.use(cors);
 
 httpServer.get('/stats', (req, res) => {
   res.status(200).json(stats);
@@ -155,4 +156,13 @@ function fetch(url, options) {
       resolve(res);
     });
   });
+}
+
+function cors(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+
+  if (req.method === 'OPTION') return res.send();
+  else next();
 }
