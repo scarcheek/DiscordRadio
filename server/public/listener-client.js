@@ -121,12 +121,11 @@ function createListeningAlongActivity(data) {
   const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
   const host = data.host.split('#')[0];
 
-  if (server.conn) {
-    buttons.unshift({
-      label: `🎉 Join along with ${host}!`,
-      url: `http://discordradio.tk/${data.host}`
-    });
-  }
+  buttons.unshift({
+    label: `🎉 Join along with ${host}!`,
+    url: `http://discordradio.tk/${data.host}`
+  });
+
 
   return {
     details: data.title,
