@@ -1,6 +1,7 @@
 const server_uri = 'discordradio.tk';
 const server_port = 80;
 
+window.host = 'heyo, me is the host :-)'
 Array.prototype.last = function () { return this[this.length - 1]; };
 
 let player, hostPlayerState, justCued = false;
@@ -42,7 +43,6 @@ async function onPlayerReady(readyEvent) {
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
     console.log(`🚀 ~ onPlayerReady ~ hostPlayerState.currTime`, hostPlayerState.currTime);
-    updateDiscordRPC({ host, ...hostPlayerState });
 
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
@@ -101,18 +101,4 @@ async function updatePlayer() {
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
-}
-
-function updateDiscordRPC(data) {
-  if (!data) return;
-  console.log('Sending data:', data)
-
-  fetch(`http://localhost:6969`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data),
-  }).catch((err) => console.error(err.message));
-  // thnx Loris for the code
 }
