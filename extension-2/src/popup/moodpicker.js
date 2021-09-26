@@ -1,26 +1,21 @@
-const images = []
-document.querySelectorAll('img').forEach(element => {
-    images.push({id: element.id, element})
-})
-console.log(images)
+let currImage = null;
 
-chrome.storage.sync.get('moodId', (data) => {
-  images.forEach(image => {
-    if (image.id === data.moodId){
-      image.element.style.borderColor = '#E49076';
+browser.storage.sync.get('moodId').then((data) => {
+  document.querySelectorAll('img').forEach(image => {
+    if (image.id === data.moodId) {
+      currImage = image;
+      currImage.style.borderColor = '#E49076';
     }
-    image.element.onclick = (event) => {
-      chrome.storage.sync.set({ moodId: image.id });
-
-      images.forEach(image => {
-        image.element.style = {}
-      });
-
-      image.element.style.borderColor = '#E49076';
-    }
+    
+    image.addEventListener('click', e => {
+      currImage.style = {};
+      currImage = image;
+      currImage.style.borderColor = '#E49076';
+      browser.storage.sync.set({ moodId: currImage.id });
+    });
   });
 });
 
 document.querySelector('button').addEventListener('click', e => {
-  chrome.storage.sync.get('link', data => navigator.clipboard.writeText(data.link));
+  browser.storage.sync.get('link').then(data => navigator.clipboard.writeText(data.link));
 });

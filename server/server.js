@@ -1,15 +1,43 @@
-import express from 'express';
-import { WebSocketServer } from 'ws';
-import path from 'path';
+const fs = require('fs/promises');
+const path = require('path');
+const https = require('https');
+const express = require('express');
+const { WebSocketServer } = require('ws');
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
-const require = (await import('module')).createRequire(import.meta.url);
 const config = require('../config.json');
+const secrets = require('./secrets.json');
+const stats = {
+  activitiesStarted: 0,
+  listenAlongSessions: 0,
+  trackedSongs: 0,
+};
+
+setTimeout(() => {
+  stats.timestamp = new Date().toLocaleString('at');
+  fs.writeFile('./stats.json', JSON.stringify(stats, null, 2), 'utf8');
+}, 15 * 60 * 1000)
 
 // http server for hosting the listener-client
 const httpServer = express();
 httpServer.use(express.static('public'));
+
+httpServer.post('/auth', async (req, res) => {
+  if (!req.body?.code) return res.status(401).send('Unauthorized, The request has not been applied because it lacks valid authentication credentials for the target resource.');
+
+  const tokens = await fetch(AUTH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 
+      `grant_type=authorization_code&code=${req.body.code}&redirect_uri=${config.redirect_uri}` +
+      `&client_id=${config.client_id}&client_secret=${secrets.client_secret}`
+  }).then(res => res.json());
+  res.status(200).json(tokens);
+});
+
 httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/listener-client.html')));
 httpServer.listen(config.server_port, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 
@@ -33,10 +61,16 @@ wsServer.on('listening', () => console.log(`Yo he, donn hot da websuckit surfer 
 
 
 function connectHost(ws, host) {
+  stats.activitiesStarted++;
   ws.send((listeners.get(host) ?? []).length);
 
-  ws.on('message', playerState => {
-    playerState = JSON.parse(playerState.toString());
+  ws.on('message', msg => {
+    playerState = JSON.parse(msg.toString());
+
+    if (playerState.URL !== hosts.get(host).playerState.URL) {
+      stats.trackedSongs++;
+    }
+
     hosts.set(host, { hostWs: ws, playerState });
 
     if (!listeners.has(host)) return;
@@ -56,6 +90,10 @@ function connectListener(ws, host) {
   listeners.get(host).push(ws);
 
   if (hosts.has(host)) {
+    if (listeners.get(host).length === 1) {
+      stats.listenAlongSessions++;
+    }
+
     const { hostWs, playerState } = hosts.get(host);
     ws.send(JSON.stringify(playerState));
     hostWs.send(listeners.get(host).length);
@@ -71,5 +109,31 @@ function connectListener(ws, host) {
 
     if (newListeners.length === 0) listeners.delete(host);
     else listeners.set(host, newListeners);
+  });
+}
+
+
+
+function fetch(url, options) {
+  return new Promise((resolve, reject) => {
+    const body = options.body;
+    delete options.body;
+  
+    const req = https.request(url, options);
+    req.write(body);
+    req.end();
+  
+    req.on('response', res => {
+      res.text =$=> new Promise((resolve, reject) => {
+        res.body = '';
+        res.on('data', data => res.body += data);
+        res.on('end', $=> {
+          resolve(res.body);
+        });
+      });
+
+      res.json =$=> res.text().then(JSON.parse);
+      resolve(res);
+    });
   });
 }
