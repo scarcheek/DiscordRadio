@@ -16,8 +16,8 @@ const stats = {
   trackedSongs: 0,
 };
 
-setTimeout(() => {
-  stats.timestamp = new Date().toLocaleString('at');
+setInterval(() => {
+  stats.lastSaveTimestamp = new Date().toLocaleString('at');
   fs.writeFile('./stats.json', JSON.stringify(stats, null, 2), 'utf8');
 }, 15 * 60 * 1000)
 
