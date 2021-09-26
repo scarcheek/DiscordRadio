@@ -80,6 +80,7 @@ async function connectToServer() {
 
 class Activity {
   static prevData;
+  static on = false;
   static listenData = {};
 
   static async set(data) {
@@ -94,6 +95,7 @@ class Activity {
         ? Activity._createPausedActivity(data)
         : Activity._createPlayingActivity(data);
 
+    Activity.on = true;
     Activity.prevData = data;
     if (server.conn && !data.host) server.sendActivityData(data);
     discord.setActivity({
@@ -103,34 +105,34 @@ class Activity {
   }
 
   static resendPrevData() {
-    if (Activity.prevData) {
+    if (Activity.on) {
       Activity.set(Activity.prevData);
     }
   }
 
   static updateMood(mood) {
-    if (Activity.prevData) {
+    if (Activity.on) {
       Activity.prevData.mood = mood;
       Activity.set(Activity.prevData);
     }
   }
 
   static updateListeners(nrOfListeners) {
-    if (Activity.prevData) {
+    if (Activity.on) {
       Activity.prevData.nrOfListeners = nrOfListeners;
       Activity.set(Activity.prevData);
     }
   }
   
   static async remove() {
-    Activity.prevData = null;
+    Activity.on = false;
     discord.setActivity({ pid: (await browser.windows.getLastFocused()).id });
   }
 
   static async listenAlong(data) {
     if (data.host !== discord.user.tag) {
       const activity = Activity._createListeningAlongActivity(data);
-      Activity.prevData = data;
+      Activity.prevData = data; // ToDo:  Get correct data here
       discord.setActivity({
         pid: (await browser.windows.getLastFocused()).id,
         activity,
@@ -139,7 +141,7 @@ class Activity {
   }
 
   static stopListening() {
-    if (Activity.prevData) {
+    if (Activity.on) {
       Activity.set(Activity.prevData);
     }
     else {

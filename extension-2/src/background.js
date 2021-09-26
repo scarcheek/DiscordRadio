@@ -1,10 +1,10 @@
 const MESSAGES = {
   init: 'init',
+  newVideo: 'newVideo',
   pause: 'pause',
   play: 'play',
   seek: 'seek',
   remove: 'remove',
-  refreshPage: 'refreshPage',
   pageLoaded: 'pageLoaded',
 };
 
@@ -92,13 +92,18 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
 // Add the listener for url changes
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log(changeInfo)
+
   if (tab.id === $.listeningAlongTabId && changeInfo.url) {
     removeListenAlong()
-  } if (changeInfo.url && tabId === $.trackedTabId) {
-    browser.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
-  } if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
+  }
+
+  if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
     Activity.listenAlong({ ...Activity.prevData, host: getHostFromUrl(tab.url) });
     browser.storage.sync.set({ listeningAlongTabId: tabId });
+  }
+  else if (tab.id === $.trackedTabId && !tab.url.includes('v=') && changeInfo.status === 'complete') {
+    console.log('removing')
+    Activity.remove();
   }
 });
 
@@ -135,6 +140,9 @@ browser.tabs.onAttached.addListener((tabId, attachInfo) => {
 browser.runtime.onMessage.addListener(async (request) => {
   if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek].includes(request.type)) {
     if (request.data) Activity.set(request.data);
+  }
+  else if (MESSAGES.newVideo === request.type) {
+    if (request.data && request.data.title !== Activity.prevData.title) Activity.set(request.data);
   }
   else if (request.type === MESSAGES.pageLoaded) {
     if ($.trackedTabId) initializeTrack(await browser.tabs.get($.trackedTabId));

@@ -1,18 +1,20 @@
 const MESSAGES = {
   init: 'init',
+  newVideo: 'newVideo',
   pause: 'pause',
   play: 'play',
   seek: 'seek',
   remove: 'remove',
-  refreshPage: 'refreshPage',
   pageLoaded: 'pageLoaded',
 };
 
 let video;
+let observer;
 
 
 // let background.js know the page is loaded
 window.addEventListener('load', () => browser.runtime.sendMessage({ type: MESSAGES.pageLoaded }));
+
 // communication with background.js
 function handleMessage(req) {
   switch (req.type) {
@@ -21,11 +23,6 @@ function handleMessage(req) {
       
     case MESSAGES.remove:
       return removeVideo();
-
-    case MESSAGES.refreshPage:
-      if (location.search.includes('v=')) location.reload();
-      else removeVideo();
-      break;
   }
 
   return true; // indicates an asynchronous response
@@ -35,36 +32,52 @@ browser.runtime.onMessage.addListener(handleMessage);
 
 async function addVideo() {
   video = document.querySelector('video');
+  addObserver();
 
-  video.onpause =()=> {
+  video.onpause = () => {
     browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.pause });
-  }
+  };
 
-  video.onplay =()=> {
+  video.onplay = () => {
     browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.play });
-  }
+  };
 
-  video.onseeked =()=> {
+  video.onseeked = () => {
     browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.seek });
-  }
+  };
 
-  return formatData()
+  return formatData();
 }
 
-function removeVideo() {
+function addObserver() {
+  const titleTag = document.querySelector('.title > yt-formatted-string.ytd-video-primary-info-renderer');
+  if (!titleTag) return setTimeout(addObserver, 1000);
+    
+  console.dir(titleTag);
+  observer = new MutationObserver(() => {
+    browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.newVideo });
+  });
+  
+  observer.observe(titleTag, { childList: true });
+}
+
+async function removeVideo() {
   if (video) {
     video.onpause = null;
     video.onplay = null;
     video.onseeked = null;
     video = null;
   }
-  return Promise.resolve();
 }
 
 function formatData() {
   const playerInfo = {};
 
-  if (document.querySelector('#scriptTag')) {
+  if (document.querySelector('.title > yt-formatted-string.ytd-video-primary-info-renderer')) {
+    playerInfo.title = document.querySelector('.title > yt-formatted-string.ytd-video-primary-info-renderer').innerText;
+    playerInfo.channelName = document.querySelector('.ytd-channel-name > yt-formatted-string.ytd-channel-name').innerText;
+  }
+  else if (document.querySelector('#scriptTag')) {
     const info = JSON.parse(document.querySelector('#scriptTag')?.textContent);
     playerInfo.title = info.name;
     playerInfo.channelName = info.author;
