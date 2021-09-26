@@ -24,12 +24,14 @@ setTimeout(() => {
 // http server for hosting the listener-client
 const httpServer = express();
 httpServer.use(express.static('public'));
+httpServer.use(express.json());
 httpServer.use(cors);
 
 httpServer.get('/stats', (req, res) => {
   res.status(200).json(stats);
 });
 
+httpServer.get('/auth', (req, res) => res.sendStatus(405));
 httpServer.post('/auth', async (req, res) => {
   if (!req.body?.code && !req.body?.refresh_token) return res.status(401).json({ 
     err: 'Unauthorized, The request has not been applied because it lacks valid authentication credentials for the target resource.'
