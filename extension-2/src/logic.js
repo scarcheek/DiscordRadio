@@ -14,7 +14,7 @@ async function connect() {
   // connect to discord
   discord = new DiscordRPC('875518867680657458');
   await discord.connect();
-  chrome.storage.sync.set({ link: `http://discordradio.tk/${discord.user.tag}` });
+  browser.storage.sync.set({ link: `http://discordradio.tk/${discord.user.tag}` });
 
   // auth to discord
   const authInfo = await browser.storage.sync.get(['client_secret', 'refresh_token', 'redirect_uri']);

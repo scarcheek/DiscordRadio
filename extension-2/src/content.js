@@ -12,57 +12,53 @@ let video;
 
 
 // let background.js know the page is loaded
-window.addEventListener('load', () => chrome.runtime.sendMessage({ type: MESSAGES.pageLoaded }));
-
+window.addEventListener('load', () => browser.runtime.sendMessage({ type: MESSAGES.pageLoaded }));
 // communication with background.js
-chrome.runtime.onMessage.addListener(
-  async function (req, sender, reply) {
-    switch (req.type) {
-      case MESSAGES.init:
-        addVideo(reply);
-        break;
+function handleMessage(req) {
+  switch (req.type) {
+    case MESSAGES.init:
+      return addVideo();
+      
+    case MESSAGES.remove:
+      return removeVideo();
 
-      case MESSAGES.remove:
-        removeVideo(reply);
-        break;
-
-      case MESSAGES.refreshPage:
-        if (location.search.includes('v=')) location.reload();
-        else removeVideo(reply);
-        break;
-    }
-
-    return true; // indicates an asynchronous response
+    case MESSAGES.refreshPage:
+      if (location.search.includes('v=')) location.reload();
+      else removeVideo();
+      break;
   }
-);
+
+  return true; // indicates an asynchronous response
+}
+browser.runtime.onMessage.addListener(handleMessage);
 
 
-async function addVideo(reply) {
+async function addVideo() {
   video = document.querySelector('video');
 
   video.onpause =()=> {
-    chrome.runtime.sendMessage({ data: formatData(), type: MESSAGES.pause });
+    browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.pause });
   }
 
   video.onplay =()=> {
-    chrome.runtime.sendMessage({ data: formatData(), type: MESSAGES.play });
+    browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.play });
   }
 
   video.onseeked =()=> {
-    chrome.runtime.sendMessage({ data: formatData(), type: MESSAGES.seek });
+    browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.seek });
   }
 
-  reply(formatData());
-  return
+  return formatData()
 }
 
-function removeVideo(reply) {
+function removeVideo() {
   if (video) {
     video.onpause = null;
     video.onplay = null;
     video.onseeked = null;
     video = null;
   }
+  return Promise.resolve();
 }
 
 function formatData() {
