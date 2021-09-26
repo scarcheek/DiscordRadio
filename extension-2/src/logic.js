@@ -1,14 +1,7 @@
 let discord, server;
 
 browser.runtime.onStartup.addListener(connect);
-browser.runtime.onInstalled.addListener(async () => {
-  await browser.storage.sync.set({ 
-    client_secret: 'dihMntY3A_LVfiYCY_5EOJQn5XRDR4l3',
-    redirect_uri: 'http://localhost:6969',
-  });
-
-  connect();
-});
+browser.runtime.onInstalled.addListener(connect);
   
 async function connect() {
   // connect to discord
@@ -17,8 +10,8 @@ async function connect() {
   browser.storage.sync.set({ link: `http://discordradio.tk/${discord.user.tag}` });
 
   // auth to discord
-  const authInfo = await browser.storage.sync.get(['client_secret', 'refresh_token', 'redirect_uri']);
-  const { refresh_token } = await discord.login(authInfo);
+  const authInfo = await browser.storage.sync.get(['refresh_token']);
+  const { refresh_token } = await discord.login(authInfo.refresh_token);
   browser.storage.sync.set({ refresh_token });
   
   discord.on('message', console.dir);
