@@ -6,6 +6,8 @@ const MESSAGES = {
   seek: 'seek',
   remove: 'remove',
   pageLoaded: 'pageLoaded',
+  update: 'update',
+  error: 'error',
 };
 
 const CONTEXT_MENU = {
@@ -153,6 +155,14 @@ function initializeTrack(tab) {
 
   browser.tabs.sendMessage(tab.id, { type: MESSAGES.init }).then((res) => {
     if (!browser.runtime.lastError) {
+      if (!discord.conn) {
+        browser.tabs.sendMessage(tab.id, { 
+          data: 'Could not connect to Discord, make sure you have Discord as well as the Discord RPC Gateway application up and running.', 
+          type: MESSAGES.error 
+        });
+        return;
+      }
+
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, res)
 
       if ($.trackedTabId) {
@@ -182,7 +192,7 @@ function removeTrack(tab) {
   }
 
   async function finishRemoveTrack() {
-    await Activity.remove();
+    if (discord.conn) await Activity.remove();
     console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
     toggleContextMenuOptions(CONTEXT_MENU.track, CONTEXT_MENU.stop);
     browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });

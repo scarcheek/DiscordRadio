@@ -21,6 +21,7 @@ async function connectToDiscord() {
       discord.conn = null;
       console.warn('Lost connection to discord, trying to reconnect in 5s...');
       browser.browserAction.setBadgeText({ text: '🚫' });
+      browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '🚫' });
       server.close();
       setTimeout(connectToDiscord, 5 * 1000);
     });
@@ -47,6 +48,7 @@ async function connectToServer() {
       if (discord.conn) {
         console.warn('Lost connection to the Discord Radio Server, trying to reconnect in 5s...');
         browser.browserAction.setBadgeText({ text: '🔇' });
+        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '🔇' });
         setTimeout(connectToServer, 5 * 1000);
       }
     });
@@ -65,7 +67,7 @@ async function connectToServer() {
     });
 
     console.log('Connected to the Discord Radio Server!');
-    Activity.resendPrevData();
+    if ($.trackedTabId) browser.tabs.sendMessage($.trackedTabId, { type: MESSAGES.update });
   }
   catch (err) {
     server.conn = null;
@@ -99,16 +101,16 @@ class Activity {
 
     Activity.on = true;
     Activity.prevData = data;
-    if (server.conn && !data.host) server.sendActivityData(data);
-    discord.setActivity({
-      pid: (await browser.windows.getLastFocused()).id,
-      activity,
-    });
-  }
+    
+    if (server.conn && !data.host) {
+      server.sendActivityData(data);
+    }
 
-  static resendPrevData() {
-    if (Activity.on) {
-      Activity.set(Activity.prevData);
+    if (discord.conn) {
+      discord.setActivity({
+        pid: (await browser.windows.getLastFocused()).id,
+        activity,
+      });
     }
   }
 
@@ -120,7 +122,7 @@ class Activity {
   }
 
   static updateListeners(nrOfListeners) {
-    if (Activity.on) {
+    if (Activity.on && Activity.prevData?.nrOfListeners !== nrOfListeners) {
       Activity.prevData.nrOfListeners = nrOfListeners;
       Activity.set(Activity.prevData);
     }
@@ -129,17 +131,20 @@ class Activity {
   static async remove() {
     console.log('Removing the activity');
     Activity.on = false;
-    discord.setActivity({ pid: (await browser.windows.getLastFocused()).id });
+    if (discord.conn) discord.setActivity({ pid: (await browser.windows.getLastFocused()).id });
   }
 
   static async listenAlong(data) {
     if (data.host !== discord.user.tag) {
       const activity = Activity._createListeningAlongActivity(data);
       Activity.prevData = data; // ToDo:  Get correct data here
-      discord.setActivity({
-        pid: (await browser.windows.getLastFocused()).id,
-        activity,
-      });
+      
+      if (discord.conn) {
+        discord.setActivity({
+          pid: (await browser.windows.getLastFocused()).id,
+          activity,
+        });
+      }
     }
   }
 
