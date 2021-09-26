@@ -1,43 +1,80 @@
-let discord, server;
+let discord = { conn: null };
+let server = { conn: null };
 
-browser.runtime.onStartup.addListener(connect);
-browser.runtime.onInstalled.addListener(connect);
-  
-async function connect() {
-  // connect to discord
-  discord = new DiscordRPC('875518867680657458');
-  await discord.connect();
-  browser.storage.sync.set({ link: `http://discordradio.tk/${discord.user.tag}` });
+browser.runtime.onStartup.addListener(connectToDiscord);
+browser.runtime.onInstalled.addListener(connectToDiscord);
 
-  // auth to discord
-  const authInfo = await browser.storage.sync.get(['refresh_token']);
-  const { refresh_token } = await discord.login(authInfo.refresh_token);
-  browser.storage.sync.set({ refresh_token });
-  
-  discord.on('message', console.dir);
-  discord.on('close', (...args) => {
-    console.error('Discord connection closed', ...args);
-  });
+async function connectToDiscord() {
+  try {
+    // connect to discord
+    discord = new DiscordRPC('875518867680657458');
+    await discord.connect();
+    browser.storage.sync.set({ link: `http://discordradio.tk/${discord.user.tag}` });
 
-  // connect to the discord radio server
-  server = new DiscordRadioServer();
-  await server.connect(discord.user);
-  server.on('close', (...args) => {
-    console.error('Server connection closed', ...args);
-  });
+    // auth to discord
+    const authInfo = await browser.storage.sync.get(['refresh_token']);
+    const { refresh_token } = await discord.login(authInfo.refresh_token);
+    browser.storage.sync.set({ refresh_token });
 
-  server.on('message', nrOfListeners => {
-    if (nrOfListeners > 0 && Activity.prevData) {
-      browser.browserAction.setBadgeText({ text: `🥳 ${nrOfListeners + 1}` });
-      browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `✔ ${nrOfListeners + 1}` });
+    discord.on('message', console.dir);
+    discord.on('close', () => {
+      discord.conn = null;
+      console.warn('Lost connection to discord, trying to reconnect in 5s...');
+      browser.browserAction.setBadgeText({ text: '🚫' });
+      server.close();
+      setTimeout(connectToDiscord, 5 * 1000);
+    });
+
+    console.log('Connected to Discord!');
+    connectToServer();
+  }
+  catch (err) {
+    discord.conn = null;
+    console.warn('Could not connect to discord, retrying in 5s...');
+    browser.browserAction.setBadgeText({ text: '🚫' });
+    setTimeout(connectToDiscord, 5 * 1000);
+  }
+}
+
+async function connectToServer() {
+  try {
+    // connect to the discord radio server
+    server = new DiscordRadioServer();
+    await server.connect(discord.user);
+    server.on('close', (...args) => {
+      server.conn = null;
+
+      if (discord.conn) {
+        console.warn('Lost connection to the Discord Radio Server, trying to reconnect in 5s...');
+        browser.browserAction.setBadgeText({ text: '🔇' });
+        setTimeout(connectToServer, 5 * 1000);
+      }
+    });
+
+    server.on('message', nrOfListeners => {
+      if (nrOfListeners > 0 && Activity.prevData) {
+        browser.browserAction.setBadgeText({ text: `🥳 ${nrOfListeners + 1}` });
+        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `✔ ${nrOfListeners + 1}` });
+      }
+      else {
+        browser.browserAction.setBadgeText({ text: '' });
+        if (Activity.prevData) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '✔' });
+      }
+
+      Activity.updateListeners(nrOfListeners);
+    });
+
+    console.log('Connected to the Discord Radio Server!');
+  }
+  catch (err) {
+    server.conn = null;
+
+    if (discord.conn) {
+      console.warn('Could not connect to the Discord Radio Server, retrying in 5s...');
+      browser.browserAction.setBadgeText({ text: '🔇' });
+      setTimeout(connectToServer, 5 * 1000);
     }
-    else {
-      browser.browserAction.setBadgeText({ text: '' });
-      if (Activity.prevData) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '✔' });
-    }
-
-    Activity.updateListeners(nrOfListeners);
-  });
+  }
 }
 
 class Activity {
