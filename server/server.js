@@ -6,6 +6,8 @@ const { WebSocketServer } = require('ws');
 
 Array.prototype.last = function() { return this[this.length - 1]; };
 
+const AUTH_URL = 'https://discordapp.com/api/oauth2/token';
+
 const config = require('../config.json');
 const secrets = require('./secrets.json');
 const stats = {
@@ -24,17 +26,30 @@ const httpServer = express();
 httpServer.use(express.static('public'));
 
 httpServer.post('/auth', async (req, res) => {
-  if (!req.body?.code) return res.status(401).send('Unauthorized, The request has not been applied because it lacks valid authentication credentials for the target resource.');
+  if (!req.body?.code && !req.body?.refresh_token) return res.status(401).json({ 
+    err: 'Unauthorized, The request has not been applied because it lacks valid authentication credentials for the target resource.'
+  });
 
-  const tokens = await fetch(AUTH_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 
-      `grant_type=authorization_code&code=${req.body.code}&redirect_uri=${config.redirect_uri}` +
-      `&client_id=${config.client_id}&client_secret=${secrets.client_secret}`
-  }).then(res => res.json());
+  const tokens = (req.body.refresh_token) 
+    ? await fetch(AUTH_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 
+          `grant_type=refresh_token&refresh_token=${req.body.refresh_token}` +
+          `&client_id=${config.client_id}&client_secret=${secrets.client_secret}`
+      }).then(res => res.json())
+    : await fetch(AUTH_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 
+          `grant_type=authorization_code&code=${req.body.code}&redirect_uri=${config.redirect_uri}` +
+          `&client_id=${config.client_id}&client_secret=${secrets.client_secret}`
+      }).then(res => res.json());
+
   res.status(200).json(tokens);
 });
 

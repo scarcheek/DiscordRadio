@@ -1,5 +1,5 @@
 class DiscordRPC {
-  static AUTH_URL = 'https://discordapp.com/api/oauth2/token';
+  static AUTH_URL = 'http://discordradio.tk/auth';
   static URL = `ws://localhost:6472`;
   static VERSION = 1;
   static ENCODING = 'json';
@@ -26,8 +26,8 @@ class DiscordRPC {
     });
   }
 
-  async login({ client_secret, redirect_uri, refresh_token }) {
-    const tokens = await this.authorize({ client_secret, redirect_uri, refresh_token });
+  async login(refresh_token = undefined) {
+    const tokens = await this.authorize(refresh_token);
     await this.authenticate(tokens.access_token);
     return tokens;
   }
@@ -47,28 +47,22 @@ class DiscordRPC {
 
 
 
-  async authorize({ client_secret, redirect_uri, refresh_token }) {
+  async authorize(refresh_token = undefined) {
     if (refresh_token) {
       return fetch(DiscordRPC.AUTH_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 
-          `grant_type=refresh_token&refresh_token=${refresh_token}` +
-          `&client_id=${this.client_id}&client_secret=${client_secret}`
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token }),
       }).then(res => res.json());
     }
 
     this._send('AUTHORIZE',{ client_id: this.client_id, scopes: ['identify'] });
-    const { data: { code: authCode } } = await this._getDiscordResponse();
+    const { data: { code } } = await this._getDiscordResponse();
 
     return fetch(DiscordRPC.AUTH_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 
-        `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirect_uri}` +
-        `&client_id=${this.client_id}&client_secret=${client_secret}`
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
     }).then(res => res.json());
   }
 
