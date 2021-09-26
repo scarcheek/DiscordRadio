@@ -84,6 +84,8 @@ class Activity {
   static listenData = {};
 
   static async set(data) {
+    console.dir(new Error().stack);
+
     data.mood = Activity.prevData?.mood ?? 'none';
     data.nrOfListeners = Activity.prevData?.nrOfListeners ?? 0;
     data.updatedOn = Date.now();
@@ -125,6 +127,7 @@ class Activity {
   }
   
   static async remove() {
+    console.log('Removing the activity');
     Activity.on = false;
     discord.setActivity({ pid: (await browser.windows.getLastFocused()).id });
   }

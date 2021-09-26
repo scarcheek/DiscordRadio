@@ -102,7 +102,6 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
   else if (tab.id === $.trackedTabId && !tab.url.includes('v=') && changeInfo.status === 'complete') {
-    console.log('removing')
     Activity.remove();
   }
 });
@@ -138,11 +137,11 @@ browser.tabs.onAttached.addListener((tabId, attachInfo) => {
 
 // communication with content.js
 browser.runtime.onMessage.addListener(async (request) => {
-  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek].includes(request.type)) {
+  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo].includes(request.type)) {
     if (request.data) Activity.set(request.data);
   }
-  else if (MESSAGES.newVideo === request.type) {
-    if (request.data && request.data.title !== Activity.prevData.title) Activity.set(request.data);
+  else if (request.type === MESSAGES.remove) {
+    Activity.remove();
   }
   else if (request.type === MESSAGES.pageLoaded) {
     if ($.trackedTabId) initializeTrack(await browser.tabs.get($.trackedTabId));

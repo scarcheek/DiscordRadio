@@ -10,6 +10,8 @@ const MESSAGES = {
 
 let video;
 let observer;
+let miniplayerCloseButton;
+let ignoreNext = false;
 
 
 // let background.js know the page is loaded
@@ -32,10 +34,11 @@ browser.runtime.onMessage.addListener(handleMessage);
 
 async function addVideo() {
   video = document.querySelector('video');
-  addObserver();
+  addObservers();
 
   video.onpause = () => {
-    browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.pause });
+    if (!ignoreNext) browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.pause });
+    ignoreNext = false;
   };
 
   video.onplay = () => {
@@ -49,16 +52,40 @@ async function addVideo() {
   return formatData();
 }
 
-function addObserver() {
-  const titleTag = document.querySelector('.title > yt-formatted-string.ytd-video-primary-info-renderer');
-  if (!titleTag) return setTimeout(addObserver, 1000);
-    
-  console.dir(titleTag);
+function addObservers() {
+  const titleTag = document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer');
+  if (!titleTag) return setTimeout(addObservers, 1000);
+  
   observer = new MutationObserver(() => {
+    console.log('title changed');
     browser.runtime.sendMessage({ data: formatData(), type: MESSAGES.newVideo });
   });
   
   observer.observe(titleTag, { childList: true });
+
+  const miniPlayerTitle = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title');
+  console.dir(miniPlayerTitle);
+
+  let miniObserver = new MutationObserver(() => {
+    console.log('miniplayer title changed');
+    browser.runtime.sendMessage({ data: formatMiniplayerData(), type: MESSAGES.newVideo });
+    addMiniplayerCloseListener();
+  });
+  
+  miniObserver.observe(miniPlayerTitle, { childList: true });
+}
+
+function addMiniplayerCloseListener() {
+  if (miniplayerCloseButton) return;
+
+  miniplayerCloseButton = document.querySelector('.ytp-miniplayer-close-button');
+  if (!miniplayerCloseButton) return setTimeout(addMiniplayerCloseListener, 1000);
+
+  miniplayerCloseButton.addEventListener('click', () => {
+    console.log('removing');
+    browser.runtime.sendMessage({ type: MESSAGES.remove });
+    ignoreNext = true;
+  });
 }
 
 async function removeVideo() {
@@ -73,9 +100,9 @@ async function removeVideo() {
 function formatData() {
   const playerInfo = {};
 
-  if (document.querySelector('.title > yt-formatted-string.ytd-video-primary-info-renderer')) {
-    playerInfo.title = document.querySelector('.title > yt-formatted-string.ytd-video-primary-info-renderer').innerText;
-    playerInfo.channelName = document.querySelector('.ytd-channel-name > yt-formatted-string.ytd-channel-name').innerText;
+  if (document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer')) {
+    playerInfo.title = document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer').innerText;
+    playerInfo.channelName = document.querySelector('.ytd-channel-name yt-formatted-string.ytd-channel-name').innerText;
   }
   else if (document.querySelector('#scriptTag')) {
     const info = JSON.parse(document.querySelector('#scriptTag')?.textContent);
@@ -86,6 +113,19 @@ function formatData() {
     playerInfo.title = document.querySelector('meta[itemprop="name"]').content;
     playerInfo.channelName = document.querySelector('span[itemprop="author"] link[itemprop="name"]').attributes.content.value;
   }
+
+  return {
+    ...playerInfo,
+    URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
+    currTime: Math.floor(video.currentTime),
+    paused: video.paused,
+  }
+}
+
+function formatMiniplayerData() {
+  const playerInfo = {};
+  playerInfo.title = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title').innerText;
+  playerInfo.channelName = document.querySelector('.ytd-miniplayer.channel > yt-formatted-string#owner-name').innerText;
 
   return {
     ...playerInfo,
