@@ -49,4 +49,4 @@ Check back to your Discord and you'll see yourself playing Discord Radio!
 
 ### Error detection
 The most common error will occur if you reload the extension without restarting chrome afterwards.
-If that doesn't solve the problem, feel free to contact `Scar#5966` or `Lancear#6961` on Discord about it!
+If that doesn't solve the problem, feel free to contact `Scar#5966` or `Lancear#1265` on Discord about it!
