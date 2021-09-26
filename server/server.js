@@ -81,13 +81,13 @@ function connectHost(ws, host) {
 
   ws.on('message', msg => {
     playerState = JSON.parse(msg.toString());
-
-    if (playerState.URL !== hosts.get(host).playerState.URL) {
+    
+    if (!hosts.has(host) || playerState.URL !== hosts.get(host).playerState.URL) {
       stats.trackedSongs++;
     }
 
     hosts.set(host, { hostWs: ws, playerState });
-
+    
     if (!listeners.has(host)) return;
     listeners.get(host).forEach(ws => ws.send(JSON.stringify(playerState)));
   });
