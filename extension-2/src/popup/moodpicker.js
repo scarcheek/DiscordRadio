@@ -19,5 +19,8 @@ chrome.storage.sync.get('moodId', (data) => {
       image.element.style.borderColor = '#E49076';
     }
   });
-})
+});
 
+document.querySelector('button').addEventListener('click', e => {
+  chrome.storage.sync.get('link', data => navigator.clipboard.writeText(data.link));
+});

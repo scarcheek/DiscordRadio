@@ -63,12 +63,6 @@ function removeVideo(reply) {
     video.onseeked = null;
     video = null;
   }
-
-  fetch(`http://localhost:6969`, { method: "DELETE" })
-  .then(() => {
-    if (reply) reply({ farewell: "removed video reference" });
-  })
-  .catch(err => console.error('gotted error: ' + err));
 }
 
 function formatData() {

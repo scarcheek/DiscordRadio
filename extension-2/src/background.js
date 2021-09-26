@@ -99,7 +99,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   } if (changeInfo.url && tabId === $.trackedTabId) {
     chrome.tabs.sendMessage(tabId, { url: changeInfo.url, type: MESSAGES.refreshPage });
   } if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
-    updateDiscordRPC({ ...$.lastData, host: getHostFromUrl(tab.title) })
+    updateDiscordRPC({ ...$.lastData, host: getHostFromUrl(tab.url) })
     chrome.storage.sync.set({ listeningAlongTabId: tabId });
   }
 });
@@ -144,19 +144,13 @@ chrome.runtime.onMessage.addListener(async (request) => {
 });
 
 
-function updateDiscordRPC(data) {
+async function updateDiscordRPC(data) {
   if (!data) return;
   data.mood = $.moodId;
-
+  data.updatedOn = Date.now();
+  
   console.log('sending data:', data);
-
-  fetch(`http://localhost:6969`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data),
-  }).catch((err) => console.error(err.message));
+  await Activity.set(data);
   chrome.storage.sync.set({ lastData: data });
 }
 
@@ -169,16 +163,16 @@ function initializeTrack(tab) {
 
       if ($.trackedTabId) {
         // if already tracking a tab
-        chrome.action.setBadgeText({ tabId: $.trackedTabId, text: '' });
+        chrome.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
       }
 
       toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
-      chrome.action.setBadgeText({ tabId: tab.id, text: 'ON' });
+      chrome.browserAction.setBadgeText({ tabId: tab.id, text: '✔' });
       chrome.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
       updateDiscordRPC(res);
     }
     else {
-      chrome.action.setBadgeText({ tabId: tab.id, text: 'ERR' });
+      chrome.browserAction.setBadgeText({ tabId: tab.id, text: 'ERR' });
       console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#5966 on Discord', chrome.runtime.lastError.message);
     }
   });
@@ -189,27 +183,21 @@ function removeTrack(tab) {
     chrome.tabs.sendMessage($.trackedTabId, { type: MESSAGES.remove }, finishRemoveTrack);
   }
   else {
-    fetch(`http://localhost:6969`, { method: "DELETE" })
-      .then(finishRemoveTrack)
-      .catch(err => console.error('gotted error: ' + err));
+    finishRemoveTrack();
   }
 
-  function finishRemoveTrack() {
+  async function finishRemoveTrack() {
+    await Activity.remove();
     console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
     toggleContextMenuOptions(CONTEXT_MENU.track, CONTEXT_MENU.stop);
-    chrome.action.setBadgeText({ tabId: $.trackedTabId, text: '' });
+    chrome.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
     chrome.storage.sync.set({ trackedTabId: null, trackedWindowId: null });
   }
 }
 
 function removeListenAlong() {
-  fetch(`http://localhost:6969`, { method: "DELETE" })
-    .then(() => {
-      chrome.storage.sync.set({ listeningAlongTabId: null })
-      if ($.lastData)
-        initializeTrack({ id: $.trackedTabId, windowId: $.trackedWindowId, title: $.lastData.title })
-    })
-    .catch(err => console.error('gotted error: ' + err));
+  chrome.storage.sync.set({ listeningAlongTabId: null })
+  Activity.stopListening();
 }
 
 /**
