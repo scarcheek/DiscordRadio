@@ -41,7 +41,7 @@ async function connectToServer() {
     // connect to the discord radio server
     server = new DiscordRadioServer();
     await server.connect(discord.user);
-    server.on('close', (...args) => {
+    server.on('close', () => {
       server.conn = null;
 
       if (discord.conn) {
@@ -65,6 +65,7 @@ async function connectToServer() {
     });
 
     console.log('Connected to the Discord Radio Server!');
+    Activity.resendPrevData();
   }
   catch (err) {
     server.conn = null;
