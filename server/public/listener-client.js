@@ -1,10 +1,9 @@
 const server_uri = 'discordradio.tk';
 const server_port = 80;
 
-window.host = 'heyo, me is the host :-)'
 Array.prototype.last = function () { return this[this.length - 1]; };
 
-let player, hostPlayerState, justCued = false;
+let player, hostPlayerState, justCued = false, discord;
 const host = location.href.split('/').last();
 document.title = `Listening to: ${host}`;
 
@@ -29,6 +28,10 @@ function onYouTubeIframeAPIReady() {
 async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
 
+  // init discord connection
+  discord = new DiscordRPC('875518867680657458');
+  await discord.connect();
+
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
     ws.send(window.location);
@@ -43,6 +46,7 @@ async function onPlayerReady(readyEvent) {
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
     console.log(`🚀 ~ onPlayerReady ~ hostPlayerState.currTime`, hostPlayerState.currTime);
+    updateDiscordRPC({ host, ...hostPlayerState });
 
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
@@ -101,4 +105,44 @@ async function updatePlayer() {
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
+}
+
+function updateDiscordRPC(data) {
+  if (!data) return;
+  console.log('Sending data:', data)
+  
+  discord.setActivity(createListeningAlongActivity(data));
+}
+
+
+function createListeningAlongActivity(data) {
+  const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
+  const host = data.host.split('#')[0];
+
+  if (data.host !== Activity.listenData?.host) {
+    Activity.listenData.host = data.host;
+    Activity.listenData.startTime = Date.now();
+  }
+
+  if (server.conn) {
+    buttons.unshift({
+      label: `🎉 Join along with ${host}!`,
+      url: `http://discordradio.tk/${data.host}` 
+    });
+  }
+
+  return {
+    details: data.title,
+    state: `Listening along with ${host}! 🙃`,
+    timestamps: {
+      start: Activity.listenData.startTime,
+    },
+    assets: {
+      large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',
+      large_text: Activity._getRandomVibeText(),
+      small_image: 'play-circle',
+      small_text: 'Playing',
+    },
+    buttons,
+  };
 }
