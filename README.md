@@ -13,7 +13,7 @@ That's why we made a browser extension for that kick-ass browser of yours which 
 
 ## How To Install
 To share your own YouTube activity you need 2 things:
-  * The Google Chrome Extension
+  * The Browser Extension
   * The Command Line Client
 
 ### Host-Client
@@ -26,11 +26,11 @@ cd ./host-client && npm install && npm start
 
 If everything ran smoothly the console should output `🎉 All set up and ready to go!`
 
-### Chrome Extension
+### Browser Extension
 > This is subject to change soon™
 
-To install the chrome extension you have to follow these 4 steps:
-* Navigate to `chrome://extensions/`
+To install the browser extension you have to follow these 4 steps:
+* Navigate to `chrome://extensions/` (ToDo: firefox)
 * Enable `Developer mode` in the top right corner
 * Click the button `Load unpacked` in the top left corner
 * Select the `extension` folder located in this repository
@@ -48,5 +48,5 @@ After you tracked your tab the host-client will output that it is currently trac
 Check back to your Discord and you'll see yourself playing Discord Radio!
 
 ### Error detection
-The most common error will occur if you reload the extension without restarting chrome afterwards.
+The most common error will occur if you reload the extension without restarting the browser afterwards.
 If that doesn't solve the problem, feel free to contact `Scar#5966` or `Lancear#6961` on Discord about it!
