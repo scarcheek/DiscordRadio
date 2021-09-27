@@ -24,7 +24,7 @@ Execute following commands:
 cd ./rpc-gateway && npm install && npm start
 ```
 
-If everything ran smoothly the console should output `🎉 All set up and ready to go!`
+If everything ran smoothly the console should output `All set up and ready to go!` 🎉
 
 ### Browser Extension
 > This is subject to change soon™
