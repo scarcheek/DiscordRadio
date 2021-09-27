@@ -1,0 +1,62 @@
+.title {
+  margin: 0;
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.note {
+  margin: 0;
+  font-style: italic;
+}
+
+#popup {
+  margin: 0;
+  padding: 0.5rem;
+}
+
+#badge-info .badges {
+  margin: 0;
+  margin-bottom: 0.5rem;
+  list-style-type: none;
+}
+
+#badge-info .badges * {
+  margin: 4px 0;
+  padding: 0;
+}
+
+#link-button {
+  margin: 1rem 0;
+  padding: 0.5rem 1.25rem;
+
+  background-color: #efe0cb;
+  border-radius: 3px;
+  border: none;
+  
+  transition: all 0.65s 0s;
+  cursor: pointer;
+}
+
+#link-button:hover {
+  background-color: #e49076;
+}
+
+#mood-picker .moods {
+  width: 320px;
+  
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#mood-picker .moods .mood {
+  height: 100px;
+  width: 100px;
+
+  border: solid transparent;
+  border-radius: 8px;
+  
+  cursor: pointer;
+  user-select: none;
+}

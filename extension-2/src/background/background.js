@@ -27,13 +27,13 @@ const $ = {
 browser.runtime.onStartup.addListener(initializeStorage);
 browser.runtime.onInstalled.addListener(initializeStorage);
   
-function initializeStorage(){
+function initializeStorage() {
   return browser.storage.sync.set({
     moodId: 'none',
     trackedTabId: null,
     trackedWindowId: null,
     listeningAlongTabId: null,
-  })
+  });
 }
 
 // Load the state from the storage
@@ -184,7 +184,6 @@ function initializeTrack(tab) {
     })
     .catch((err) => {
       browser.browserAction.setBadgeText({ tabId: tab.id, text: '🔁' });
-      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#5966 on Discord', err.message);
     });
 }
 

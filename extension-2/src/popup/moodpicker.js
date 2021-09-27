@@ -16,6 +16,6 @@ browser.storage.sync.get('moodId').then((data) => {
   });
 });
 
-document.querySelector('button').addEventListener('click', e => {
+document.querySelector('#link-button').addEventListener('click', e => {
   browser.storage.sync.get('link').then(data => navigator.clipboard.writeText(data.link));
 });
