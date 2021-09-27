@@ -43,7 +43,7 @@ async function onPlayerReady(readyEvent) {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
-    consolde.dir(hostPlayerState);
+    console.dir(hostPlayerState);
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
