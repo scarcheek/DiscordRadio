@@ -101,7 +101,6 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 
   if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
-    // Activity.listenAlong({ ...Activity.prevData, host: getHostFromUrl(tab.url) });
     browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
   else if (tab.id === $.trackedTabId && !tab.url.includes('v=') && changeInfo.status === 'complete') {

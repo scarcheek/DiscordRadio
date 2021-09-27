@@ -130,7 +130,7 @@ class Activity {
 
   static stopListening() {
     if (Activity.on) {
-      Activity.set(Activity.prevData);
+      Activity._update(Activity.prevData);
     }
     else {
       Activity.remove();
