@@ -88,8 +88,6 @@ function connectHost(ws, host) {
 
   ws.on('message', msg => {
     const playerState = JSON.parse(msg.toString());
-
-    console.log(playerState)
     
     if (!hosts.has(host) || playerState.URL !== hosts.get(host).playerState.URL) {
       stats.trackedSongs++;
@@ -122,6 +120,10 @@ function connectListener(ws, host) {
     ws.send(JSON.stringify(playerState));
     hostWs.send(listeners.get(host).length);
   }
+
+  ws.on('message', (msg) => {
+    console.log(msg)
+  })
 
   ws.on('close', () => {
     const newListeners = listeners.get(host).filter(listener => listener !== ws);
