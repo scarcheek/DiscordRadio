@@ -14,11 +14,11 @@ That's why we made a browser extension for that kick-ass browser of yours which 
 ## How To Install
 To share your own YouTube activity you need 2 things:
   * The Browser Extension
-  * The Command Line Client
+  * The Electron RPC Gateway
 
-### Host-Client
+### Electron RPC Gateway
 
-To get the Host-Client up and running you need to have node v16 and a node package manager installed on your system.
+To get the Electron RPC Gateway up and running you need to have node v16 and a node package manager installed on your system.
 Execute following commands:
 ```bash
 cd ./rpc-gateway && npm install && npm start
