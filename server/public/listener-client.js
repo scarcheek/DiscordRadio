@@ -109,7 +109,7 @@ function updateDiscordRPC(data) {
   let activityData = createListeningAlongActivity(data)
   console.log('Sending data:', activityData)
 
-  discord.setActivity(activityData);
+  ws.send(activityData);
 }
 
 
