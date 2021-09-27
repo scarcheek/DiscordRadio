@@ -122,7 +122,7 @@ function connectListener(ws, host) {
   }
 
   ws.on('message', (msg) => {
-    console.log(msg.toString('utf8'))
+    console.log(JSON.parse(msg.toString('utf8')))
   })
 
   ws.on('close', () => {
