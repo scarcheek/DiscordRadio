@@ -85,46 +85,27 @@ class Activity {
   static on = false;
 
   static async set(data) {
-    console.dir(new Error().stack);
-
     data.mood = Activity.prevData?.mood ?? 'none';
     data.nrOfListeners = Activity.prevData?.nrOfListeners ?? 0;
     data.updatedOn = Date.now();
-    console.log('sending data:', data);
-
-    const activity = (data.host && data.host !== discord.user.tag)
-      ? Activity._createListeningAlongActivity(data)
-      : (data.paused)
-        ? Activity._createPausedActivity(data)
-        : Activity._createPlayingActivity(data);
-
-    Activity.on = true;
-    Activity.prevData = data;
+    Activity._update(data);
     
     if (server.conn && !data.host) {
       server.sendActivityData(data);
-    }
-
-    if (discord.conn) {
-      console.log('sending activity data to discord: ', activity)
-      discord.setActivity({
-        pid: (await browser.windows.getLastFocused()).id,
-        activity,
-      });
     }
   }
 
   static updateMood(mood) {
     if (Activity.on) {
       Activity.prevData.mood = mood;
-      Activity.set(Activity.prevData);
+      Activity._update(Activity.prevData);
     }
   }
 
   static updateListeners(nrOfListeners) {
     if (Activity.on && Activity.prevData?.nrOfListeners !== nrOfListeners) {
       Activity.prevData.nrOfListeners = nrOfListeners;
-      Activity.set(Activity.prevData);
+      Activity._update(Activity.prevData);
     }
   }
   
@@ -157,6 +138,28 @@ class Activity {
   }
 
 
+
+  static _update(data) {
+    console.dir(new Error().stack);
+    console.log('sending data:', data);
+
+    const activity = (data.host && data.host !== discord.user.tag)
+      ? Activity._createListeningAlongActivity(data)
+      : (data.paused)
+        ? Activity._createPausedActivity(data)
+        : Activity._createPlayingActivity(data);
+
+    Activity.on = true;
+    Activity.prevData = data;
+
+    if (discord.conn) {
+      console.log('sending activity data to discord: ', activity)
+      discord.setActivity({
+        pid: (await browser.windows.getLastFocused()).id,
+        activity,
+      });
+    }
+  }
 
   static _createPlayingActivity(data) {
     const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
