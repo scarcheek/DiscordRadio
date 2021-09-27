@@ -42,8 +42,8 @@ async function onPlayerReady(readyEvent) {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
-    console.dir(hostPlayerState);
     console.dir(JSON.parse(e.data));
+    console.dir(Date.now());
     console.dir(Date.now() - JSON.parse(e.data).updatedOn);
     
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
