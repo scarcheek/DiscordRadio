@@ -106,9 +106,10 @@ async function updatePlayer() {
 
 function updateDiscordRPC(data) {
   if (!data) return;
-  console.log('Sending data:', data)
+  let activityData = createListeningAlongActivity(data)
+  console.log('Sending data:', activityData)
 
-  discord.setActivity(createListeningAlongActivity(data));
+  discord.setActivity(activityData);
 }
 
 
