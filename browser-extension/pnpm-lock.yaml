@@ -1,0 +1,20 @@
+lockfileVersion: 5.3
+
+specifiers:
+  pure-uuid: ^1.6.2
+  webextension-polyfill: ^0.8.0
+
+devDependencies:
+  pure-uuid: 1.6.2
+  webextension-polyfill: 0.8.0
+
+packages:
+
+  /pure-uuid/1.6.2:
+    resolution: {integrity: sha512-WQ4xz74ApW6s0BToRuuyuMo9g0VHx1HljY0H2gPng+mqqz/K1yLj7sHZonZZQ2++WfHl/ZzruilWvuz+WtmxjQ==}
+    engines: {node: '>=8.0.0'}
+    dev: true
+
+  /webextension-polyfill/0.8.0:
+    resolution: {integrity: sha512-a19+DzlT6Kp9/UI+mF9XQopeZ+n2ussjhxHJ4/pmIGge9ijCDz7Gn93mNnjpZAk95T4Tae8iHZ6sSf869txqiQ==}
+    dev: true

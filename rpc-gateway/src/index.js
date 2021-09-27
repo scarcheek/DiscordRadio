@@ -16,6 +16,7 @@ app.whenReady().then(() => {
   appUI.window = createWindow();
   appUI.tray = createTray(appUI.window);
   setWindowPosition(appUI.window, appUI.tray);
+  console.log('All set up and ready to go!');
 });
 
 /**

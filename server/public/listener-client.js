@@ -1,9 +1,13 @@
+const MESSAGES = {
+  hostData: 'hostData',
+};
+
 const server_uri = 'discordradio.tk';
 const server_port = 80;
 
 Array.prototype.last = function () { return this[this.length - 1]; };
 
-let player, hostPlayerState, justCued = false;
+let player, hostPlayerState = {}, justCued = false;
 const host = location.href.split('/').last();
 document.title = `Listening to: ${host}`;
 
@@ -37,12 +41,11 @@ async function onPlayerReady(readyEvent) {
   ws.onmessage = async e => {
     if (!e.data) return;
 
-    hostPlayerState = JSON.parse(e.data);
-    hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
+    hostPlayerState = JSON.parse(e.data);   
+    hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
-    console.log(`🚀 ~ onPlayerReady ~ hostPlayerState.currTime`, hostPlayerState.currTime);
-    updateDiscordRPC({ host, ...hostPlayerState });
+    window.postMessage({ type: MESSAGES.hostData, data: { ...hostPlayerState, host } }, '*');
 
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
@@ -57,16 +60,12 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function onPlayerStateChange(event) {
-  console.log(`🚀 ~ onPlayerStateChange 1 ~ hostPlayerState.currTime`, hostPlayerState?.currTime);
-  console.dir(event);
-
   if (event.data === YT.PlayerState.CUED) {
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
   }
   else if (justCued && event.data === YT.PlayerState.PLAYING) {
-    hostPlayerState.currTime += (Date.now() - hostPlayerState.playedOn) / 1000;
-    console.log(`🚀 ~ onPlayerStateChange 2 ~ hostPlayerState.currTime`, hostPlayerState.currTime);
+    hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.playedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
     player.seekTo(hostPlayerState.currTime);
     justCued = false;
@@ -77,42 +76,13 @@ async function onPlayerStateChange(event) {
 }
 
 async function loadNewVideo() {
-  console.log('Loading new video...');
-  const videoId = player.getVideoUrl().split('v=')[1];
-  console.group(new Date().toLocaleTimeString("at"));
-  console.dir(videoId);
-  console.dir(hostPlayerState);
-  console.groupEnd();
-
   player.cueVideoById(hostPlayerState.videoId, hostPlayerState.currTime);
   justCued = true;
 }
 
 async function updatePlayer() {
-  console.log('Updating the player...');
-  const videoId = player.getVideoUrl().split('v=')[1];
-  console.group(new Date().toLocaleTimeString("at"));
-  console.dir(videoId);
-  console.dir(hostPlayerState);
-  console.groupEnd();
-
   await player.seekTo(hostPlayerState.currTime);
-  console.log(`🚀 ~ updatePlayer ~ hostPlayerState.currTime`, hostPlayerState.currTime);
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
-}
-
-function updateDiscordRPC(data) {
-  if (!data) return;
-  console.log('Sending data:', data)
-
-  fetch(`http://localhost:6969`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data),
-  }).catch((err) => console.error(err.message));
-  // thnx Loris for the code
 }

@@ -13,32 +13,32 @@ That's why we made a browser extension for that kick-ass browser of yours which 
 
 ## How To Install
 To share your own YouTube activity you need 2 things:
-  * The Google Chrome Extension
-  * The Command Line Client
+  * The Browser Extension
+  * The Electron RPC Gateway
 
-### Host-Client
+### Electron RPC Gateway
 
-To get the Host-Client up and running you need to have node v16 and a node package manager installed on your system.
+To get the Electron RPC Gateway up and running you need to have node v16 and a node package manager installed on your system.
 Execute following commands:
 ```bash
-cd ./host-client && npm install && npm start
+cd ./rpc-gateway && npm install && npm start
 ```
 
-If everything ran smoothly the console should output `🎉 All set up and ready to go!`
+If everything ran smoothly the console should output `All set up and ready to go!` 🎉
 
-### Chrome Extension
+### Browser Extension
 > This is subject to change soon™
 
-To install the chrome extension you have to follow these 4 steps:
-* Navigate to `chrome://extensions/`
+To install the browser extension you have to follow these 4 steps:
+* Navigate to `chrome://extensions/` (ToDo: firefox)
 * Enable `Developer mode` in the top right corner
 * Click the button `Load unpacked` in the top left corner
-* Select the `extension` folder located in this repository
+* Select the `browser-extension` folder located in this repository
 
 ## Usage
 After you've successfully completed the installation you can start up the host client by executing following command:
 ```bash
-cd ./host-client && npm start
+cd ./rpc-gateway && npm start
 ```
 
 Now you can open your favorite song on YouTube and right click to track the current tab.
@@ -48,5 +48,5 @@ After you tracked your tab the host-client will output that it is currently trac
 Check back to your Discord and you'll see yourself playing Discord Radio!
 
 ### Error detection
-The most common error will occur if you reload the extension without restarting chrome afterwards.
+The most common error will occur if you reload the extension without restarting the browser afterwards.
 If that doesn't solve the problem, feel free to contact `Scar#5966` or `Lancear#1265` on Discord about it!
