@@ -83,7 +83,6 @@ async function connectToServer() {
 class Activity {
   static prevData;
   static on = false;
-  static listenData = {};
 
   static async set(data) {
     console.dir(new Error().stack);
@@ -119,21 +118,14 @@ class Activity {
     if (Activity.on) {
       Activity.prevData.mood = mood;
       Activity.set(Activity.prevData);
-      this.update();
     }
   }
 
   static updateListeners(nrOfListeners) {
     if (Activity.on && Activity.prevData?.nrOfListeners !== nrOfListeners) {
       Activity.prevData.nrOfListeners = nrOfListeners;
-      this.update();
+      Activity.set(Activity.prevData);
     }
-  }
-
-  static update() {
-    Activity.prevData.currTime += (Date.now() - Activity.prevData.updatedOn) / 1000;
-
-    Activity.set(Activity.prevData);
   }
   
   static async remove() {
@@ -145,7 +137,6 @@ class Activity {
   static async listenAlong(data) {
     if (data.host !== discord.user.tag) {
       const activity = Activity._createListeningAlongActivity(data);
-      Activity.prevData = data; // ToDo:  Get correct data here
       
       if (discord.conn) {
         discord.setActivity({
@@ -220,11 +211,6 @@ class Activity {
     const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
     const host = data.host.split('#')[0];
   
-    if (data.host !== Activity.listenData?.host) {
-      Activity.listenData.host = data.host;
-      Activity.listenData.startTime = Date.now();
-    }
-  
     if (server.conn) {
       buttons.unshift({
         label: `🎉 Join along with ${host}!`,
@@ -236,7 +222,7 @@ class Activity {
       details: data.title,
       state: `Listening along with ${host}! 🙃`,
       timestamps: {
-        start: Activity.listenData.startTime,
+        start: data.updatedOn - (1000 * data.currTime),
       },
       assets: {
         large_image: (![undefined, 'none'].includes(data.mood)) ? `mood-${data.mood}` : 'image',

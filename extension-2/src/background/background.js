@@ -7,6 +7,7 @@ const MESSAGES = {
   remove: 'remove',
   pageLoaded: 'pageLoaded',
   update: 'update',
+  listenAlongUpdate: 'listenAlongUpdate',
   error: 'error',
 };
 
@@ -100,7 +101,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 
   if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
-    Activity.listenAlong({ ...Activity.prevData, host: getHostFromUrl(tab.url) });
+    // Activity.listenAlong({ ...Activity.prevData, host: getHostFromUrl(tab.url) });
     browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
   else if (tab.id === $.trackedTabId && !tab.url.includes('v=') && changeInfo.status === 'complete') {
@@ -141,6 +142,9 @@ browser.tabs.onAttached.addListener((tabId, attachInfo) => {
 browser.runtime.onMessage.addListener(async (request) => {
   if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo].includes(request.type)) {
     if (request.data) Activity.set(request.data);
+  }
+  else if (request.type === MESSAGES.listenAlongUpdate) {
+    if (request.data) Activity.listenAlong(request.data);
   }
   else if (request.type === MESSAGES.remove) {
     Activity.remove();

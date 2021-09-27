@@ -15,7 +15,7 @@
       ],
       "js": [
         "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
-        "src/content.js"
+        "src/yt-content.js"
       ]
     },
     {
@@ -24,7 +24,7 @@
       ],
       "js": [
         "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
-        "src/discordradio.js"
+        "src/dr-content.js"
       ]
     }
   ],
@@ -32,10 +32,10 @@
     "scripts": [
       "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
       "node_modules/pure-uuid/uuid.min.js",
-      "src/discord-rpc.js",
-      "src/server.js",
-      "src/logic.js",
-      "src/background.js"
+      "src/background/discord-rpc.js",
+      "src/background/server.js",
+      "src/background/logic.js",
+      "src/background/background.js"
     ]
   },
   "browser_action": {
