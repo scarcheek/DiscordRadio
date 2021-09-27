@@ -21,7 +21,7 @@ async function connectToDiscord() {
       discord.conn = null;
       console.warn('Lost connection to discord, trying to reconnect in 5s...');
       browser.browserAction.setBadgeText({ text: '🚫' });
-      browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '🚫' });
+      if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🚫' });
       server.close();
       setTimeout(connectToDiscord, 5 * 1000);
     });
@@ -33,6 +33,7 @@ async function connectToDiscord() {
     discord.conn = null;
     console.warn('Could not connect to discord, retrying in 5s...');
     browser.browserAction.setBadgeText({ text: '🚫' });
+    if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🚫' });
     setTimeout(connectToDiscord, 5 * 1000);
   }
 }
@@ -48,19 +49,19 @@ async function connectToServer() {
       if (discord.conn) {
         console.warn('Lost connection to the Discord Radio Server, trying to reconnect in 5s...');
         browser.browserAction.setBadgeText({ text: '🔇' });
-        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '🔇' });
+        if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🔇' });
         setTimeout(connectToServer, 5 * 1000);
       }
     });
 
     server.on('message', nrOfListeners => {
-      if (nrOfListeners > 0 && Activity.prevData) {
+      if (nrOfListeners > 0 && $.trackedTabId) {
         browser.browserAction.setBadgeText({ text: `🥳 ${nrOfListeners + 1}` });
-        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `✔ ${nrOfListeners + 1}` });
+        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `👀 ${nrOfListeners + 1}` });
       }
       else {
         browser.browserAction.setBadgeText({ text: '' });
-        if (Activity.prevData) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '✔' });
+        if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀' });
       }
 
       Activity.updateListeners(nrOfListeners);
@@ -75,6 +76,7 @@ async function connectToServer() {
     if (discord.conn) {
       console.warn('Could not connect to the Discord Radio Server, retrying in 5s...');
       browser.browserAction.setBadgeText({ text: '🔇' });
+      if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🔇' });
       setTimeout(connectToServer, 5 * 1000);
     }
   }

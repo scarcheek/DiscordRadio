@@ -38,14 +38,14 @@ function initializeStorage(){
 
 // Load the state from the storage
 let storageState = browser.storage.sync.get().then((storageState) => {
-  outputDebugMessage(35, 'browser.storage.sync.get', null, storageState)
+  console.log(`🚀 ~ storageState ~ storageState`, storageState);
   if (storageState) Object.assign($, storageState);
 });
 
 // Sync the state with the storage
 browser.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
-    outputDebugMessage(42, 'browser.storage.onChanged', null, changes)
+    console.log(`🚀 ~ browser.storage.onChanged.addListener ~ changes`, changes);
     Object.entries(changes).forEach(([key, { newValue }]) => $[key] = newValue);
 
     if (changes.moodId) {
@@ -99,7 +99,7 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
 
 // Add the listener for url changes
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(changeInfo)
+  console.log(`🚀 ~ browser.tabs.onUpdated.addListener ~ changeInfo`, changeInfo);
 
   if (tab.id === $.listeningAlongTabId && changeInfo.url) {
     removeListenAlong()
@@ -126,12 +126,12 @@ browser.tabs.onRemoved.addListener(function (tabId, removeInfo) {
 
 // Add the tab/window focus changed listeners to update the context menu accordingly
 browser.tabs.onActivated.addListener((activeInfo) => {
-  outputDebugMessage(114, 'browser.tabs.onActivated', { tabId: activeInfo?.tabId, trackedTabId: $.trackedTabId })
+  console.log(`🚀 ~ browser.tabs.onActivated.addListener ~ tabInfo`, { tabId: activeInfo?.tabId, trackedTabId: $.trackedTabId });
   if (activeInfo) onFocusedChanged(activeInfo.tabId, $.trackedTabId);
 });
 
 browser.windows.onFocusChanged.addListener((windowId) => {
-  outputDebugMessage(119, 'browser.tabs.onFocusChanged', { windowId, trackedWindowId: $.trackedWindowId })
+  console.log(`🚀 ~ browser.windows.onFocusChanged.addListener ~ windowInfo`, { windowId, trackedWindowId: $.trackedWindowId });
   onFocusedChanged(windowId, $.trackedWindowId)
 });
 
@@ -159,36 +159,33 @@ browser.runtime.onMessage.addListener(async (request) => {
 });
 
 function initializeTrack(tab) {
-  console.log(`trying to track tab with id: ${tab.id}`);
+  console.log(`Trying to track tab with id: ${tab.id}`);
 
-  browser.tabs.sendMessage(tab.id, { type: MESSAGES.init }).then((res) => {
-    if (!browser.runtime.lastError) {
+  browser.tabs.sendMessage(tab.id, { type: MESSAGES.init })
+    .then((res) => {
       if (!discord.conn) {
-        browser.tabs.sendMessage(tab.id, { 
+        return browser.tabs.sendMessage(tab.id, { 
           data: 'Could not connect to Discord, make sure you have Discord as well as the Discord RPC Gateway application up and running.', 
           type: MESSAGES.error 
         });
-        return;
       }
-
-      console.log(`Now tracking: ${tab.title} with id ${tab.id}`, res)
-
+      
       if ($.trackedTabId) {
-        // if already tracking a tab
+        // if already tracking a tab, clear the badge for the old tab
         browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
       }
-
+      
+      console.log(`Now tracking: ${tab.title} with id ${tab.id}`, res)
       toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
-      browser.browserAction.setBadgeText({ tabId: tab.id, text: '✔' });
+      browser.browserAction.setBadgeText({ tabId: tab.id, text: '👀' + (server.conn ? '' : ' 🔇') });
       browser.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
       
       if (res) Activity.set(res);
-    }
-    else {
-      browser.browserAction.setBadgeText({ tabId: tab.id, text: 'ERR' });
-      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#5966 on Discord', browser.runtime.lastError.message);
-    }
-  });
+    })
+    .catch((err) => {
+      browser.browserAction.setBadgeText({ tabId: tab.id, text: '🔁' });
+      console.error('You need to refresh the page or restart your browser before using the context menu. If that doesn\'t fix it, contact Scar#5966 on Discord', err.message);
+    });
 }
 
 function removeTrack(tab) {
@@ -203,7 +200,7 @@ function removeTrack(tab) {
     if (discord.conn) await Activity.remove();
     console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
     toggleContextMenuOptions(CONTEXT_MENU.track, CONTEXT_MENU.stop);
-    browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
+    if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
     browser.storage.sync.set({ trackedTabId: null, trackedWindowId: null });
   }
 }
@@ -255,31 +252,4 @@ function enableContextMenuOption(contextMenuId) {
  */
 function disableContextMenuOption(contextMenuId) {
   browser.contextMenus.update(contextMenuId, { enabled: false });
-}
-
-/**
- * 
- * @param {number} line 
- * @param {name} caller 
- * @param {Object} props 
- */
-function outputDebugMessage(line, caller, props, ...objects) {
-  let propsString = '';
-  if (props) {
-    for (let i = 0; i < Object.keys(props).length; i++) {
-      propsString += `${Object.keys(props)[i]} ${Object.values(props)[i]}${Object.keys(props)[i + 1] ? ' > ' : ''}`;
-    }
-  }
-  const outPutString = `🚀 ~ file: background.js ~ line ${line} ~ ${caller}${propsString.length > 0 ? ` ~ ${propsString}` : ''}`
-
-  console.log(outPutString);
-  if (objects.length > 0) {
-    if (objects.length === 1)
-      console.dir(objects[0]);
-    else
-      console.dir(objects)
-  }
-}
-function getHostFromUrl(url) {
-  return url.split('/')[url.split('/').length - 1];
 }
