@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Discord Radio - {userTag}" />
+  <meta property="og:description" content="Listen along to the tunes @${userTag} is vibing to! 🎶" />
+  <meta property="og:image" content="http://discordradio.tk/image.jpg" />
+  <meta property="og:url" content="{userUrl}" />
+
   <link rel="stylesheet" type="text/css" href="listener-client.css" />
 
-  <title>Hellö</title>
+  <title>Listening to {userTag}</title>
 </head>
 <body>
   <div id="snackbar"></div>
   <p id="fallbacktext">lmao your browser is too whack to display iFrames. Get the latest update or upgrade to a newer browser</p>
   <div id="player"></div>
 
-  <script src="listener-client.js"></script>
+  <script src="/listener-client.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>

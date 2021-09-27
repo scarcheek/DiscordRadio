@@ -9,7 +9,7 @@ Array.prototype.last = function() { return this[this.length - 1]; };
 const AUTH_URL = 'https://discordapp.com/api/oauth2/token';
 
 const config = require('../config.json');
-const secrets = require('./secrets.json');
+// const secrets = require('./secrets.json');
 let stats = {
   activitiesStarted: 0,
   listenAlongSessions: 0,
@@ -68,7 +68,16 @@ httpServer.post('/auth', async (req, res) => {
   res.status(200).json(tokens);
 });
 
-httpServer.get('*', (req, res) => res.sendFile(path.resolve('public/listener-client.html')));
+httpServer.get('/d/:username/:discriminator', async (req, res) => {
+  const userTag = `${req.params.username}#${req.params.discriminator}`;
+  const userUrl = `http://discordradio.tk/d/${userTag.replace('#', '/')}`;
+  const template = await fs.readFile(path.resolve('public/listener-client.html'), 'utf8');
+  const page = template
+    .replaceAll('{userUrl}', userUrl)
+    .replaceAll('{userTag}', userTag);
+  res.status(200).header('Content-Type', 'text/html').send(page);
+});
+
 httpServer.listen(config.server_port, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 
 

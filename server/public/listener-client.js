@@ -8,8 +8,8 @@ const server_port = 80;
 Array.prototype.last = function () { return this[this.length - 1]; };
 
 let player, hostPlayerState = {}, justCued = false;
-const host = location.href.split('/').last();
-document.title = `Listening to: ${host}`;
+const urlParts = location.href.split('/');
+const host = `${urlParts[urlParts.length - 2]}#${urlParts[urlParts.length - 1]}`;
 
 function onYouTubeIframeAPIReady() {
   prevState = YT.PlayerState.UNSTARTED;
