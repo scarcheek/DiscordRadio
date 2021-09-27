@@ -88,6 +88,7 @@ function connectHost(ws, host) {
 
   ws.on('message', msg => {
     const playerState = JSON.parse(msg.toString());
+    console.dir(playerState);
     
     if (!hosts.has(host) || playerState.URL !== hosts.get(host).playerState.URL) {
       stats.trackedSongs++;

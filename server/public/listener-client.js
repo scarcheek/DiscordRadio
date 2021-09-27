@@ -36,14 +36,13 @@ async function onPlayerReady(readyEvent) {
   ws.onopen = async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
-    hostPlayerState.initializedOn = Date.now();
   };
 
   ws.onmessage = async e => {
     if (!e.data) return;
 
     hostPlayerState = JSON.parse(e.data);
-    console.dir(hostPlayerState);
+    console.dir(JSON.parse(e.data));
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];

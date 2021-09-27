@@ -15,6 +15,8 @@ class DiscordRadioServer {
   }
 
   sendActivityData(data) {
+    console.log('Sending data to the server...');
+    console.dir(data);
     this.conn.send(JSON.stringify(data));
   }
 
