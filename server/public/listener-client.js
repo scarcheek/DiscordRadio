@@ -46,7 +46,7 @@ async function onPlayerReady(readyEvent) {
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
-    window.postMessage({ type: MESSAGES.hostData, data }, '*');
+    window.postMessage({ type: MESSAGES.hostData, data: { ...hostPlayerState, host } }, '*');
 
     const currVideoUrl = player.getVideoUrl();
     const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
