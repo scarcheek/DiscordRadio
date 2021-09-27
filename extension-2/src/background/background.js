@@ -24,12 +24,17 @@ const $ = {
 };
 
 // Set the default mood and storage state on installation
-browser.runtime.onStartup.addListener(() => browser.storage.sync.set({
-  moodId: 'none',
-  trackedTabId: null,
-  trackedWindowId: null,
-  listeningAlongTabId: null,
-}));
+browser.runtime.onStartup.addListener(initializeStorage);
+browser.runtime.onInstalled.addListener(initializeStorage);
+  
+function initializeStorage(){
+  return browser.storage.sync.set({
+    moodId: 'none',
+    trackedTabId: null,
+    trackedWindowId: null,
+    listeningAlongTabId: null,
+  })
+}
 
 // Load the state from the storage
 let storageState = browser.storage.sync.get().then((storageState) => {
