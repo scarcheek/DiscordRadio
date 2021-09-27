@@ -9,7 +9,7 @@ Array.prototype.last = function() { return this[this.length - 1]; };
 const AUTH_URL = 'https://discordapp.com/api/oauth2/token';
 
 const config = require('../config.json');
-// const secrets = require('./secrets.json');
+const secrets = require('./secrets.json');
 let stats = {
   activitiesStarted: 0,
   listenAlongSessions: 0,
@@ -89,7 +89,8 @@ const wsServer = new WebSocketServer({ port: 420 });
 wsServer.on('connection', (ws) => {
   ws.once('message', (msg) => {
     const connUrl = msg.toString();
-    const host = connUrl.split('/').last();
+    const urlParts = connUrl.split('/');
+    const host = `${urlParts[urlParts.length - 2]}#${urlParts[urlParts.length - 1]}`;
 
     if (connUrl.startsWith('host://')) connectHost(ws, host);
     else connectListener(ws, host);

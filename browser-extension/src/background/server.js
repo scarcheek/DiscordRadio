@@ -8,7 +8,7 @@ class DiscordRadioServer {
       this.conn = new WebSocket(DiscordRadioServer.URL);
       this.conn.addEventListener('error', reject);
       this.conn.addEventListener('open', () => {
-        this.conn.send(`host://${user.username}#${user.discriminator}`);
+        this.conn.send(`host://d/${user.user.tag.replace('#', '/')}`);
         resolve(this);
       });
     });
