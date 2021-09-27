@@ -43,7 +43,7 @@ async function onPlayerReady(readyEvent) {
   ws.onmessage = async e => {
     if (!e.data) return;
 
-    hostPlayerState = JSON.parse(e.data);
+    hostPlayerState = {...hostPlayerState, ...JSON.parse(e.data)};
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];

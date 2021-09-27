@@ -107,6 +107,7 @@ class Activity {
     }
 
     if (discord.conn) {
+      console.log('sending activity data to discord: ', activity)
       discord.setActivity({
         pid: (await browser.windows.getLastFocused()).id,
         activity,
