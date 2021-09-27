@@ -3,7 +3,7 @@ const server_port = 80;
 
 Array.prototype.last = function () { return this[this.length - 1]; };
 
-let player, hostPlayerState = {}, justCued = false, discord, ws;
+let player, hostPlayerState = {}, justCued = false, discord;
 const host = location.href.split('/').last();
 document.title = `Listening to: ${host}`;
 
@@ -32,7 +32,7 @@ async function onPlayerReady(readyEvent) {
   discord = new DiscordRPC('875518867680657458');
   await discord.connect();
 
-  ws = new WebSocket(`ws://${server_uri}:420`);
+  const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.onopen = async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
@@ -109,7 +109,7 @@ function updateDiscordRPC(data) {
   let activityData = createListeningAlongActivity(data)
   console.log('Sending data:', activityData)
 
-  ws.send(activityData);
+  discord.setActivity(activityData);
 }
 
 

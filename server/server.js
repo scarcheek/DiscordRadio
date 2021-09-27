@@ -121,11 +121,6 @@ function connectListener(ws, host) {
     hostWs.send(listeners.get(host).length);
   }
 
-  ws.on('message', (msg) => {
-    console.dir(ws)
-    ws.send(JSON.stringify(msg))
-  })
-
   ws.on('close', () => {
     const newListeners = listeners.get(host).filter(listener => listener !== ws);
     
