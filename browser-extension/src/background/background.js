@@ -81,10 +81,10 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
     if ($.trackedTabId && $.trackedTabId !== tab.id) {
       // A Tab was already tracked
       console.log(`Removing old tracked tab`);
-      browser.tabs.sendMessage(tab.id, { type: MESSAGES.remove }.then(() => {
+      browser.tabs.sendMessage(tab.id, { type: MESSAGES.remove }).then(() => {
         console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
         initializeTrack(tab);
-      }));
+      });
     }
     else {
       // First track of the session
@@ -117,10 +117,10 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 browser.tabs.onRemoved.addListener(function (tabId, removeInfo) {
   if ($.listeningAlongTabId === tabId) {
     removeListenAlong();
-  } else
-    if (removeInfo && tabId === $.trackedTabId) {
-      removeTrack();
-    }
+  } 
+  else if (removeInfo && tabId === $.trackedTabId) {
+    removeTrack();
+  }
 });
 
 
