@@ -63,9 +63,6 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function onPlayerStateChange(event) {
-  console.log(`🚀 ~ onPlayerStateChange 1 ~ hostPlayerState.currTime`, hostPlayerState?.currTime);
-  console.dir(event);
-
   if (event.data === YT.PlayerState.CUED) {
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
@@ -84,9 +81,7 @@ async function onPlayerStateChange(event) {
 
 async function loadNewVideo() {
   console.log('Loading new video...');
-  const videoId = player.getVideoUrl().split('v=')[1];
   console.group(new Date().toLocaleTimeString("at"));
-  console.dir(videoId);
   console.dir(hostPlayerState);
   console.groupEnd();
 
