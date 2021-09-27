@@ -10,16 +10,24 @@ const AUTH_URL = 'https://discordapp.com/api/oauth2/token';
 
 const config = require('../config.json');
 const secrets = require('./secrets.json');
-const stats = {
+let stats = {
   activitiesStarted: 0,
   listenAlongSessions: 0,
   trackedSongs: 0,
 };
 
+// stats loading and saving cron
+try {
+  stats = require('./stats.json');
+}
+catch (err) { /* ignore, no previous stats exist */ }
+
 setInterval(() => {
   stats.lastSaveTimestamp = new Date().toLocaleString('at');
   fs.writeFile('./stats.json', JSON.stringify(stats, null, 2), 'utf8');
 }, 15 * 60 * 1000)
+
+
 
 // http server for hosting the listener-client
 const httpServer = express();

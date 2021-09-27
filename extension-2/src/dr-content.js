@@ -9,7 +9,6 @@ window.addEventListener('message', e => {
   const msg = e.data;
 
   if (msg.type === MESSAGES.hostData) {
-    console.dir(msg.data);
     browser.runtime.sendMessage({ data: msg.data, type: MESSAGES.listenAlongUpdate });
   }
 });

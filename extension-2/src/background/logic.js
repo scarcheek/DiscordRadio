@@ -84,7 +84,7 @@ class Activity {
   static prevData;
   static on = false;
 
-  static async set(data) {
+  static set(data) {
     data.mood = Activity.prevData?.mood ?? 'none';
     data.nrOfListeners = Activity.prevData?.nrOfListeners ?? 0;
     data.updatedOn = Date.now();
@@ -139,7 +139,7 @@ class Activity {
 
 
 
-  static _update(data) {
+  static async _update(data) {
     console.dir(new Error().stack);
     console.log('sending data:', data);
 

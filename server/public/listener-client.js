@@ -41,13 +41,8 @@ async function onPlayerReady(readyEvent) {
   ws.onmessage = async e => {
     if (!e.data) return;
 
-    hostPlayerState = JSON.parse(e.data);
-    console.dir(JSON.parse(e.data));
-    console.dir(new Date(JSON.parse(e.data).updatedOn).toLocaleString('at'));
-    console.dir(new Date().toLocaleString('at'));
-    console.dir(Date.now() - JSON.parse(e.data).updatedOn);
-    
-    hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
+    hostPlayerState = JSON.parse(e.data);   
+    hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
     window.postMessage({ type: MESSAGES.hostData, data: { ...hostPlayerState, host } }, '*');
@@ -70,7 +65,7 @@ async function onPlayerStateChange(event) {
     else event.target.playVideo();
   }
   else if (justCued && event.data === YT.PlayerState.PLAYING) {
-    hostPlayerState.currTime += (Date.now() - hostPlayerState.playedOn) / 1000;
+    hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.playedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
     player.seekTo(hostPlayerState.currTime);
     justCued = false;
