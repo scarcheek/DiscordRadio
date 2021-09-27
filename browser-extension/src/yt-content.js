@@ -143,10 +143,10 @@ function formatMiniplayerData() {
   const playerInfo = {};
   playerInfo.title = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title').innerText;
   playerInfo.channelName = document.querySelector('.ytd-miniplayer.channel > yt-formatted-string#owner-name').innerText;
+  playerInfo.URL = document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint')?.href;
 
   return {
     ...playerInfo,
-    URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
     currTime: Math.floor(video.currentTime),
     paused: video.paused,
   }

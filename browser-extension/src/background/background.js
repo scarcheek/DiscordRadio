@@ -63,7 +63,7 @@ browser.contextMenus.removeAll().then(() => {
     id: CONTEXT_MENU.track,
     title: "Track current Tab with Discord RPC",
     contexts: ["page"],
-    documentUrlPatterns: ['https://*.youtube.com/watch?*']
+    documentUrlPatterns: ['https://*.youtube.com/*']
   });
 
   browser.contextMenus.create({
@@ -108,7 +108,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
     browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
-  else if (tab.id === $.trackedTabId && !tab.url.includes('v=') && changeInfo.status === 'complete') {
+  else if (tab.id === $.trackedTabId && !tab.url.includes('youtube.com') && changeInfo.status === 'complete') {
     Activity.remove();
   }
 });
@@ -182,7 +182,7 @@ function initializeTrack(tab) {
       
       if (res) Activity.set(res);
     })
-    .catch((err) => {
+    .catch(() => {
       browser.browserAction.setBadgeText({ tabId: tab.id, text: '🔁' });
     });
 }
@@ -199,7 +199,7 @@ function removeTrack(tab) {
     if (discord.conn) await Activity.remove();
     console.log(`Stopped tracking tab with id: ${$.trackedTabId}`);
     toggleContextMenuOptions(CONTEXT_MENU.track, CONTEXT_MENU.stop);
-    if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
+    if (tab && $.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
     browser.storage.sync.set({ trackedTabId: null, trackedWindowId: null });
   }
 }
