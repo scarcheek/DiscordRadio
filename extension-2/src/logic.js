@@ -107,6 +107,7 @@ class Activity {
     }
 
     if (discord.conn) {
+      console.log('sending activity data to discord: ', activity)
       discord.setActivity({
         pid: (await browser.windows.getLastFocused()).id,
         activity,
@@ -118,14 +119,21 @@ class Activity {
     if (Activity.on) {
       Activity.prevData.mood = mood;
       Activity.set(Activity.prevData);
+      this.update();
     }
   }
 
   static updateListeners(nrOfListeners) {
     if (Activity.on && Activity.prevData?.nrOfListeners !== nrOfListeners) {
       Activity.prevData.nrOfListeners = nrOfListeners;
-      Activity.set(Activity.prevData);
+      this.update();
     }
+  }
+
+  static update() {
+    Activity.prevData.currTime += (Date.now() - Activity.prevData.updatedOn) / 1000;
+
+    Activity.set(Activity.prevData);
   }
   
   static async remove() {

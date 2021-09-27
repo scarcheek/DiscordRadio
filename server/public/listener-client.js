@@ -43,7 +43,7 @@ async function onPlayerReady(readyEvent) {
   ws.onmessage = async e => {
     if (!e.data) return;
 
-    hostPlayerState = JSON.parse(e.data);
+    hostPlayerState = {...hostPlayerState, ...JSON.parse(e.data)};
     hostPlayerState.currTime += (Date.now() - hostPlayerState.updatedOn) / 1000;
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
@@ -63,9 +63,6 @@ async function onPlayerReady(readyEvent) {
 }
 
 async function onPlayerStateChange(event) {
-  console.log(`🚀 ~ onPlayerStateChange 1 ~ hostPlayerState.currTime`, hostPlayerState?.currTime);
-  console.dir(event);
-
   if (event.data === YT.PlayerState.CUED) {
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
@@ -84,9 +81,7 @@ async function onPlayerStateChange(event) {
 
 async function loadNewVideo() {
   console.log('Loading new video...');
-  const videoId = player.getVideoUrl().split('v=')[1];
   console.group(new Date().toLocaleTimeString("at"));
-  console.dir(videoId);
   console.dir(hostPlayerState);
   console.groupEnd();
 
@@ -111,9 +106,10 @@ async function updatePlayer() {
 
 function updateDiscordRPC(data) {
   if (!data) return;
-  console.log('Sending data:', data)
+  let activityData = createListeningAlongActivity(data)
+  console.log('Sending data:', activityData)
 
-  discord.setActivity(createListeningAlongActivity(data));
+  discord.setActivity(activityData);
 }
 
 
