@@ -10,15 +10,19 @@ body {
 }
 
 #header {
-  height: 12%;
+  display: flex;
+  flex-wrap: wrap;
+
+  background-color: #e49076;
+}
+
+#header > * {
+  height: 12vh;
   padding: 0.5rem 1rem;
   box-sizing: border-box;
 
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-
-  background-color: #e49076;
 }
 
 #header .image {
@@ -48,7 +52,7 @@ body {
 #player-container {
   position: relative;
   
-  height: 88%;
+  height: 80vh;
   padding: 1.5rem 2rem;
   box-sizing: border-box;
 }
