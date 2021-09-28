@@ -16,9 +16,19 @@
   <title>Listening to {userTag}</title>
 </head>
 <body>
-  <div id="snackbar"></div>
-  <p id="fallbacktext">lmao your browser is too whack to display iFrames. Get the latest update or upgrade to a newer browser</p>
-  <div id="player"></div>
+  <header class="header">
+    <figure class="image">
+      <img src="https://discordradio.tk/icon.png" alt="Discord Radio" />
+    </figure>
+    <h1 class="title">Discord Radio</h1>
+    <h2 class="info">- Listening along with {userTag}<span id="nrOfListeners"></span>! 🥳</h2>
+  </header>
+  <section id="player-container">
+    <div id="player"></div>
+    <dic class="popup">
+      <p id="fallbacktext">lmao your browser is too whack to display iFrames. Get the latest update or upgrade to a newer browser</p>
+    </dic>
+  </section>
 
   <script src="/listener-client.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
