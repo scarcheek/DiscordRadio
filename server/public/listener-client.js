@@ -10,7 +10,7 @@ let player, hostPlayerState = {}, justCued = false;
 
 const $nrOfListeners = document.querySelector('#nrOfListeners');
 const $popup = document.querySelector('#popup');
-const $popupMessage = $popup.querySelector('.popup-message');
+const $popupMessage = $popup.querySelector('#popup-message');
 
 function onYouTubeIframeAPIReady() {
   prevState = YT.PlayerState.UNSTARTED;
