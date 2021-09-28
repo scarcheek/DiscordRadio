@@ -143,7 +143,13 @@ function formatMiniplayerData() {
   const playerInfo = {};
   playerInfo.title = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title').innerText;
   playerInfo.channelName = document.querySelector('.ytd-miniplayer.channel > yt-formatted-string#owner-name').innerText;
-  playerInfo.URL = document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint')?.href;
+  
+  if (document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint')) {
+    playerInfo.URL = document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint').href;
+  }
+  else {
+    playerInfo.URL = document.querySelector('link[rel="canonical"]').href;
+  }
 
   return {
     ...playerInfo,

@@ -143,7 +143,7 @@ browser.tabs.onAttached.addListener((tabId, attachInfo) => {
 
 
 // communication with content.js
-browser.runtime.onMessage.addListener(async (request) => {
+browser.runtime.onMessage.addListener(async (request, sender) => {
   if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo].includes(request.type)) {
     if (request.data) Activity.set(request.data);
   }
@@ -154,7 +154,9 @@ browser.runtime.onMessage.addListener(async (request) => {
     Activity.remove();
   }
   else if (request.type === MESSAGES.pageLoaded) {
-    if ($.trackedTabId) initializeTrack(await browser.tabs.get($.trackedTabId));
+    if ($.trackedTabId && $.trackedTabId === sender?.tab?.id) {
+      initializeTrack(await browser.tabs.get($.trackedTabId));
+    }
   }
 });
 
