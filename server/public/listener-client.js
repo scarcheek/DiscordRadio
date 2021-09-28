@@ -63,7 +63,7 @@ async function onPlayerReady(readyEvent) {
 
     $popup.classList.remove('visible');
     $playerInfo.classList.add('visible');
-    $playerInfoText.innerText = `Listening to: ${hostPlayerState.title}`;
+    $playerInfoText.innerText = `Listening and vibing to: ${hostPlayerState.title}`;
 
     if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
     else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;

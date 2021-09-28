@@ -50,13 +50,16 @@ body {
 }
 
 #player-info {
+  padding: 1.5rem 2rem 0 2rem;
+
   font-size: 1.25rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 #player-info:not(.visible) {
   display: none;
 }
-
 
 #player-container {
   position: relative;
@@ -125,8 +128,13 @@ body {
     font-size: 0.9rem;
   }
 
+  #player-info {
+    padding: 1.5rem 1rem 0 1rem;
+  }
+
   #player-container {
     height: 70vh;
+    padding: 1.5rem 1rem;
   }
 
   #player-container .popup .popup-content {
