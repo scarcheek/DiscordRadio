@@ -49,6 +49,15 @@ body {
   font-size: 1.5rem;
 }
 
+#player-info {
+  font-size: 1.25rem;
+}
+
+#player-info:not(.visible) {
+  display: none;
+}
+
+
 #player-container {
   position: relative;
   
@@ -110,6 +119,10 @@ body {
 
   #header .subtitle {
     font-size: 1rem;
+  }
+
+  #player-info {
+    font-size: 0.9rem;
   }
 
   #player-container {

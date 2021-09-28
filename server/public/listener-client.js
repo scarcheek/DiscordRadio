@@ -9,6 +9,9 @@ const host = getHost();
 let player, hostPlayerState = {}, justCued = false;
 
 const $nrOfListeners = document.querySelector('#nrOfListeners');
+const $playerInfo = document.querySelector('#player-info');
+const $playerStatus = playerInfo.querySelector('#player-status');
+const $playerTitle = playerInfo.querySelector('#player-title');
 const $popup = document.querySelector('#popup');
 const $popupMessage = $popup.querySelector('#popup-message');
 
@@ -38,12 +41,13 @@ async function onPlayerReady(readyEvent) {
   ws.addEventListener('open', async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
+
+    $playerStatus.innerText = '🥳';
   });
 
   ws.addEventListener('message', async e => {
     if (!e.data) return;
 
-    $popup.classList.remove('visible');
     hostPlayerState = JSON.parse(e.data);
     hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
@@ -56,8 +60,13 @@ async function onPlayerReady(readyEvent) {
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
     else updatePlayer();
 
+    $popup.classList.remove('visible');
+    $playerInfo.classList.add('visible');
+    $playerTitle.innerText = hostPlayerState.title;
+
     if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
-    else $nrOfListeners.innerText = ` and ${hostPlayerState.nrOfListeners} other friends`;
+    else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;
+    else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
   });
 
   ws.addEventListener('error', e => {
