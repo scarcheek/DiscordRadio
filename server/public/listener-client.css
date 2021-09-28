@@ -10,7 +10,7 @@ body {
 }
 
 #header {
-  padding: 0 1rem;
+  padding: 0.5rem 1rem;
 
   display: flex;
   flex-wrap: wrap;
@@ -20,8 +20,6 @@ body {
 
 #header > * {
   height: 12vh;
-  padding: 0.5rem 0;
-  box-sizing: border-box;
 
   display: flex;
   align-items: center;
@@ -39,10 +37,11 @@ body {
 
 #header .title {
   font-size: 2rem;
+  margin-right: 0.75rem;
 }
 
 .divider {
-  margin: 0 0.75rem;
+  margin-right: 0.75rem;
 }
 
 #header .subtitle {
@@ -101,11 +100,15 @@ body {
   }
   
   #header .title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+  }
+
+  #header .divider {
+    display: none;
   }
 
   #header .subtitle {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
 
   #player-container {
@@ -113,6 +116,6 @@ body {
   }
 
   #player-container .popup .popup-content {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 }
