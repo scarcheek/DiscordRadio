@@ -37,10 +37,15 @@ body {
 
 #header .title {
   margin-right: 0.75rem;
+  font-size: 2rem;
 }
 
 .divider {
   margin-right: 0.75rem;
+}
+
+#header .subtitle {
+  font-size: 1.5rem;
 }
 
 #player-container {
@@ -72,9 +77,17 @@ body {
 }
 
 #player-container .popup .popup-content {
+  height: 100%;
+  width: 100%;
+  padding: 2rem 4rem;
+  box-sizing: border-box;
+
   display: flex;
   align-items: center;
   justify-content: center;
   
-  background-color: aliceblue;
+  color: #efe0cb;
+  font-size: 1.5rem;
+  hyphens: auto;
+  background-color: #746f69;
 }
