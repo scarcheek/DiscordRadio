@@ -1,6 +1,6 @@
 class DiscordRPC {
   static AUTH_URL = 'http://discordradio.tk/auth';
-  static URL = `ws://localhost:6472`;
+  static URL = `ws://localhost:6473`;
   static VERSION = 1;
   static ENCODING = 'json';
 

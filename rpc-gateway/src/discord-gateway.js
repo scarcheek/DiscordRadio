@@ -7,7 +7,7 @@ const BASE_PATH = (process.platform === 'win32')
   ? '//?/pipe/discord-ipc-'.replaceAll('/', '\\')
   : `${(XDG_RUNTIME_DIR || TMPDIR || TMP || TEMP || '/tmp').replace(/\/$/, '')}/discord-ipc-`;
 
-const wss = new ws.Server({ port: 6472 });
+const wss = new ws.Server({ port: 6473 });
 wss.on('connection', async (ws, req) => {
   const options = req.url.split('?')[1]
     .split('&')
