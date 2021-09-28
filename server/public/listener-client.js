@@ -37,44 +37,67 @@ function onYouTubeIframeAPIReady() {
 async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
   $popupMessage.innerText = `${host} is not listening to any music on Discord Radio at the moment! 🙈`;
+  connect();
+}
 
-  const ws = new WebSocket(`ws://${server_uri}:${server_ws_port}`);
-  ws.addEventListener('error', err => console.error(err));
+function connect() {
+  try {
+    const ws = new WebSocket(`ws://${server_uri}:${server_ws_port}`);
+    ws.addEventListener('error', err => console.error(err));
+    ws.addEventListener('close', () => {
+      console.warn('Lost connection to the Discord Radio Server, trying to reconnect in 5s...');
+      $playerStatus.innerText = '🔌';
+      $playerInfoText.innerText = 'Lost connection to the Discord Radio Server, trying to reconnect in 5s...';
+      $playerStatus.title = 'Disconnected!';
+      setTimeout(connect, 5 * 1000);
+    });
 
-  ws.addEventListener('open', async () => {
-    ws.send(window.location);
-    window.onbeforeunload = () => ws.close();
+    ws.addEventListener('open', async () => {
+      ws.send(window.location);
+      window.onbeforeunload = () => ws.close();
 
-    $playerStatus.innerText = '🥳';
-    $playerStatus.title = 'Connected!';
-  });
+      $playerStatus.innerText = '🥳';
+      $playerStatus.title = 'Connected!';
+      $playerInfoText.innerText = 'Start the player below to listen along!';
+    });
 
-  ws.addEventListener('message', async e => {
-    if (!e.data) return;
+    ws.addEventListener('message', async e => {
+      if (!e.data) return;
 
-    hostPlayerState = JSON.parse(e.data);
-    hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
-    hostPlayerState.playedOn = Date.now();
-    hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
-    window.postMessage({ type: MESSAGES.hostData, data: { ...hostPlayerState, host } }, '*');
+      hostPlayerState = JSON.parse(e.data);
+      hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
+      hostPlayerState.playedOn = Date.now();
+      hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
+      window.postMessage({ type: MESSAGES.hostData, data: { ...hostPlayerState, host } }, '*');
 
-    const currVideoUrl = player.getVideoUrl();
-    const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
+      const currVideoUrl = player.getVideoUrl();
+      const currVideoId = (currVideoUrl?.includes('v=')) ? currVideoUrl.match(/[?&]v=([^&]*)/)[1] : undefined;
 
-    if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
-    else updatePlayer();
+      if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
+      else updatePlayer();
 
-    $popup.classList.remove('visible');
-    $playerInfo.classList.add('visible');
-    $playerInfoText.innerText = hostPlayerState.title;
+      $popup.classList.remove('visible');
+      $playerInfo.classList.add('visible');
 
-    if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
-    else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;
-    else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
-  });
+      if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
+      else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;
+      else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
+    });
+  }
+  catch (err) {
+    console.warn('Could not connect to the Discord Radio Server, retrying every 5s...');
+    $playerStatus.innerText = '🔌';
+    $playerInfoText.innerText = 'Could not connect to the Discord Radio Server, retrying every 5s...';
+    $playerStatus.title = 'Disconnected!';
+    setTimeout(connect, 5 * 1000);
+  }
 }
 
 async function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PLAYING) {
+    $playerInfoText.innerText = hostPlayerState.title;
+  }
+
   if (event.data === YT.PlayerState.CUED) {
     if (hostPlayerState.paused) event.target.pauseVideo();
     else event.target.playVideo();
