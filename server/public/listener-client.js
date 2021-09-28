@@ -10,8 +10,8 @@ let player, hostPlayerState = {}, justCued = false;
 
 const $nrOfListeners = document.querySelector('#nrOfListeners');
 const $playerInfo = document.querySelector('#player-info');
-const $playerStatus = playerInfo.querySelector('#player-status');
-const $playerTitle = playerInfo.querySelector('#player-title');
+const $playerStatus = $playerInfo.querySelector('#player-status');
+const $playerInfoText = $playerInfo.querySelector('#player-info-text');
 const $popup = document.querySelector('#popup');
 const $popupMessage = $popup.querySelector('#popup-message');
 
@@ -43,6 +43,7 @@ async function onPlayerReady(readyEvent) {
     window.onbeforeunload = () => ws.close();
 
     $playerStatus.innerText = '🥳';
+    $playerStatus.title = 'Connected!';
   });
 
   ws.addEventListener('message', async e => {
@@ -62,7 +63,7 @@ async function onPlayerReady(readyEvent) {
 
     $popup.classList.remove('visible');
     $playerInfo.classList.add('visible');
-    $playerTitle.innerText = hostPlayerState.title;
+    $playerInfoText.innerText = `Listening to: ${hostPlayerState.title}`;
 
     if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
     else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;
