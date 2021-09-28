@@ -14,8 +14,9 @@ body {
 }
 
 #header {
-  height: 10vh;
+  height: 12vh;
   padding: 0.5rem 1rem;
+  box-sizing: border-box;
 
   display: flex;
   align-items: center;
@@ -44,7 +45,10 @@ body {
 
 #player-container {
   position: relative;
-  padding: 1rem 2rem;
+  
+  height: 88vh;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
 }
 
 #player-container #player {
@@ -54,4 +58,23 @@ body {
 
 #player-container .popup {
   position: absolute;
+  top: 0;
+  left: 0;
+
+  height: 100%;
+  width: 100%;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+}
+
+#player-container .popup:not(.visible) {
+  display: none;
+}
+
+#player-container .popup .popup-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background-color: aliceblue;
 }
