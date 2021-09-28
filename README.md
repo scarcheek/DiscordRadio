@@ -29,7 +29,8 @@ If everything ran smoothly the console should output `All set up and ready to go
 ### Browser Extension
 > This is subject to change soon™
 
-To install the browser extension you have to follow these 4 steps:
+To install the browser extension you have to follow these 5 steps:
+* Run `npm install` in the `browser-extension` folder
 * Navigate to `chrome://extensions/` (ToDo: firefox)
 * Enable `Developer mode` in the top right corner
 * Click the button `Load unpacked` in the top left corner
