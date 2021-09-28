@@ -91,10 +91,6 @@ class Activity {
     data.nrOfListeners = Activity.prevData?.nrOfListeners ?? 0;
     data.updatedOn = Date.now();
     Activity._update(data);
-    
-    if (server.conn && !data.host) {
-      server.sendActivityData(data);
-    }
   }
 
   static updateMood(mood) {
@@ -159,6 +155,10 @@ class Activity {
         pid: (await browser.windows.getLastFocused()).id,
         activity,
       });
+    }
+
+    if (server.conn && !data.host) {
+      server.sendActivityData(data);
     }
   }
 

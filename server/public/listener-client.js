@@ -32,7 +32,7 @@ function onYouTubeIframeAPIReady() {
 
 async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
-  $popupMessage.innerText = `${host} is not listening to any music on Discord Radio at the moment 🙉`;
+  $popupMessage.innerText = `${host} is not listening to any music on Discord Radio at the moment! 🙈`;
 
   const ws = new WebSocket(`ws://${server_uri}:420`);
   ws.addEventListener('open', async () => {
@@ -57,7 +57,7 @@ async function onPlayerReady(readyEvent) {
     else updatePlayer();
 
     if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
-    else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
+    else $nrOfListeners.innerText = ` and ${hostPlayerState.nrOfListeners} other friends`;
   });
 
   ws.addEventListener('error', e => {
