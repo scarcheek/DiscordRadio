@@ -1,21 +1,24 @@
-.title {
+@import url('https://fonts.googleapis.com/css2?family=Raleway');
+
+* {
   margin: 0;
+}
+
+body {
+  padding: 0.5rem;
+  font-family: 'Raleway', sans-serif;
+}
+
+.title {
   margin-bottom: 0.25rem;
   font-size: 1.1rem;
 }
 
 .note {
-  margin: 0;
   font-style: italic;
 }
 
-#popup {
-  margin: 0;
-  padding: 0.5rem;
-}
-
 #badge-info .badges {
-  margin: 0;
   margin-bottom: 0.5rem;
   list-style-type: none;
 }

@@ -1,17 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway');
+
+* {
+  margin: 0;
+}
+
 body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 
-  margin: 0;
+  font-family: 'Raleway', sans-serif;
+  background-color: #efe0cb;
 }
 
-#player {
-  height: 100vh;
-  width: 100vw;
+#header {
+  height: 10vh;
+  padding: 0.5rem 1rem;
+
+  display: flex;
+  align-items: center;
+
+  background-color: #e49076;
 }
 
-#fallbacktext {
+#header .image {
+  height: 100%;
+  margin-right: 2rem;
+}
+
+#header .image img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+#header .title {
+  margin-right: 0.75rem;
+}
+
+.divider {
+  margin-right: 0.75rem;
+}
+
+#player-container {
+  position: relative;
+  padding: 1rem 2rem;
+}
+
+#player-container #player {
+  height: 100%;
+  width: 100%;
+}
+
+#player-container .popup {
   position: absolute;
-  z-index: -1;
 }
