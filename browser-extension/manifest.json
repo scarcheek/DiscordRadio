@@ -52,5 +52,10 @@
     "32": "assets/logo/icon32.png",
     "48": "assets/logo/icon48.png",
     "128": "assets/logo/icon128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "extension@discordradio.tk"
+    }
   }
 }
