@@ -114,6 +114,10 @@ body {
   #header > * {
     height: 8vh;
   }
+
+  #header > :last-child {
+    height: 6vh;
+  }
   
   #header .title {
     font-size: 1.5rem;
@@ -137,6 +141,10 @@ body {
 
   #player-container {
     height: 70vh;
+    padding: 1.5rem 1rem;
+  }
+
+  #player-container .popup {
     padding: 1.5rem 1rem;
   }
 
