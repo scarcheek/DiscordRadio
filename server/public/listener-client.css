@@ -42,6 +42,7 @@ body {
 
 .divider {
   margin-right: 0.75rem;
+  font-weight: bold;
 }
 
 #header .subtitle {

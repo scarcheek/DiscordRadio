@@ -4,12 +4,13 @@ const MESSAGES = {
 
 const server_uri = 'discordradio.tk';
 const server_port = 80;
-
-Array.prototype.last = function () { return this[this.length - 1]; };
+const host = getHost();
 
 let player, hostPlayerState = {}, justCued = false;
-const urlParts = location.href.split('/');
-const host = `${urlParts[urlParts.length - 2]}#${urlParts[urlParts.length - 1]}`;
+
+const $nrOfListeners = document.querySelector('#nrOfListeners');
+const $popup = document.querySelector('#popup');
+const $popupMessage = $popup.querySelector('.popup-message');
 
 function onYouTubeIframeAPIReady() {
   prevState = YT.PlayerState.UNSTARTED;
@@ -33,15 +34,15 @@ async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
 
   const ws = new WebSocket(`ws://${server_uri}:420`);
-  ws.onopen = async () => {
+  ws.onopen.addEventListener(async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
-  };
+  });
 
-  ws.onmessage = async e => {
+  ws.onmessage.addEventListener(async e => {
     if (!e.data) return;
 
-    hostPlayerState = JSON.parse(e.data);   
+    hostPlayerState = JSON.parse(e.data);
     hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
     hostPlayerState.videoId = hostPlayerState.URL.match(/[?&]v=([^&]*)/)[1];
@@ -52,11 +53,14 @@ async function onPlayerReady(readyEvent) {
 
     if (currVideoId !== hostPlayerState.videoId) loadNewVideo();
     else updatePlayer();
-  };
 
-  ws.onerror = (e) => {
+    if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
+    else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
+  });
+
+  ws.onerror.addEventListener(e => {
     console.log('YouTube has problems. Listen to them: ', e)
-  }
+  });
 }
 
 async function onPlayerStateChange(event) {
@@ -85,4 +89,9 @@ async function updatePlayer() {
 
   if (hostPlayerState.paused) player.pauseVideo();
   else player.playVideo();
+}
+
+function getHost() {
+  const urlParts = location.href.split('/');
+  return `${urlParts[urlParts.length - 2]}#${urlParts[urlParts.length - 1]}`;
 }
