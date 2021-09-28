@@ -4,6 +4,7 @@ const MESSAGES = {
 
 const server_uri = 'discordradio.tk';
 const server_port = 80;
+const server_ws_port = 420;
 const host = getHost();
 
 let player, hostPlayerState = {}, justCued = false;
@@ -37,7 +38,9 @@ async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
   $popupMessage.innerText = `${host} is not listening to any music on Discord Radio at the moment! 🙈`;
 
-  const ws = new WebSocket(`ws://${server_uri}:420`);
+  const ws = new WebSocket(`ws://${server_uri}:${server_ws_port}`);
+  ws.addEventListener('error', err => console.error(err));
+
   ws.addEventListener('open', async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
@@ -68,10 +71,6 @@ async function onPlayerReady(readyEvent) {
     if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
     else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;
     else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
-  });
-
-  ws.addEventListener('error', e => {
-    console.log('YouTube has problems. Listen to them: ', e)
   });
 }
 

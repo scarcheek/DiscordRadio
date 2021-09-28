@@ -62,7 +62,7 @@ body {
 }
 
 #player-info:not(.visible) {
-  display: none;
+  visibility: hidden;
 }
 
 #player-container {
@@ -90,7 +90,7 @@ body {
 }
 
 #player-container .popup:not(.visible) {
-  visibility: hidden;
+  display: none;
 }
 
 #player-container .popup .popup-content {
@@ -112,7 +112,7 @@ body {
 }
 
 #donate-link {
-  padding: 0.5rem 0 1.5rem 0;
+  padding: 1rem 0 1.5rem 0;
 
   display: flex;
   align-items: center;
@@ -123,10 +123,6 @@ body {
 }
 
 @media only screen and (max-width: 800px) {
-  #header > :last-child {
-    height: 6vh;
-  }
-  
   #header .title {
     font-size: 1.5rem;
   }
@@ -158,5 +154,12 @@ body {
 
   #player-container .popup .popup-content {
     font-size: 0.8rem;
+    padding: 1rem 2rem;
+  }
+}
+
+@media only screen and (max-width: 620px) {
+  #header > :last-child {
+    height: 6vh;
   }
 }
