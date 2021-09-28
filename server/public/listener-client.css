@@ -96,7 +96,7 @@ body {
 
 @media only screen and (max-width: 800px) {
   #header > * {
-    height: 10vh;
+    height: 8vh;
   }
   
   #header .title {
@@ -112,7 +112,7 @@ body {
   }
 
   #player-container {
-    height: 72vh;
+    height: 70vh;
   }
 
   #player-container .popup .popup-content {
