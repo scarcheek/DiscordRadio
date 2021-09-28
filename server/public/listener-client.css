@@ -50,7 +50,9 @@ body {
 }
 
 #player-info {
+  width: 100%;
   padding: 1.5rem 2rem 0 2rem;
+  box-sizing: border-box;
 
   font-size: 1.25rem;
   white-space: nowrap;
