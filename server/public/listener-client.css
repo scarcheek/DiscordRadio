@@ -10,6 +10,8 @@ body {
 }
 
 #header {
+  padding: 0 1rem;
+
   display: flex;
   flex-wrap: wrap;
 
@@ -18,7 +20,7 @@ body {
 
 #header > * {
   height: 12vh;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0;
   box-sizing: border-box;
 
   display: flex;
@@ -36,12 +38,11 @@ body {
 }
 
 #header .title {
-  margin-right: 0.75rem;
   font-size: 2rem;
 }
 
 .divider {
-  margin-right: 0.75rem;
+  margin: 0 0.75rem;
 }
 
 #header .subtitle {
