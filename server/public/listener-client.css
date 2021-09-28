@@ -15,11 +15,12 @@ body {
   display: flex;
   flex-wrap: wrap;
 
+  color: #21201f;
   background-color: #e49076;
 }
 
 #header > * {
-  height: 12vh;
+  height: 8vh;
 
   display: flex;
   align-items: center;
@@ -51,7 +52,7 @@ body {
 
 #player-info {
   width: 100%;
-  padding: 1.5rem 2rem 0 2rem;
+  padding: 1rem 2rem 0 2rem;
   box-sizing: border-box;
 
   font-size: 1.25rem;
@@ -67,8 +68,8 @@ body {
 #player-container {
   position: relative;
   
-  height: 80vh;
-  padding: 1.5rem 2rem;
+  height: 75vh;
+  padding: 0.5rem 2rem;
   box-sizing: border-box;
 }
 
@@ -84,12 +85,12 @@ body {
 
   height: 100%;
   width: 100%;
-  padding: 1.5rem 2rem;
+  padding: 0.5rem 2rem;
   box-sizing: border-box;
 }
 
 #player-container .popup:not(.visible) {
-  display: none;
+  visibility: hidden;
 }
 
 #player-container .popup .popup-content {
@@ -110,11 +111,18 @@ body {
   background-color: #746f69;
 }
 
-@media only screen and (max-width: 800px) {
-  #header > * {
-    height: 8vh;
-  }
+#donate-link {
+  padding: 0.5rem 0 1.5rem 0;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  color: #b74624;
+  font-size: 1rem;
+}
+
+@media only screen and (max-width: 800px) {
   #header > :last-child {
     height: 6vh;
   }
@@ -136,16 +144,16 @@ body {
   }
 
   #player-info {
-    padding: 1.5rem 1rem 0 1rem;
+    padding: 1rem 1rem 0 1rem;
   }
 
   #player-container {
-    height: 70vh;
-    padding: 1.5rem 1rem;
+    height: 65vh;
+    padding: 0.5rem 1rem;
   }
 
   #player-container .popup {
-    padding: 1.5rem 1rem;
+    padding: 0.5rem 1rem;
   }
 
   #player-container .popup .popup-content {
