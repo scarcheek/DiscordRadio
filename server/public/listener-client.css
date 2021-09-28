@@ -9,6 +9,28 @@ body {
   background-color: #efe0cb;
 }
 
+@media only screen and (max-width: 900px) {
+  #header > * {
+    height: 10vh;
+  }
+  
+  #header .title {
+    font-size: 1.75rem;
+  }
+
+  #header .subtitle {
+    font-size: 1.25rem;
+  }
+
+  #player-container {
+    height: 72vh;
+  }
+
+  #player-container .popup .popup-content {
+    font-size: 1rem;
+  }
+}
+
 #header {
   padding: 0 1rem;
 
@@ -88,7 +110,7 @@ body {
   justify-content: center;
   
   color: #efe0cb;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   hyphens: auto;
   text-align: center;
 
