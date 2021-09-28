@@ -14,12 +14,12 @@ let stats = {
   activitiesStarted: 0,
   listenAlongSessions: 0,
   trackedSongs: 0,
-  referralsByLukas: -1,
+  referralsByLukas: 0,
 };
 
 // stats loading and saving cron
 try {
-  stats = { ...require('./stats.json'), ...stats };
+  stats = { ...stats, ...require('./stats.json') };
 }
 catch (err) { /* ignore, no previous stats exist */ }
 
