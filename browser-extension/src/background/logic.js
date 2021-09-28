@@ -56,8 +56,8 @@ async function connectToServer() {
 
     server.on('message', nrOfListeners => {
       if (nrOfListeners > 0 && $.trackedTabId) {
-        browser.browserAction.setBadgeText({ text: `🥳 ${nrOfListeners + 1}` });
-        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `👀 ${nrOfListeners + 1}` });
+        browser.browserAction.setBadgeText({ text: `🥳 ${nrOfListeners}` });
+        browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `👀 ${nrOfListeners}` });
       }
       else {
         browser.browserAction.setBadgeText({ text: '' });
