@@ -32,16 +32,18 @@ function onYouTubeIframeAPIReady() {
 
 async function onPlayerReady(readyEvent) {
   console.log('Player ready:', readyEvent);
+  $popupMessage.innerText = `${host} is not listening to any music on Discord Radio at the moment 🙉`;
 
   const ws = new WebSocket(`ws://${server_uri}:420`);
-  ws.onopen.addEventListener(async () => {
+  ws.addEventListener('open', async () => {
     ws.send(window.location);
     window.onbeforeunload = () => ws.close();
   });
 
-  ws.onmessage.addEventListener(async e => {
+  ws.addEventListener('message', async e => {
     if (!e.data) return;
 
+    $popup.classList.remove('visible');
     hostPlayerState = JSON.parse(e.data);
     hostPlayerState.currTime += Math.max((Date.now() - hostPlayerState.updatedOn) / 1000, 0);
     hostPlayerState.playedOn = Date.now();
@@ -58,7 +60,7 @@ async function onPlayerReady(readyEvent) {
     else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
   });
 
-  ws.onerror.addEventListener(e => {
+  ws.addEventListener('error', e => {
     console.log('YouTube has problems. Listen to them: ', e)
   });
 }
