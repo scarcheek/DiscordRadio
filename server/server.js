@@ -14,11 +14,12 @@ let stats = {
   activitiesStarted: 0,
   listenAlongSessions: 0,
   trackedSongs: 0,
+  referralsByLukas: -1,
 };
 
 // stats loading and saving cron
 try {
-  stats = require('./stats.json');
+  stats = { ...require('./stats.json'), ...stats };
 }
 catch (err) { /* ignore, no previous stats exist */ }
 
@@ -34,6 +35,11 @@ const httpServer = express();
 httpServer.use(express.static('public'));
 httpServer.use(express.json());
 httpServer.use(cors);
+
+httpServer.get('/watch-jungle-school-with-lukas', (req, res) => {
+  stats.referralsByLukas++;
+  res.redirect('https://discord.gg/ZGDTGRgxtx');
+});
 
 httpServer.get('/stats', (req, res) => {
   res.status(200).json(stats);
