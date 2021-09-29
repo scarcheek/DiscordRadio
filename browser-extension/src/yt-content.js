@@ -11,7 +11,7 @@ const MESSAGES = {
 };
 
 let video;
-let observer;
+let observer, miniObserver;
 let miniplayerCloseButton;
 let miniPlaying = false;
 let ignoreNext = false;
@@ -81,9 +81,8 @@ function addObservers() {
   observer.observe(titleTag, { childList: true });
 
   const miniPlayerTitle = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title');
-  console.dir(miniPlayerTitle);
 
-  let miniObserver = new MutationObserver(() => {
+  miniObserver = new MutationObserver(() => {
     browser.runtime.sendMessage({ data: formatMiniplayerData(), type: MESSAGES.newVideo });
     miniPlaying = true;
     addMiniplayerCloseListener();
@@ -146,6 +145,9 @@ function formatMiniplayerData() {
   
   if (document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint')) {
     playerInfo.URL = document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint').href;
+  }
+  else if (document.querySelector('#page-manager ytd-watch-flexy.ytd-page-manager')) {
+    playerInfo.URL = document.querySelector('#page-manager ytd-watch-flexy.ytd-page-manager').videoId;
   }
   else {
     playerInfo.URL = document.querySelector('link[rel="canonical"]').href;

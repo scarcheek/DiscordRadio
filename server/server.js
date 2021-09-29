@@ -11,9 +11,12 @@ const AUTH_URL = 'https://discordapp.com/api/oauth2/token';
 const config = require('../config.json');
 const secrets = require('./secrets.json');
 let stats = {
-  activitiesStarted: 0,
-  listenAlongSessions: 0,
-  trackedSongs: 0,
+  currentActiveHosts: 0,
+  currentActiveListeners: 0,
+  totalTrackedTabs: 0,
+  totalSessionsWithListeners: 0,
+  totalTrackedSongs: 0,
+  totalListenedSeconds: 0,
   referralsByLukas: 0,
 };
 
@@ -42,7 +45,14 @@ httpServer.get('/watch-jungle-school-with-lukas', (req, res) => {
 });
 
 httpServer.get('/stats', (req, res) => {
-  res.status(200).json(stats);
+  stats.currentActiveHosts = hosts.size;
+  stats.currentActiveListeners = listeners.size;
+
+  const totalSecondsIncludingActiveSession = stats.totalListenedSeconds + listeners.values()
+    .map(listeners => listeners.reduce((hostSum, { listeningSince }) => hostSum + (Date.now() - listeningSince) / 1000))
+    .reduce((totalSum, hostSum) => totalSum + hostSum);
+
+  res.status(200).json({ stats, totalListenedSeconds: totalSecondsIncludingActiveSession });
 });
 
 httpServer.get('/auth', (req, res) => res.sendStatus(405));
@@ -107,20 +117,25 @@ wsServer.on('listening', () => console.log(`Yo he, donn hot da websuckit surfer 
 
 
 function connectHost(ws, host) {
-  stats.activitiesStarted++;
+  stats.totalTrackedTabs++;
   ws.send((listeners.get(host) ?? []).length);
+
+  if (listeners.get(host)) {
+    stats.totalSessionsWithListeners++;
+    listeners.get(host).forEach(listener => listener.listeningSince = Date.now());
+  }
 
   ws.on('message', msg => {
     const playerState = JSON.parse(msg.toString());
     
     if (!hosts.has(host) || playerState.URL !== hosts.get(host).playerState.URL) {
-      stats.trackedSongs++;
+      stats.totalTrackedSongs++;
     }
 
     hosts.set(host, { hostWs: ws, playerState });
     
     if (!listeners.has(host)) return;
-    listeners.get(host).forEach(ws => ws.send(JSON.stringify(playerState)));
+    listeners.get(host).forEach(listener => listener.ws.send(JSON.stringify(playerState)));
   });
 
   ws.on('close', () => {
@@ -133,11 +148,14 @@ function connectListener(ws, host) {
     listeners.set(host, []);
   }
 
-  listeners.get(host).push(ws);
+  if (!hosts.has(host)) {
+    listeners.get(host).push({ ws });
+  }
+  else {
+    listeners.get(host).push({ ws, listeningSince: Date.now() });
 
-  if (hosts.has(host)) {
     if (listeners.get(host).length === 1) {
-      stats.listenAlongSessions++;
+      stats.totalSessionsWithListeners++;
     }
 
     const { hostWs, playerState } = hosts.get(host);
@@ -146,7 +164,10 @@ function connectListener(ws, host) {
   }
 
   ws.on('close', () => {
-    const newListeners = listeners.get(host).filter(listener => listener !== ws);
+    const leavingListener = listeners.get(host).find(listener => listener.ws === ws);
+    stats.totalListenedSeconds += (Date.now() - leavingListener.listeningSince) / 1000;
+
+    const newListeners = listeners.get(host).filter(listener => listener.ws !== ws);
     
     if (hosts.has(host)) {
       const { hostWs } = hosts.get(host);

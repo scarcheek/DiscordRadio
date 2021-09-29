@@ -56,10 +56,12 @@ async function connectToServer() {
 
     server.on('message', nrOfListeners => {
       if (nrOfListeners > 0 && $.trackedTabId) {
+        browser.browserAction.setTitle({ title: `🥳 ${nrOfListeners} - Discord Radio` });
         browser.browserAction.setBadgeText({ text: `🥳 ${nrOfListeners}` });
         browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `👀 ${nrOfListeners}` });
       }
       else {
+        browser.browserAction.setTitle({ title: `🥳 ${nrOfListeners} - Discord Radio` });
         browser.browserAction.setBadgeText({ text: '' });
         if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀' });
       }
@@ -163,7 +165,7 @@ class Activity {
   }
 
   static _createPlayingActivity(data) {
-    const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
+    let buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
 
     if (server.conn) {
       buttons.unshift({ 
@@ -171,6 +173,8 @@ class Activity {
         url: `http://discordradio.tk/d/${discord.user.tag.replace('#', '/')}`,
       });
     }
+
+    if (!data.URL) buttons = undefined;
 
     return {
       details: data.title,
@@ -189,7 +193,7 @@ class Activity {
   }
 
   static _createPausedActivity(data) {
-    const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
+    let buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
 
     if (server.conn) {
       buttons.unshift({ 
@@ -197,6 +201,8 @@ class Activity {
         url: `http://discordradio.tk/d/${discord.user.tag.replace('#', '/')}`,
       });
     }
+
+    if (!data.URL) buttons = undefined;
 
     return {
       details: data.title,
@@ -212,7 +218,7 @@ class Activity {
   }
 
   static _createListeningAlongActivity(data) {
-    const buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
+    let buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
     const host = data.host.split('#')[0];
   
     if (server.conn) {
@@ -221,6 +227,8 @@ class Activity {
         url: `http://discordradio.tk/d/${data.host.replace('#', '/')}` 
       });
     }
+
+    if (!data.URL) buttons = undefined;
   
     return {
       details: data.title,

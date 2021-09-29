@@ -40,6 +40,7 @@
   },
   "browser_action": {
     "default_popup": "src/popup/moodpicker.html",
+    "default_title": "Discord Radio",
     "default_icon": {
       "16": "assets/logo/icon16.png",
       "32": "assets/logo/icon32.png",
