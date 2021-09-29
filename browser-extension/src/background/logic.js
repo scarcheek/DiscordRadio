@@ -3,6 +3,15 @@ let server = { conn: null };
 
 browser.runtime.onStartup.addListener(connectToDiscord);
 browser.runtime.onInstalled.addListener(connectToDiscord);
+browser.alarms.onAlarm.addListener((alarm) => {
+  switch (alarm.name) {
+    case 'reconnect-rpc':
+      return connectToDiscord();
+
+    case 'reconnect-server':
+      return connectToServer();
+  }
+});
 
 async function connectToDiscord() {
   try {
@@ -24,7 +33,7 @@ async function connectToDiscord() {
       browser.browserAction.setBadgeText({ text: '🚫' });
       if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🚫' });
       server.close();
-      setTimeout(connectToDiscord, 5 * 1000);
+      browser.alarms.create('reconnect-rpc', { delayInMinutes: 5 / 60 });
     });
 
     console.log('Connected to Discord!');
@@ -35,7 +44,7 @@ async function connectToDiscord() {
     console.warn('Could not connect to discord, retrying in 5s...');
     browser.browserAction.setBadgeText({ text: '🚫' });
     if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🚫' });
-    setTimeout(connectToDiscord, 5 * 1000);
+    browser.alarms.create('reconnect-rpc', { delayInMinutes: 5 / 60 });
   }
 }
 
@@ -51,7 +60,7 @@ async function connectToServer() {
         console.warn('Lost connection to the Discord Radio Server, trying to reconnect in 5s...');
         browser.browserAction.setBadgeText({ text: '🔇' });
         if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🔇' });
-        setTimeout(connectToServer, 5 * 1000);
+        browser.alarms.create('reconnect-server', { delayInMinutes: 5 / 60 });
       }
     });
 
@@ -80,7 +89,7 @@ async function connectToServer() {
       console.warn('Could not connect to the Discord Radio Server, retrying in 5s...');
       browser.browserAction.setBadgeText({ text: '🔇' });
       if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀 🔇' });
-      setTimeout(connectToServer, 5 * 1000);
+      browser.alarms.create('reconnect-server', { delayInMinutes: 5 / 60 });
     }
   }
 }

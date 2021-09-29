@@ -97,6 +97,9 @@ httpServer.get('/d/:username/:discriminator', async (req, res) => {
   res.status(200).header('Content-Type', 'text/html').send(page);
 });
 
+httpServer.get('/', (req, res) => res.sendFile('public/index.html'));
+httpServer.get('*', (req, res) => res.redirect('https://discordradio.tk'));
+
 httpServer.listen(config.server_port, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 
 

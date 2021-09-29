@@ -24,6 +24,7 @@ const BASE_PATH = (process.platform === 'win32')
 function start(appUI) {
   appUI.ipcMain.on('RESEND_APPS', () => {
     Object.values(apps).forEach(app => appUI.window.webContents.send('ADD_APP', app));
+    appUI.window.webContents.send('TOGGLE_DISCORD_CONNECTION', { connected: (connections.size > 1 || healthCheckClient) ? true : false });
   });
 
   appUI.ipcMain.on('TOGGLE_ENABLE', async (event, app) => {
@@ -98,7 +99,7 @@ function start(appUI) {
             appUI.window.webContents.send('ADD_APP', app);
           }
           else {
-            stopHealthCheck(appUI);
+            stopHealthCheck();
             appUI.window.webContents.send('TOGGLE_CONNECTION', { ...apps[payload.data.application.id], status: 'connected' });
           }
 
@@ -125,13 +126,15 @@ function start(appUI) {
 
 
 
-let healthCheckClient;
+let healthCheckClient = null;
 let healthCheckTimeout;
 
 async function startHealthCheck(appUI) {
   try {
     healthCheckClient = await connectDiscordIpcClient();
     healthCheckClient.on('close', () => {
+      healthCheckClient = null;
+
       if (connections.size === 0) {
         startHealthCheck(appUI);
       } 
@@ -140,14 +143,16 @@ async function startHealthCheck(appUI) {
     appUI.window.webContents.send('TOGGLE_DISCORD_CONNECTION', { connected: true });
   }
   catch (err) {
+    healthCheckClient = null;
     appUI.window.webContents.send('TOGGLE_DISCORD_CONNECTION', { connected: false });
     healthCheckTimeout = setTimeout(() => startHealthCheck(appUI), 5000);
   }
 }
 
-function stopHealthCheck(appUI) {
+function stopHealthCheck() {
   if (healthCheckTimeout) clearTimeout(healthCheckTimeout);
   if (healthCheckClient) healthCheckClient.close();
+  healthCheckClient = null;
 }
 
 async function connectDiscordIpcClient() {
