@@ -52,7 +52,7 @@ function createWindow() {
     maximizable: false,
     webPreferences: {
       nativeWindowOpen: true,
-      preload: path.join(app.getAppPath(), 'src/preload.js'),
+      preload: path.join(app.getAppPath(), 'src/pages/index.js'),
     },
   });
 

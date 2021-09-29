@@ -46,7 +46,6 @@ function start(appUI) {
 
   const wss = new ws.Server({ port: 6473 });
   wss.on('connection', async (ws, req) => {
-    console.log('ws connected');
     const options = req.url.split('?')[1]
       .split('&')
       .reduce((obj, keyValPair) => {
@@ -58,7 +57,11 @@ function start(appUI) {
     try {
       const client = await connectDiscordIpcClient();
       client.on('close', () => ws.close());
-      ws.on('close', () => client.close());
+      ws.on('close', () => {
+        client.close();
+        const appId = [...connections.entries()].find(([, connection]) => connection === ws)[0];
+        appUI.window.webContents.send('TOGGLE_CONNECTION', apps[appId]);
+      });
 
       if (apps[options.client_id] && apps[options.client_id].status === 'disabled') {
         return ws.close();
@@ -81,6 +84,9 @@ function start(appUI) {
             apps[app.id] = app;
             await fs.writeFile('./apps.json', JSON.stringify(apps, null, 2));
             appUI.window.webContents.send('ADD_APP', app);
+          }
+          else {
+            appUI.window.webContents.send('TOGGLE_CONNECTION', { ...apps[payload.data.application.id], status: 'connected' });
           }
 
           if (apps[payload.data.application.id].status === 'disabled') {
@@ -120,8 +126,6 @@ async function connectDiscordIpcClient() {
 
   throw new Error('Unable to connect to the Discord client!');
 }
-
-
 
 module.exports = {
   start,
