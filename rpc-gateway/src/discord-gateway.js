@@ -1,7 +1,6 @@
 const ws = require('ws');
 const fs= require('fs/promises');
 const ipcClient = require('./utils/ipc');
-const { app } = require('electron');
 
 const connections = new Map();
 let apps = {};
@@ -60,6 +59,7 @@ function start(appUI) {
       ws.on('close', () => {
         client.close();
         const appId = [...connections.entries()].find(([, connection]) => connection === ws)[0];
+        connections.delete(appId);
         appUI.window.webContents.send('TOGGLE_CONNECTION', apps[appId]);
       });
 
