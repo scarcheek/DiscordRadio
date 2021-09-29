@@ -50,10 +50,12 @@ httpServer.get('/stats', (req, res) => {
 
   const totalSecondsIncludingActiveSession = stats.totalListenedSeconds 
     + [...listeners.values()]
-      .map(listeners => listeners.reduce((hostSum, { listeningSince }) => hostSum + (Date.now() - listeningSince) / 1000))
-      .reduce((totalSum, hostSum) => totalSum + hostSum);
+      .map(listeners => listeners
+        .filter(listener => listener.listeningSince)
+        .reduce((hostSum, { listeningSince }) => hostSum + (Date.now() - listeningSince) / 1000, 0))
+      .reduce((totalSum, hostSum) => totalSum + hostSum, 0);
 
-  res.status(200).json({ stats, totalListenedSeconds: totalSecondsIncludingActiveSession });
+  res.status(200).json({ ...stats, totalListenedSeconds: totalSecondsIncludingActiveSession });
 });
 
 httpServer.get('/auth', (req, res) => res.sendStatus(405));
