@@ -1,15 +1,8 @@
 class DiscordRPC {
-  static AUTH_URL = 'http://discordradio.tk/auth';
-  static URL = `ws://localhost:6473`;
-  static VERSION = 1;
-  static ENCODING = 'json';
-
-  client_id;
-  conn;
-  user;
-
   constructor(client_id) {
     this.client_id = client_id;
+    this.conn = null;
+    this.user = null;
   }
 
   connect() {
@@ -160,3 +153,8 @@ class DiscordRPC {
     return nonce;
   }
 }
+
+DiscordRPC.AUTH_URL = 'http://discordradio.tk/auth';
+DiscordRPC.URL = `ws://localhost:6473`;
+DiscordRPC.VERSION = 1;
+DiscordRPC.ENCODING = 'json';

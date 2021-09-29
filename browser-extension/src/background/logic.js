@@ -61,7 +61,7 @@ async function connectToServer() {
         browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: `👀 ${nrOfListeners}` });
       }
       else {
-        browser.browserAction.setTitle({ title: `🥳 ${nrOfListeners} - Discord Radio` });
+        browser.browserAction.setTitle({ title: 'Discord Radio' });
         browser.browserAction.setBadgeText({ text: '' });
         if ($.trackedTabId) browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '👀' });
       }
@@ -85,9 +85,6 @@ async function connectToServer() {
 }
 
 class Activity {
-  static prevData;
-  static on = false;
-
   static set(data) {
     data.mood = Activity.prevData?.mood ?? 'none';
     data.nrOfListeners = Activity.prevData?.nrOfListeners ?? 0;
@@ -250,6 +247,9 @@ class Activity {
     return VIBE_TEXTS[Math.floor(Math.random() * VIBE_TEXTS.length)];
   }
 }
+
+Activity.prevData = null;
+Activity.on = false;
 
 
 

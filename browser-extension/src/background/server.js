@@ -1,7 +1,7 @@
 class DiscordRadioServer {
-  static URL = 'ws://discordradio.tk:420';
-
-  conn;
+  constructor() {
+    this.conn = null;
+  }
 
   connect(user) {
     return new Promise((resolve, reject) => {
@@ -31,3 +31,5 @@ class DiscordRadioServer {
     this.conn.close();
   }
 }
+
+DiscordRadioServer.URL = 'ws://discordradio.tk:420';
