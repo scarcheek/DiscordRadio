@@ -3,6 +3,7 @@ const fs= require('fs/promises');
 const ipcClient = require('./utils/ipc');
 
 const connections = new Map();
+
 let apps = {};
 try {
   apps = require('../apps.json');
@@ -21,7 +22,9 @@ const BASE_PATH = (process.platform === 'win32')
 
 
 function start(appUI) {
-  Object.values(apps).forEach(app => appUI.window.webContents.send('ADD_APP', app));
+  appUI.ipcMain.on('RESEND_APPS', () => {
+    Object.values(apps).forEach(app => appUI.window.webContents.send('ADD_APP', app));
+  });
 
   appUI.ipcMain.on('TOGGLE_ENABLE', async (event, app) => {
     apps[app.id] = app;
@@ -43,6 +46,7 @@ function start(appUI) {
     }
   });
 
+  startHealthCheck(appUI);
   const wss = new ws.Server({ port: 6473 });
   wss.on('connection', async (ws, req) => {
     const options = req.url.split('?')[1]
@@ -58,9 +62,17 @@ function start(appUI) {
       client.on('close', () => ws.close());
       ws.on('close', () => {
         client.close();
-        const appId = [...connections.entries()].find(([, connection]) => connection === ws)[0];
-        connections.delete(appId);
-        appUI.window.webContents.send('TOGGLE_CONNECTION', apps[appId]);
+        const appEntry = [...connections.entries()].find(([id, connection]) => connection === ws);
+        
+        if (appEntry) {
+          const appId = appEntry[0];
+          connections.delete(appId);
+
+          if (connections.size === 0) startHealthCheck(appUI);
+          
+          appUI.window.webContents.send('TOGGLE_DISCORD_CONNECTION', { connected: true });
+          appUI.window.webContents.send('TOGGLE_CONNECTION', apps[appId]);
+        }
       });
 
       if (apps[options.client_id] && apps[options.client_id].status === 'disabled') {
@@ -86,6 +98,7 @@ function start(appUI) {
             appUI.window.webContents.send('ADD_APP', app);
           }
           else {
+            stopHealthCheck(appUI);
             appUI.window.webContents.send('TOGGLE_CONNECTION', { ...apps[payload.data.application.id], status: 'connected' });
           }
 
@@ -111,6 +124,31 @@ function start(appUI) {
 }
 
 
+
+let healthCheckClient;
+let healthCheckTimeout;
+
+async function startHealthCheck(appUI) {
+  try {
+    healthCheckClient = await connectDiscordIpcClient();
+    healthCheckClient.on('close', () => {
+      if (connections.size === 0) {
+        startHealthCheck(appUI);
+      } 
+    });
+
+    appUI.window.webContents.send('TOGGLE_DISCORD_CONNECTION', { connected: true });
+  }
+  catch (err) {
+    appUI.window.webContents.send('TOGGLE_DISCORD_CONNECTION', { connected: false });
+    healthCheckTimeout = setTimeout(() => startHealthCheck(appUI), 5000);
+  }
+}
+
+function stopHealthCheck(appUI) {
+  if (healthCheckTimeout) clearTimeout(healthCheckTimeout);
+  if (healthCheckClient) healthCheckClient.close();
+}
 
 async function connectDiscordIpcClient() {
   for (let id = 0; id < 10; id++) {

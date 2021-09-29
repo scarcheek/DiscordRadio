@@ -1,4 +1,9 @@
-const { ipcRenderer } = require('electron')
+const { ipcRenderer } = require('electron');
+let lastDiscordStatus = { connected: false };
+
+document.addEventListener('DOMContentLoaded', e => {
+  ipcRenderer.send('RESEND_APPS', {});
+});
 
 ipcRenderer.on('ADD_APP', (event, app) => {
   addApp(app);
@@ -8,19 +13,51 @@ ipcRenderer.on('TOGGLE_CONNECTION', (event, app) => {
   toggleAppConnection(app);
 });
 
+ipcRenderer.on('TOGGLE_DISCORD_CONNECTION', (event, discord) => {
+  toggleDiscordConnection(discord);
+  lastDiscordStatus = discord;
+});
+
 function addApp(app) {
   document.getElementById('apps').appendChild(buildAppTemplate(app));
+}
+
+function toggleDiscordConnection(discord) {
+  const header = document.getElementById('header');
+  
+  if (discord.connected) {
+    if (document.querySelector(`.app #app-status.connected`)) {
+      header.title = 'Connected!';
+      header.classList.add('connected');
+      header.classList.remove('idle');
+      header.classList.remove('disconnected');
+    }
+    else {
+      header.title = 'Idle!';
+      header.classList.add('idle');
+      header.classList.remove('connected');
+      header.classList.remove('disconnected');
+    }
+  }
+  else {
+    header.title = 'Disconnected!';
+    header.classList.add('disconnected');
+    header.classList.remove('connected');
+    header.classList.remove('idle');
+  }
 }
 
 function toggleAppConnection(app) {
   document.querySelector(`#app-${app.id} #app-status`).outerHTML = getStatusIcon(app.status);
   document.querySelector(`#app-${app.id} #btnToggleEnable`).innerHTML = getToggleEnableButtonContent(app.status);
+  toggleDiscordConnection(lastDiscordStatus);
 }
 
 function toggleEnable(app) {
   app.status = (app.status === 'disabled') ? 'enabled' : 'disabled';
   document.querySelector(`#app-${app.id} #app-status`).outerHTML = getStatusIcon(app.status);
   document.querySelector(`#app-${app.id} #btnToggleEnable`).innerHTML = getToggleEnableButtonContent(app.status);
+  toggleDiscordConnection(lastDiscordStatus);
   ipcRenderer.send('TOGGLE_ENABLE', app);
 }
 
