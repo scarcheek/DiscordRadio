@@ -123,6 +123,7 @@ header.disconnected figure {
   border-radius: 0.25rem;
 
   cursor: pointer;
+  user-select: none;
 }
 
 .app-info {
@@ -131,9 +132,13 @@ header.disconnected figure {
 }
 
 .app-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-grow: 0;
+  flex-shrink: 0;
 
-  width: 2rem;
+  width: 3rem;
   margin: 0;
   margin-right: 0.75rem;
 }
@@ -156,15 +161,13 @@ header.disconnected figure {
 }
 
 .app-info-text p {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .app-status {
   flex-grow: 0;
-}
-
-.app-status {
   font-size: 1.25rem;
+  margin-right: 0.5rem;
 }
 
 .app-status.connected {

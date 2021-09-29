@@ -6,6 +6,7 @@ browser.runtime.onInstalled.addListener(connectToDiscord);
 
 async function connectToDiscord() {
   try {
+    console.warn('Trying to connect to Discord...');
     // connect to discord
     discord = new DiscordRPC('875518867680657458');
     await discord.connect();

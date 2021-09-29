@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Discord Radio",
-  "description": "Creates a Discord Rich Presence based on the YouTube video that has been selected.",
-  "version": "0.9.1",
+  "description": "Creates a Discord Rich Presence and allows friends to listen along to the YouTube page that has been selected.",
+  "version": "0.9.5",
   "permissions": [
     "contextMenus",
     "storage",

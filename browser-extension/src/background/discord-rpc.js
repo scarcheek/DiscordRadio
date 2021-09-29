@@ -10,6 +10,7 @@ class DiscordRPC {
       const url = `${DiscordRPC.URL}/?v=${DiscordRPC.VERSION}&client_id=${this.client_id}&encoding=${DiscordRPC.ENCODING}`;
       this.conn = new WebSocket(url);
       this.conn.addEventListener('error', reject);
+      this.conn.addEventListener('close', reject);
       this.conn.addEventListener('open', async () => {
         const { data: { user } } = await this._getDiscordResponse();
         this.user = user;

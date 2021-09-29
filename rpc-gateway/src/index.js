@@ -1,12 +1,13 @@
-const { app, Tray, BrowserWindow, Menu, nativeImage } = require('electron');
+const { app, Tray, BrowserWindow, Menu, nativeImage, ipcMain } = require('electron');
 const path = require('path');
 
-require('./discord-gateway');
+const gateway = require('./discord-gateway');
 
 const WINDOW_HEIGHT = 500;
 const WINDOW_WIDTH = 300;
 
 const appUI = {
+  ipcMain,
   /** @type {Tray} */ tray: null,
   /** @type {BrowserWindow} */ window: null,
 };
@@ -17,17 +18,17 @@ app.whenReady().then(() => {
   appUI.tray = createTray(appUI.window);
   setWindowPosition(appUI.window, appUI.tray);
   console.log('All set up and ready to go!');
+  gateway.start(appUI);
 });
 
 /**
  * @param {BrowserWindow} window 
  */
 function createTray(window) {
-  const trayImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/Discord-Logo-White.png'));
+  const trayImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/Discord-Logo-Icon.png'));
   const tray = new Tray(trayImage);
   tray.setToolTip('Discord RPC Gateway');
   tray.on('click', $=> {
-    window.loadFile('src/pages/index.html');
     window.show();
   });
 
@@ -51,12 +52,14 @@ function createWindow() {
     maximizable: false,
     webPreferences: {
       nativeWindowOpen: true,
-    }
+      preload: path.join(app.getAppPath(), 'src/preload.js'),
+    },
   });
 
   window.on('minimize', hideWindow);
   window.on('maximize', e => e.preventDefault());
   window.on('close', hideWindow);
+  window.loadFile('src/pages/index.html');
   return window;
 
   function hideWindow(e) {

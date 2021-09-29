@@ -19,6 +19,7 @@ async function createClient(path) {
     handshake: (payload) => handshake(socket, payload),
     sendFrame: (payload) => sendFrame(socket, payload),
     onReceive: (handler) => onReceive(socket, handler),
+    on: (event, handler) => socket.on(event, handler),
     close: () => socket.destroy(),
   };
 };
@@ -51,7 +52,7 @@ function connect(path) {
 /**
  * Send a handshake message to the IPC socket and wait for a response.
  * @param {net.Socket} socket The socket to send the handshake to.
- * @param {string|Buffer} payload The payload to send.
+ * @param {object} payload The payload to send.
  * @return {Promise<IpcMessage>} A promise that resolves to the received handshake response.
  */
 function handshake(socket, payload) {
@@ -61,7 +62,7 @@ function handshake(socket, payload) {
 /**
  * Send a frame to the IPC socket.
  * @param {net.Socket} socket The socket to send the frame to.
- * @param {string|Buffer} payload The payload to send.
+ * @param {object} payload The payload to send.
  */
 function sendFrame(socket, payload) {
   send(socket, OPCODES.FRAME, payload);
@@ -71,7 +72,7 @@ function sendFrame(socket, payload) {
  * Send a message to the IPC socket.
  * @param {net.Socket} socket The socket to send the message to.
  * @param {number} opcode The opcode of the message.
- * @param {string|Buffer} payload The payload to send.
+ * @param {object} payload The payload to send.
  */
 function send(socket, opcode, payload) {
   const payloadString = JSON.stringify(payload);
