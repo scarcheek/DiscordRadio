@@ -48,9 +48,10 @@ httpServer.get('/stats', (req, res) => {
   stats.currentActiveHosts = hosts.size;
   stats.currentActiveListeners = listeners.size;
 
-  const totalSecondsIncludingActiveSession = stats.totalListenedSeconds + listeners.values()
-    .map(listeners => listeners.reduce((hostSum, { listeningSince }) => hostSum + (Date.now() - listeningSince) / 1000))
-    .reduce((totalSum, hostSum) => totalSum + hostSum);
+  const totalSecondsIncludingActiveSession = stats.totalListenedSeconds 
+    + [...listeners.values()]
+      .map(listeners => listeners.reduce((hostSum, { listeningSince }) => hostSum + (Date.now() - listeningSince) / 1000))
+      .reduce((totalSum, hostSum) => totalSum + hostSum);
 
   res.status(200).json({ stats, totalListenedSeconds: totalSecondsIncludingActiveSession });
 });
