@@ -28,7 +28,14 @@ catch (err) { /* ignore, no previous stats exist */ }
 
 setInterval(() => {
   stats.lastSaveTimestamp = new Date().toLocaleString('at');
-  fs.writeFile('./stats.json', JSON.stringify(stats, null, 2), 'utf8');
+  const totalSecondsIncludingActiveSession = stats.totalListenedSeconds 
+    + [...listeners.values()]
+      .map(listeners => listeners
+        .filter(listener => listener.listeningSince)
+        .reduce((hostSum, { listeningSince }) => hostSum + (Date.now() - listeningSince) / 1000, 0))
+      .reduce((totalSum, hostSum) => totalSum + hostSum, 0);
+
+  fs.writeFile('./stats.json', JSON.stringify({ ...stats, totalListenedSeconds: totalSecondsIncludingActiveSession }, null, 2), 'utf8');
 }, 15 * 60 * 1000)
 
 
