@@ -28,7 +28,7 @@ browser.runtime.onStartup.addListener(initializeStorage);
 browser.runtime.onInstalled.addListener(initializeStorage);
   
 function initializeStorage() {
-  browser.browserAction.setBadgeBackgroundColor({ color: '#efe0cb' });
+  browser.browserAction.setBadgeBackgroundColor({ color: '#e49076' });
   return browser.storage.sync.set({
     moodId: 'none',
     trackedTabId: null,

@@ -79,9 +79,9 @@ function connect() {
       $popup.classList.remove('visible');
       $playerInfo.classList.add('visible');
 
-      if (hostPlayerState.nrOfListeners < 1) $nrOfListeners.innerText = '';
-      else if (hostPlayerState.nrOfListeners === 1) $nrOfListeners.innerText = ` & 1 other`;
-      else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners} others`;
+      if (hostPlayerState.nrOfListeners < 2) $nrOfListeners.innerText = '';
+      else if (hostPlayerState.nrOfListeners === 2) $nrOfListeners.innerText = ` & 1 other`;
+      else $nrOfListeners.innerText = ` & ${hostPlayerState.nrOfListeners - 1} others`;
     });
   }
   catch (err) {
