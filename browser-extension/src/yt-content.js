@@ -15,7 +15,7 @@ let observer, miniObserver;
 let miniplayerCloseButton;
 let miniPlaying = false;
 let ignoreNext = false;
-
+let nextMiniplayerUrl;
 
 // let background.js know the page is loaded
 window.addEventListener('load', () => browser.runtime.sendMessage({ type: MESSAGES.pageLoaded }));
@@ -54,7 +54,7 @@ async function addVideo() {
 
   video.onplay = () => {
     const data = (miniPlaying) ? formatMiniplayerData() : formatData();
-    browser.runtime.sendMessage({ data, type: MESSAGES.play });
+    if (!ignoreNext) browser.runtime.sendMessage({ data, type: MESSAGES.play });
   };
 
   video.onseeked = () => {
@@ -82,9 +82,12 @@ function addObservers() {
 
   const miniPlayerTitle = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title');
 
-  miniObserver = new MutationObserver(() => {
-    browser.runtime.sendMessage({ data: formatMiniplayerData(), type: MESSAGES.newVideo });
+  miniObserver = new MutationObserver((changes) => {
+    console.dir(changes);
+
     miniPlaying = true;
+    ignoreNext = true;
+    browser.runtime.sendMessage({ data: formatMiniplayerData(), type: MESSAGES.newVideo });
     addMiniplayerCloseListener();
   });
   
@@ -92,15 +95,30 @@ function addObservers() {
 }
 
 function addMiniplayerCloseListener() {
-  if (miniplayerCloseButton) return;
+  if (miniplayerCloseButton) {
+    console.log('Setting nextMiniplayerUrl');
+    nextMiniplayerUrl = document.querySelector('.ytp-miniplayer-button-container .ytp-next-button').href;
+    console.log(nextMiniplayerUrl);
+    return;
+  }
 
   miniplayerCloseButton = document.querySelector('.ytp-miniplayer-close-button');
   if (!miniplayerCloseButton) return setTimeout(addMiniplayerCloseListener, 1000);
 
+  console.log('Setting nextMiniplayerUrl');
+  nextMiniplayerUrl = document.querySelector('.ytp-miniplayer-button-container .ytp-next-button').href;
+  console.log(nextMiniplayerUrl);
+
   miniplayerCloseButton.addEventListener('click', () => {
     browser.runtime.sendMessage({ type: MESSAGES.remove });
     miniPlaying = false;
+    nextMiniplayerUrl = null;
     ignoreNext = true;
+  });
+
+  document.querySelector('.ytp-miniplayer-expand-watch-page-button').addEventListener('click', e => {
+    miniPlaying = false;
+    nextMiniplayerUrl = null;
   });
 }
 
@@ -115,6 +133,7 @@ async function removeVideo() {
 
 function formatData() {
   const playerInfo = {};
+  nextMiniplayerUrl = null;
 
   if (document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer')) {
     playerInfo.title = document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer').innerText;
@@ -139,19 +158,30 @@ function formatData() {
 }
 
 function formatMiniplayerData() {
+  console.log(new Error().stack);
+
   const playerInfo = {};
   playerInfo.title = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title').innerText;
   playerInfo.channelName = document.querySelector('.ytd-miniplayer.channel > yt-formatted-string#owner-name').innerText;
   
   if (document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint')) {
+    console.log('A');
     playerInfo.URL = document.querySelector('ytd-thumbnail[now-playing] #thumbnail.yt-simple-endpoint').href;
   }
-  else if (document.querySelector('#page-manager ytd-watch-flexy.ytd-page-manager')) {
+  else if (document.querySelector('#page-manager ytd-watch-flexy.ytd-page-manager')?.videoId) {
+    console.log('B');
     playerInfo.URL = document.querySelector('#page-manager ytd-watch-flexy.ytd-page-manager').videoId;
   }
+  else if (nextMiniplayerUrl) {
+    console.log('C');
+    playerInfo.URL = nextMiniplayerUrl;
+  }
   else {
+    console.log('D');
     playerInfo.URL = document.querySelector('link[rel="canonical"]').href;
   }
+
+  console.dir(playerInfo);
 
   return {
     ...playerInfo,
