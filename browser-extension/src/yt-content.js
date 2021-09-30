@@ -82,9 +82,7 @@ function addObservers() {
 
   const miniPlayerTitle = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title');
 
-  miniObserver = new MutationObserver((changes) => {
-    console.dir(changes);
-
+  miniObserver = new MutationObserver(() => {
     miniPlaying = true;
     ignoreNext = true;
     browser.runtime.sendMessage({ data: formatMiniplayerData(), type: MESSAGES.newVideo });
@@ -96,18 +94,14 @@ function addObservers() {
 
 function addMiniplayerCloseListener() {
   if (miniplayerCloseButton) {
-    console.log('Setting nextMiniplayerUrl');
     nextMiniplayerUrl = document.querySelector('.ytp-miniplayer-button-container .ytp-next-button').href;
-    console.log(nextMiniplayerUrl);
     return;
   }
 
   miniplayerCloseButton = document.querySelector('.ytp-miniplayer-close-button');
   if (!miniplayerCloseButton) return setTimeout(addMiniplayerCloseListener, 1000);
 
-  console.log('Setting nextMiniplayerUrl');
   nextMiniplayerUrl = document.querySelector('.ytp-miniplayer-button-container .ytp-next-button').href;
-  console.log(nextMiniplayerUrl);
 
   miniplayerCloseButton.addEventListener('click', () => {
     browser.runtime.sendMessage({ type: MESSAGES.remove });
@@ -158,8 +152,6 @@ function formatData() {
 }
 
 function formatMiniplayerData() {
-  console.log(new Error().stack);
-
   const playerInfo = {};
   playerInfo.title = document.querySelector('.ytd-miniplayer.title yt-formatted-string.miniplayer-title').innerText;
   playerInfo.channelName = document.querySelector('.ytd-miniplayer.channel > yt-formatted-string#owner-name').innerText;
@@ -180,8 +172,6 @@ function formatMiniplayerData() {
     console.log('D');
     playerInfo.URL = document.querySelector('link[rel="canonical"]').href;
   }
-
-  console.dir(playerInfo);
 
   return {
     ...playerInfo,
