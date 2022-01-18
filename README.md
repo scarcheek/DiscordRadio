@@ -29,6 +29,7 @@ If everything ran smoothly the console should output `All set up and ready to go
 ### Browser Extension
 #### Express Installation (recommended)
 > This installation may lack behind some patches sometimes due to us not thinking about the chrome webstore page.
+
 Visit the [chrome webstore](https://chrome.google.com/webstore/detail/discord-radio/inhkknpphjhmhlkmlnmoaldikmfciecc) and install the extension with one click.
 
 #### Manual Installation
