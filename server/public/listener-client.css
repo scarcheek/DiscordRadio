@@ -127,18 +127,6 @@ body {
 }
 
 @media only screen and (max-width: 800px) {
-  #header .title {
-    font-size: 1.5rem;
-  }
-
-  #header .divider {
-    display: none;
-  }
-
-  #header .subtitle {
-    font-size: 1rem;
-  }
-
   #player-info {
     font-size: 0.9rem;
   }
@@ -160,10 +148,8 @@ body {
     font-size: 0.8rem;
     padding: 1rem 2rem;
   }
-}
 
-@media only screen and (max-width: 620px) {
-  #header > :last-child {
-    height: 6vh;
+  .title, .divider {
+    display: none !important;
   }
 }
