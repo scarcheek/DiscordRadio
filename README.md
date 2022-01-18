@@ -27,7 +27,12 @@ cd ./rpc-gateway && npm install && npm start
 If everything ran smoothly the console should output `All set up and ready to go!` 🎉
 
 ### Browser Extension
-> This is subject to change soon™
+#### Express Installation (recommended)
+> This installation may lack behind some patches sometimes due to us not thinking about the chrome webstore page.
+Visit the [chrome webstore](https://chrome.google.com/webstore/detail/discord-radio/inhkknpphjhmhlkmlnmoaldikmfciecc) and install the extension with one click.
+
+#### Manual Installation
+> You will have to manually pull the GitHub to get any updates
 
 To install the browser extension you have to follow these 5 steps:
 * Run `npm install` in the `browser-extension` folder
