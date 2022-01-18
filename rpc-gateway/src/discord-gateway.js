@@ -1,6 +1,7 @@
 const ws = require('ws');
 const fs= require('fs/promises');
 const ipcClient = require('./utils/ipc');
+const port = require('../../config.json').gatewayPort;
 
 const connections = new Map();
 
@@ -48,7 +49,7 @@ function start(appUI) {
   });
 
   startHealthCheck(appUI);
-  const wss = new ws.Server({ port: 6473 });
+  const wss = new ws.Server({ port });
   wss.on('connection', async (ws, req) => {
     const options = req.url.split('?')[1]
       .split('&')

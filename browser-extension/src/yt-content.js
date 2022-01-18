@@ -41,9 +41,16 @@ function handleMessage(req) {
 }
 browser.runtime.onMessage.addListener(handleMessage);
 
+const delay = millis => new Promise((resolve, reject) => {
+  setTimeout(_ => resolve(), millis)
+});
 
 async function addVideo() {
   video = document.querySelector('video');
+  if(!video){
+    await delay(1000);
+    return addVideo()
+  }
   addObservers();
 
   video.onpause = () => {
@@ -143,11 +150,18 @@ function formatData() {
     playerInfo.channelName = document.querySelector('span[itemprop="author"] link[itemprop="name"]').attributes.content.value;
   }
 
+  console.dir({
+    ...playerInfo,
+    URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
+    currTime: Math.floor(video?.currentTime ?? 0),
+    paused: video?.paused ?? false,
+  })
+
   return {
     ...playerInfo,
     URL: `${location.href}`.replaceAll(/&t=\d+s(?=&|$)/g, ''),
-    currTime: Math.floor(video.currentTime),
-    paused: video.paused,
+    currTime: Math.floor(video?.currentTime ?? 0),
+    paused: video?.paused ?? false,
   }
 }
 

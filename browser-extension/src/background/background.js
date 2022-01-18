@@ -185,7 +185,8 @@ function initializeTrack(tab) {
       
       if (res) Activity.set(res);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err)
       browser.browserAction.setBadgeText({ tabId: tab.id, text: '🔁' });
     });
 }

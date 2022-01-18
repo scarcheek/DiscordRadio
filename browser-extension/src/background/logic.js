@@ -15,7 +15,7 @@ browser.alarms.onAlarm.addListener((alarm) => {
 
 async function connectToDiscord() {
   try {
-    console.warn('Trying to connect to Discord...');
+    console.log('Trying to connect to Discord...');
     // connect to discord
     discord = new DiscordRPC('875518867680657458');
     await discord.connect();
@@ -64,6 +64,7 @@ async function connectToServer() {
       }
     });
 
+    // set number of listeners for activity and badge
     server.on('message', nrOfListeners => {
       if (nrOfListeners > 0 && $.trackedTabId) {
         browser.browserAction.setTitle({ title: `🥳 ${nrOfListeners} - Discord Radio` });
