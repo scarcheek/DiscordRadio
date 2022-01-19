@@ -155,7 +155,7 @@ class DiscordRPC {
   }
 }
 
-DiscordRPC.AUTH_URL = 'http://dev.discordradio.tk/auth';
+DiscordRPC.AUTH_URL = 'http://discordradio.tk/auth';
 DiscordRPC.URL = `ws://localhost:6473`;
 DiscordRPC.VERSION = 1;
 DiscordRPC.ENCODING = 'json';

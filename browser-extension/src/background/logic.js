@@ -1,7 +1,7 @@
 let discord = { conn: null };
 let server = { conn: null };
 
-const server_uri = 'dev.discordradio.tk';
+const server_uri = 'discordradio.tk';
 
 browser.runtime.onStartup.addListener(connectToDiscord);
 browser.runtime.onInstalled.addListener(connectToDiscord);

@@ -1,4 +1,4 @@
-const server_uri = 'dev.discordradio.tk';
+const server_uri = 'discordradio.tk';
 
 const MESSAGES = {
   init: 'init',
