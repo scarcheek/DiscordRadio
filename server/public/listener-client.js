@@ -2,7 +2,7 @@ const MESSAGES = {
   hostData: 'hostData',
 };
 
-const server_uri = 'discordradio.tk';
+const server_uri = 'dev.discordradio.tk';
 const server_port = 80;
 const server_ws_port = 420;
 const host = getHost();

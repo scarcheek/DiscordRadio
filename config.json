@@ -1,5 +1,5 @@
 {
-  "server_uri": "discordradio.tk",
+  "server_uri": "dev.discordradio.tk",
   "server_port": 80,
   "gatewayPort": 6473,
   "client_id": "875518867680657458",

@@ -1,3 +1,5 @@
+const server_uri = 'dev.discordradio.tk';
+
 const MESSAGES = {
   init: 'init',
   newVideo: 'newVideo',
@@ -106,7 +108,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     removeListenAlong()
   }
 
-  if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
+  if (tab.url.includes(`${server_uri}/`) && changeInfo.status === 'complete') {
     browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
   else if (tab.id === $.trackedTabId && !tab.url.includes('youtube.com') && changeInfo.status === 'complete') {

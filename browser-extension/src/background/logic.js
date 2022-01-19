@@ -1,6 +1,8 @@
 let discord = { conn: null };
 let server = { conn: null };
 
+const server_uri = 'dev.discordradio.tk';
+
 browser.runtime.onStartup.addListener(connectToDiscord);
 browser.runtime.onInstalled.addListener(connectToDiscord);
 browser.alarms.onAlarm.addListener((alarm) => {
@@ -19,7 +21,7 @@ async function connectToDiscord() {
     // connect to discord
     discord = new DiscordRPC('875518867680657458');
     await discord.connect();
-    browser.storage.sync.set({ link: `http://discordradio.tk/d/${discord.user.tag.replace('#', '/')}` });
+    browser.storage.sync.set({ link: `http://${server_uri}/d/${discord.user.tag.replace('#', '/')}` });
 
     // auth to discord
     const authInfo = await browser.storage.sync.get(['refresh_token']);
@@ -178,7 +180,7 @@ class Activity {
     if (server.conn) {
       buttons.unshift({ 
         label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`,
-        url: `http://discordradio.tk/d/${discord.user.tag.replace('#', '/')}`,
+        url: `http://${server_uri}/d/${discord.user.tag.replace('#', '/')}`,
       });
     }
 
@@ -206,7 +208,7 @@ class Activity {
     if (server.conn) {
       buttons.unshift({ 
         label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`,
-        url: `http://discordradio.tk/d/${discord.user.tag.replace('#', '/')}`,
+        url: `http://${server_uri}/d/${discord.user.tag.replace('#', '/')}`,
       });
     }
 
@@ -232,7 +234,7 @@ class Activity {
     if (server.conn) {
       buttons.unshift({
         label: `🎉 Join along with ${host}!`,
-        url: `http://discordradio.tk/d/${data.host.replace('#', '/')}` 
+        url: `http://${server_uri}/d/${data.host.replace('#', '/')}` 
       });
     }
 

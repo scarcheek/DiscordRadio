@@ -32,4 +32,4 @@ class DiscordRadioServer {
   }
 }
 
-DiscordRadioServer.URL = 'ws://discordradio.tk:420';
+DiscordRadioServer.URL = 'ws://dev.discordradio.tk:420';
