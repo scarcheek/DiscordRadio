@@ -1,6 +1,7 @@
 const MESSAGES = {
   init: 'init',
   newVideo: 'newVideo',
+  newStream: 'newStream',
   pause: 'pause',
   play: 'play',
   seek: 'seek',
@@ -11,6 +12,8 @@ const MESSAGES = {
   trackTwitch: 'trackTwitch',
   error: 'error',
 };
+
+const twitchSubPages = ['/directory', '/u', '/p', '/settings', '/s', '/wallet', '/subscriptions', '/drops']
 
 const CONTEXT_MENU = {
   track: 'track',
@@ -108,10 +111,16 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     removeListenAlong()
   }
 
-  if (tab.url.includes(`${server_uri}/`) && changeInfo.status === 'complete') {
-    browser.storage.sync.set({ listeningAlongTabId: tabId });
+  if (changeInfo.status !== 'complete') return;
+
+  if (tab.url.includes(`${server_uri}/`)) {
+    return browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
-  else if (tab.id === $.trackedTabId && !tab.url.includes('youtube.com') && changeInfo.status === 'complete') {
+  if (tab.id !== $.trackedTabId) return
+  if (tab.url.includes('twitch.tv') && !twitchSubPages.some(page => tab.url.includes(page))) {
+    return browser.tabs.sendMessage(tab.id, { type: MESSAGES.update })
+  }
+  if (!tab.url.includes('youtube.com/watch?v=') && !tab.url.includes('twitch.tv')) {
     Activity.remove();
   }
 });
@@ -147,7 +156,7 @@ browser.tabs.onAttached.addListener((tabId, attachInfo) => {
 
 // communication with content.js
 browser.runtime.onMessage.addListener(async (request, sender) => {
-  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo].includes(request.type)) {
+  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo, MESSAGES.newStream].includes(request.type)) {
     if (request.data) Activity.set(request.data);
   }
   else if (request.type === MESSAGES.listenAlongUpdate) {
@@ -165,7 +174,7 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
 
 function initializeTrack(tab) {
   console.log(`Trying to track tab with id: ${tab.id}`);
-  
+
   browser.tabs.sendMessage(tab.id, { type: MESSAGES.init })
     .then((res) => {
       if (!discord.conn) {
