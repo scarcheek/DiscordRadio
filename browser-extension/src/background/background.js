@@ -1,5 +1,3 @@
-const server_uri = 'discordradio.tk';
-
 const MESSAGES = {
   init: 'init',
   newVideo: 'newVideo',
@@ -10,6 +8,7 @@ const MESSAGES = {
   pageLoaded: 'pageLoaded',
   update: 'update',
   listenAlongUpdate: 'listenAlongUpdate',
+  trackTwitch: 'trackTwitch',
   error: 'error',
 };
 
@@ -28,7 +27,7 @@ const $ = {
 // Set the default mood and storage state on installation
 browser.runtime.onStartup.addListener(initializeStorage);
 browser.runtime.onInstalled.addListener(initializeStorage);
-  
+
 function initializeStorage() {
   browser.browserAction.setBadgeBackgroundColor({ color: '#e49076' });
   return browser.storage.sync.set({
@@ -37,6 +36,7 @@ function initializeStorage() {
     trackedWindowId: null,
     listeningAlongTabId: null,
   });
+
 }
 
 // Load the state from the storage
@@ -66,7 +66,7 @@ browser.contextMenus.removeAll().then(() => {
     id: CONTEXT_MENU.track,
     title: "Track current Tab with Discord RPC",
     contexts: ["page"],
-    documentUrlPatterns: ['https://*.youtube.com/*']
+    documentUrlPatterns: ['https://*.youtube.com/*', 'https://*.twitch.tv/*']
   });
 
   browser.contextMenus.create({
@@ -120,7 +120,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 browser.tabs.onRemoved.addListener(function (tabId, removeInfo) {
   if ($.listeningAlongTabId === tabId) {
     removeListenAlong();
-  } 
+  }
   else if (removeInfo && tabId === $.trackedTabId) {
     removeTrack();
   }
@@ -165,26 +165,26 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
 
 function initializeTrack(tab) {
   console.log(`Trying to track tab with id: ${tab.id}`);
-
+  
   browser.tabs.sendMessage(tab.id, { type: MESSAGES.init })
     .then((res) => {
       if (!discord.conn) {
-        return browser.tabs.sendMessage(tab.id, { 
-          data: 'Could not connect to Discord, make sure you have Discord as well as the Discord RPC Gateway application up and running.', 
-          type: MESSAGES.error 
+        return browser.tabs.sendMessage(tab.id, {
+          data: 'Could not connect to Discord, make sure you have Discord as well as the Discord RPC Gateway application up and running.',
+          type: MESSAGES.error
         });
       }
-      
+
       if ($.trackedTabId) {
         // if already tracking a tab, clear the badge for the old tab
         browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
       }
-      
+
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, res)
       toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
       browser.browserAction.setBadgeText({ tabId: tab.id, text: '👀' + (server.conn ? '' : ' 🔇') });
       browser.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
-      
+
       if (res) Activity.set(res);
     })
     .catch((err) => {

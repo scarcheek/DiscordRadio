@@ -118,7 +118,7 @@ class Activity {
       Activity._update(Activity.prevData);
     }
   }
-  
+
   static async remove() {
     console.log('Removing the activity');
     Activity.on = false;
@@ -128,7 +128,7 @@ class Activity {
   static async listenAlong(data) {
     if (data.host !== discord.user.tag) {
       const activity = Activity._createListeningAlongActivity(data);
-      
+
       if (discord.conn) {
         discord.setActivity({
           pid: (await browser.windows.getLastFocused()).id,
@@ -153,11 +153,7 @@ class Activity {
     console.dir(new Error().stack);
     console.log('sending data:', data);
 
-    const activity = (data.host && data.host !== discord.user.tag)
-      ? Activity._createListeningAlongActivity(data)
-      : (data.paused)
-        ? Activity._createPausedActivity(data)
-        : Activity._createPlayingActivity(data);
+    const activity = this._createActivity(data)
 
     Activity.on = true;
     Activity.prevData = data;
@@ -174,11 +170,21 @@ class Activity {
     }
   }
 
+  static _createActivity(data) {
+    if (data.host && data.host !== discord.user.tag) return Activity._createListeningAlongActivity(data)
+
+    if (data.twitch) return Activity._createTwitchActivity(data);
+    if (data.paused) return Activity._createPausedActivity(data);
+
+    return Activity._createPlayingActivity(data);
+  }
+
+
   static _createPlayingActivity(data) {
     let buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
 
     if (server.conn) {
-      buttons.unshift({ 
+      buttons.unshift({
         label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`,
         url: `http://${server_uri}/d/${discord.user.tag.replace('#', '/')}`,
       });
@@ -206,7 +212,7 @@ class Activity {
     let buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
 
     if (server.conn) {
-      buttons.unshift({ 
+      buttons.unshift({
         label: `🎉 Listen ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`,
         url: `http://${server_uri}/d/${discord.user.tag.replace('#', '/')}`,
       });
@@ -230,16 +236,16 @@ class Activity {
   static _createListeningAlongActivity(data) {
     let buttons = [{ label: "🎧 Play on YouTube", url: data.URL }];
     const host = data.host.split('#')[0];
-  
+
     if (server.conn) {
       buttons.unshift({
         label: `🎉 Join along with ${host}!`,
-        url: `http://${server_uri}/d/${data.host.replace('#', '/')}` 
+        url: `http://${server_uri}/d/${data.host.replace('#', '/')}`
       });
     }
 
     if (!data.URL) buttons = undefined;
-  
+
     return {
       details: data.title,
       state: `Listening along with ${host}! 🙃`,
@@ -251,6 +257,34 @@ class Activity {
         large_text: Activity._getRandomVibeText(),
         small_image: 'play-circle',
         small_text: 'Playing',
+      },
+      buttons,
+    };
+  }
+
+  static _createTwitchActivity(data) {
+    let buttons = [{ label: "📺 Watch the stream", url: data.URL }];
+
+    if (server.conn) {
+      buttons.unshift({
+        label: `🎉 Watch ${data.nrOfListeners > 0 ? `with ${data.nrOfListeners + 1} friends!` : `along!`}`,
+        url: `http://${server_uri}/d/${discord.user.tag.replace('#', '/')}`,
+      });
+    }
+
+    if (!data.URL) buttons = undefined;
+
+    return {
+      details: `Watching ${data.channelName}`,
+      state: `on: Twitch.tv`,
+      timestamps: {
+        start: data.startTime
+      },
+      assets: {
+        large_image: (data.mood !== 'none') ? `mood-${data.mood}` : 'image',
+        large_text: Activity._getRandomVibeText(),
+        small_image: 'twitch',
+        small_text: 'Twitch.',
       },
       buttons,
     };
