@@ -1,7 +1,7 @@
 {
-  "name": "discord-rpc-gateway",
-  "productName": "discord-rpc-gateway",
-  "displayName": "Discord RPC Gateway",
+  "name": "discord-radio-gateway",
+  "productName": "Discord Radio Gateway",
+  "displayName": "Discord Radio Gateway",
   "version": "0.0.2",
   "description": "A websocket gateway which connects to the Discord RPC API.",
   "main": "src/index.js",
@@ -25,12 +25,18 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./assets/icon.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "discord_rpc_gateway"
+            "authors": "Discord Radio Devs",
+            "certificateFile": "./cert.pfx",
+            "certificatePassword": "P23a.derderschicktmocht",
+            "setupExe": "DiscordRadio_Setup.exe",
+            "setupIcon": "./assets/icon.ico"
           }
         },
         {
@@ -46,13 +52,6 @@
         {
           "name": "@electron-forge/maker-rpm",
           "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "certificateFile": "./cert.pfx",
-            "certificatePassword": "this-is-a-secret"
-          }
         }
       ]
     }

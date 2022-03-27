@@ -5,6 +5,7 @@ specifiers:
   '@electron-forge/maker-deb': ^6.0.0-beta.63
   '@electron-forge/maker-rpm': ^6.0.0-beta.63
   '@electron-forge/maker-squirrel': ^6.0.0-beta.63
+  '@electron-forge/maker-wix': ^6.0.0-beta.63
   '@electron-forge/maker-zip': ^6.0.0-beta.63
   electron: 17.2.0
   electron-squirrel-startup: ^1.0.0
@@ -19,10 +20,17 @@ devDependencies:
   '@electron-forge/maker-deb': 6.0.0-beta.63
   '@electron-forge/maker-rpm': 6.0.0-beta.63
   '@electron-forge/maker-squirrel': 6.0.0-beta.63
+  '@electron-forge/maker-wix': 6.0.0-beta.63
   '@electron-forge/maker-zip': 6.0.0-beta.63
   electron: 17.2.0
 
 packages:
+
+  /@bitdisaster/exe-icon-extractor/1.0.10:
+    resolution: {integrity: sha512-iTZ8cVGZ5dglNRyFdSj8U60mHIrC8XNIuOHN/NkM5/dQP4nsmpyqeQTAADLLQgoFCNJD+DiwQCv8dR2cCeWP4g==}
+    requiresBuild: true
+    dev: true
+    optional: true
 
   /@electron-forge/async-ora/6.0.0-beta.63:
     resolution: {integrity: sha512-e1BbeUV20yWZWeRJ3LDLcloPPgHwTXV1wAJXpAdDbmTmcRyAGx9iVx2Qyh6t878c7zX36XXlqfCIOvODsgiuOQ==}
@@ -226,6 +234,20 @@ packages:
       fs-extra: 10.0.1
     optionalDependencies:
       electron-winstaller: 5.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@electron-forge/maker-wix/6.0.0-beta.63:
+    resolution: {integrity: sha512-XA00Tye4vbwjEbomgsfexa6hGgipyvJPNTwv4HW2Pas1lQx3ScXsa9TgqPVkZnvhN/d9URNDZUw3auaHhkINlg==}
+    engines: {node: '>= 12.13.0'}
+    dependencies:
+      '@electron-forge/maker-base': 6.0.0-beta.63
+      '@electron-forge/shared-types': 6.0.0-beta.63
+      chalk: 4.1.2
+      electron-wix-msi: 3.2.0
+      log-symbols: 4.1.0
+      parse-author: 2.0.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1230,6 +1252,24 @@ packages:
     dev: true
     optional: true
 
+  /electron-wix-msi/3.2.0:
+    resolution: {integrity: sha512-qNlRP3S3sxnf68bW89butEICaWGELNHwzerXr1M2Iu3TuPIdMMJyMfXuaQTPoLgouri2E/SQPpYzk3GS+6BHNQ==}
+    engines: {node: '>=6.0.0'}
+    dependencies:
+      debug: 4.3.4
+      fs-extra: 8.1.0
+      klaw: 3.0.0
+      lodash: 4.17.21
+      rcedit: 2.3.0
+      rcinfo: 0.1.3
+      semver: 6.3.0
+      uuid: 3.4.0
+    optionalDependencies:
+      '@bitdisaster/exe-icon-extractor': 1.0.10
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /electron/17.2.0:
     resolution: {integrity: sha512-eNXhPVEUofkgAeqRFvTizzYecoCMyS0Rar08WZHSAw9wjfZXawYMvTpjjjk9GiX9W/+Cjxua4YtGn5bOTabc0A==}
     engines: {node: '>= 8.6'}
@@ -2052,6 +2092,12 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
+  /klaw/3.0.0:
+    resolution: {integrity: sha512-0Fo5oir+O9jnXu5EefYbVK+mHMBeEVEy2cmctR1O1NECcCkPRreJKrS6Qt/j3KC2C148Dfo9i3pCmCMsdqGr0g==}
+    dependencies:
+      graceful-fs: 4.2.9
+    dev: true
+
   /load-json-file/2.0.0:
     resolution: {integrity: sha1-eUfkIUmvgNaWy/eXvKq8/h/inKg=}
     engines: {node: '>=4'}
@@ -2785,11 +2831,20 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /rcedit/2.3.0:
+    resolution: {integrity: sha512-h1gNEl9Oai1oijwyJ1WYqYSXTStHnOcv1KYljg/8WM4NAg3H1KBK3azIaKkQ1WQl+d7PoJpcBMscPfLXVKgCLQ==}
+    engines: {node: '>= 8.0.0'}
+    dev: true
+
   /rcedit/3.0.1:
     resolution: {integrity: sha512-XM0Jv40/y4hVAqj/MO70o/IWs4uOsaSoo2mLyk3klFDW+SStLnCtzuQu+1OBTIMGlM8CvaK9ftlYCp6DJ+cMsw==}
     engines: {node: '>= 10.0.0'}
     dependencies:
       cross-spawn-windows-exe: 1.2.0
+    dev: true
+
+  /rcinfo/0.1.3:
+    resolution: {integrity: sha1-rDaDLR8eWXDGN55XFIDqWCZRH8Y=}
     dev: true
 
   /read-pkg-up/2.0.0:

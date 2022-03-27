@@ -24,7 +24,7 @@ const createWindow = () => {
     icon: windowImage,
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
-    show: false,
+    show: true,
     alwaysOnTop: true,
     resizable: false,
     maximizable: false,
