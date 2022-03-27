@@ -27,7 +27,7 @@
     "forge": {
       "packagerConfig": {
         "icon": "./assets/icon.ico",
-        "executableName": "free-dice"
+        "executableName": "discord-radio-gateway"
       },
       "makers": [
         {
