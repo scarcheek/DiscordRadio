@@ -38,7 +38,11 @@
             "certificatePassword": "P23a.derderschicktmocht",
             "setupExe": "DiscordRadio_Setup.exe",
             "setupIcon": "./assets/icon.ico"
-          }
+          },
+          "platforms": [
+            "win32",
+            "win64"
+          ]
         },
         {
           "name": "@electron-forge/maker-zip",
