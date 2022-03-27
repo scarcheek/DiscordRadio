@@ -12,36 +12,14 @@ const appUI = {
   /** @type {BrowserWindow} */ window: null,
 };
 
-app.on('window-all-closed', e => e.preventDefault());
-app.whenReady().then(() => {
-  appUI.window = createWindow();
-  appUI.tray = createTray(appUI.window);
-  setWindowPosition(appUI.window, appUI.tray);
-  console.log('All set up and ready to go!');
-  gateway.start(appUI);
-});
-
-/**
- * @param {BrowserWindow} window 
- */
-function createTray(window) {
-  const trayImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/Discord-Logo-Icon.png'));
-  const tray = new Tray(trayImage);
-  tray.setToolTip('Discord RPC Gateway');
-  tray.on('click', $=> {
-    window.show();
-  });
-
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Show', click: $=> window.show() },
-    { label: 'Quit', click: $=> app.exit() },
-  ]));
-
-  return tray;
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require('electron-squirrel-startup')) {
+  // eslint-disable-line global-require
+  app.quit();
 }
 
-function createWindow() {
-  const windowImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/Discord-Logo-White.png'));
+const createWindow = () => {
+  const windowImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/icon.png'));
   const window = new BrowserWindow({
     icon: windowImage,
     width: WINDOW_WIDTH,
@@ -66,13 +44,33 @@ function createWindow() {
     e.preventDefault();
     window.hide();
   }
+};
+
+/**
+ * @param {BrowserWindow} window 
+ */
+ function createTray(window) {
+  const trayImage = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets/icon16.png'));
+  const tray = new Tray(trayImage);
+  tray.setToolTip('Discord RPC Gateway');
+  tray.on('click', $=> {
+    window.show();
+  });
+
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Show', click: $=> window.show() },
+    { label: 'Quit', click: $=> app.exit() },
+  ]));
+
+  return tray;
 }
+
 
 /**
  * @param {BrowserWindow} window 
  * @param {Tray} tray 
  */
-function setWindowPosition(window, tray) {
+ function setWindowPosition(window, tray) {
   const bounds = {
     x: tray.getBounds().x - WINDOW_WIDTH / 2,
     y: tray.getBounds().y,
@@ -85,3 +83,27 @@ function setWindowPosition(window, tray) {
 
   window.setBounds(bounds);
 }
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('ready', () => {
+  appUI.window = createWindow();
+  appUI.tray = createTray(appUI.window);
+  setWindowPosition(appUI.window, appUI.tray);
+  console.log('All set up and ready to go!');
+  gateway.start(appUI);
+});
+
+app.on('window-all-closed', e => e.preventDefault());
+
+app.on('activate', () => {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and import them here.
