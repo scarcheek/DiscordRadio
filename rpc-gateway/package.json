@@ -26,7 +26,8 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./assets/icon.ico"
+        "icon": "./assets/icon.ico",
+        "executableName": "free-dice"
       },
       "makers": [
         {
