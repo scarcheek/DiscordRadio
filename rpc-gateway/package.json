@@ -34,8 +34,6 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "authors": "Discord Radio Devs",
-            "certificateFile": "./cert.pfx",
-            "certificatePassword": "P23a.derderschicktmocht",
             "setupExe": "DiscordRadio_Setup.exe",
             "setupIcon": "./assets/icon.ico"
           },
