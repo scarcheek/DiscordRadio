@@ -1,6 +1,7 @@
 const MESSAGES = {
   init: 'init',
   newVideo: 'newVideo',
+  newStream: 'newStream',
   pause: 'pause',
   play: 'play',
   seek: 'seek',
@@ -8,8 +9,11 @@ const MESSAGES = {
   pageLoaded: 'pageLoaded',
   update: 'update',
   listenAlongUpdate: 'listenAlongUpdate',
+  trackTwitch: 'trackTwitch',
   error: 'error',
 };
+
+const twitchSubPages = ['/directory', '/u', '/p', '/settings', '/s', '/wallet', '/subscriptions', '/drops']
 
 const CONTEXT_MENU = {
   track: 'track',
@@ -26,7 +30,7 @@ const $ = {
 // Set the default mood and storage state on installation
 browser.runtime.onStartup.addListener(initializeStorage);
 browser.runtime.onInstalled.addListener(initializeStorage);
-  
+
 function initializeStorage() {
   browser.browserAction.setBadgeBackgroundColor({ color: '#e49076' });
   return browser.storage.sync.set({
@@ -35,6 +39,7 @@ function initializeStorage() {
     trackedWindowId: null,
     listeningAlongTabId: null,
   });
+
 }
 
 // Load the state from the storage
@@ -64,7 +69,7 @@ browser.contextMenus.removeAll().then(() => {
     id: CONTEXT_MENU.track,
     title: "Track current Tab with Discord RPC",
     contexts: ["page"],
-    documentUrlPatterns: ['https://*.youtube.com/*']
+    documentUrlPatterns: ['https://*.youtube.com/*', 'https://*.twitch.tv/*']
   });
 
   browser.contextMenus.create({
@@ -106,10 +111,16 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     removeListenAlong()
   }
 
-  if (tab.url.includes('discordradio.tk/') && changeInfo.status === 'complete') {
-    browser.storage.sync.set({ listeningAlongTabId: tabId });
+  if (changeInfo.status !== 'complete') return;
+
+  if (tab.url.includes(`${server_uri}/`)) {
+    return browser.storage.sync.set({ listeningAlongTabId: tabId });
   }
-  else if (tab.id === $.trackedTabId && !tab.url.includes('youtube.com') && changeInfo.status === 'complete') {
+  if (tab.id !== $.trackedTabId) return
+  if (tab.url.includes('twitch.tv') && !twitchSubPages.some(page => tab.url.includes(page))) {
+    return browser.tabs.sendMessage(tab.id, { type: MESSAGES.update })
+  }
+  if (!tab.url.includes('youtube.com/watch?v=') && !tab.url.includes('twitch.tv')) {
     Activity.remove();
   }
 });
@@ -118,7 +129,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 browser.tabs.onRemoved.addListener(function (tabId, removeInfo) {
   if ($.listeningAlongTabId === tabId) {
     removeListenAlong();
-  } 
+  }
   else if (removeInfo && tabId === $.trackedTabId) {
     removeTrack();
   }
@@ -145,7 +156,7 @@ browser.tabs.onAttached.addListener((tabId, attachInfo) => {
 
 // communication with content.js
 browser.runtime.onMessage.addListener(async (request, sender) => {
-  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo].includes(request.type)) {
+  if ([MESSAGES.play, MESSAGES.pause, MESSAGES.seek, MESSAGES.newVideo, MESSAGES.newStream].includes(request.type)) {
     if (request.data) Activity.set(request.data);
   }
   else if (request.type === MESSAGES.listenAlongUpdate) {
@@ -167,22 +178,22 @@ function initializeTrack(tab) {
   browser.tabs.sendMessage(tab.id, { type: MESSAGES.init })
     .then((res) => {
       if (!discord.conn) {
-        return browser.tabs.sendMessage(tab.id, { 
-          data: 'Could not connect to Discord, make sure you have Discord as well as the Discord RPC Gateway application up and running.', 
-          type: MESSAGES.error 
+        return browser.tabs.sendMessage(tab.id, {
+          data: 'Could not connect to Discord, make sure you have Discord as well as the Discord RPC Gateway application up and running.',
+          type: MESSAGES.error
         });
       }
-      
+
       if ($.trackedTabId) {
         // if already tracking a tab, clear the badge for the old tab
         browser.browserAction.setBadgeText({ tabId: $.trackedTabId, text: '' });
       }
-      
+
       console.log(`Now tracking: ${tab.title} with id ${tab.id}`, res)
       toggleContextMenuOptions(CONTEXT_MENU.stop, CONTEXT_MENU.track);
       browser.browserAction.setBadgeText({ tabId: tab.id, text: '👀' + (server.conn ? '' : ' 🔇') });
       browser.storage.sync.set({ trackedTabId: tab.id, trackedWindowId: tab.windowId });
-      
+
       if (res) Activity.set(res);
     })
     .catch((err) => {

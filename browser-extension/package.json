@@ -1,7 +1,7 @@
 {
   "name": "discord-radio-extension",
   "description": "Creates a Discord Rich Presence based on the YouTube video that has been selected.",
-  "version": "0.9.1",
+  "version": "0.9.7",
   "devDependencies": {
     "pure-uuid": "^1.6.2",
     "webextension-polyfill": "^0.8.0"

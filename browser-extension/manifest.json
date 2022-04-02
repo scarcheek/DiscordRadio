@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Discord Radio",
   "description": "Creates a Discord Rich Presence and allows friends to listen along to the YouTube page that has been selected.",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "permissions": [
     "contextMenus",
     "storage",
@@ -17,6 +17,15 @@
       "js": [
         "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
         "src/yt-content.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://*.twitch.tv/*"
+      ],
+      "js": [
+        "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
+        "src/twitch-content.js"
       ]
     },
     {

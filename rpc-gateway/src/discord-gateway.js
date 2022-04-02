@@ -1,7 +1,8 @@
 const ws = require('ws');
 const fs= require('fs/promises');
 const ipcClient = require('./utils/ipc');
-const port = require('../../config.json').gatewayPort;
+// const port = require('../../config.json').gatewayPort;
+const port = 6473;
 
 const connections = new Map();
 

@@ -2,6 +2,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const https = require('https');
 const express = require('express');
+const server_uri = require('../config.json').server_uri;
 const { WebSocketServer } = require('ws');
 
 Array.prototype.last = function() { return this[this.length - 1]; };
@@ -96,7 +97,7 @@ httpServer.post('/auth', async (req, res) => {
 
 httpServer.get('/d/:username/:discriminator', async (req, res) => {
   const userTag = `${req.params.username}#${req.params.discriminator}`;
-  const userUrl = `http://discordradio.tk/d/${userTag.replace('#', '/')}`;
+  const userUrl = `http://${server_uri}/d/${userTag.replace('#', '/')}`;
   const template = await fs.readFile(path.resolve('public/listener-client.html'), 'utf8');
   const page = template
     .replaceAll('{userUrl}', userUrl)
@@ -105,7 +106,7 @@ httpServer.get('/d/:username/:discriminator', async (req, res) => {
 });
 
 httpServer.get('/', (req, res) => res.sendFile('public/index.html'));
-httpServer.get('*', (req, res) => res.redirect('http://discordradio.tk'));
+httpServer.get('*', (req, res) => res.redirect(`http://${server_uri}`));
 
 httpServer.listen(config.server_port, $ => console.log(`Yo he, donn hot da http surfer e schon gwunnen!`));
 
